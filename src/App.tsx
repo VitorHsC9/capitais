@@ -1,7 +1,7 @@
 import { useState, useEffect, type ElementType } from 'react';
 import { 
   ArrowRight, RotateCcw, Home, Trophy, Flame, 
-  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints, Flag, MapPin
+  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints, Flag, MapPin, Building2 
 } from 'lucide-react';
 
 import { useQuizGame} from './hooks/useQuizGame';
@@ -101,7 +101,9 @@ export default function App() {
             {/* SELETOR DE MODO */}
             <div className="space-y-3">
                <span className={`text-xs font-bold uppercase tracking-wider ${s.textSecondary}`}>Modo de Jogo</span>
-               <div className="grid grid-cols-2 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  
+                  {/* MODO CLASSIC: Países -> Capitais */}
                   <button 
                     onClick={() => game.setGameMode('classic')}
                     className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
@@ -111,9 +113,29 @@ export default function App() {
                     }`}
                   >
                      <MapPin className="w-6 h-6" />
-                     <span className="font-bold">Capitais</span>
+                     <div className="flex flex-col items-center leading-none">
+                       <span className="text-[10px] uppercase font-bold opacity-70">Países &rarr;</span>
+                       <span className="font-bold">Capitais</span>
+                     </div>
                   </button>
 
+                  {/* MODO REVERSE: Capitais -> Países */}
+                  <button 
+                    onClick={() => game.setGameMode('reverse')}
+                    className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+                      game.gameMode === 'reverse' 
+                        ? (isDarkMode ? 'bg-blue-900/30 border-blue-500 text-blue-400' : 'bg-blue-50 border-blue-500 text-blue-700') 
+                        : s.card
+                    }`}
+                  >
+                     <Building2 className="w-6 h-6" />
+                     <div className="flex flex-col items-center leading-none">
+                       <span className="text-[10px] uppercase font-bold opacity-70">Capitais &rarr;</span>
+                       <span className="font-bold">Países</span>
+                     </div>
+                  </button>
+
+                  {/* MODO FLAGS: Bandeiras */}
                   <button 
                     onClick={() => game.setGameMode('flags')}
                     className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
@@ -123,7 +145,10 @@ export default function App() {
                     }`}
                   >
                      <Flag className="w-6 h-6" />
-                     <span className="font-bold">Bandeiras</span>
+                     <div className="flex flex-col items-center leading-none">
+                       <span className="text-[10px] uppercase font-bold opacity-70">Quiz de</span>
+                       <span className="font-bold">Bandeiras</span>
+                     </div>
                   </button>
                </div>
             </div>
@@ -220,20 +245,27 @@ export default function App() {
                     {game.questions[game.currentIndex].continent}
                 </span>
 
-                <div className="relative group">
-                  <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-blue-500' : 'bg-blue-600'}`}></div>
-                  <img
-                    src={`https://flagcdn.com/w160/${game.questions[game.currentIndex].code}.png`}
-                    srcSet={`https://flagcdn.com/w320/${game.questions[game.currentIndex].code}.png 2x`}
-                    alt={`Bandeira de ${game.questions[game.currentIndex].name}`}
-                    className="relative h-28 w-auto rounded-lg shadow-lg object-cover border border-slate-200 dark:border-slate-600 transform transition-transform group-hover:scale-105 duration-300"
-                  />
-                </div>
+                {/* Exibe bandeira apenas no modo de bandeiras para não facilitar o modo reverso */}
+                {game.gameMode === 'flags' && (
+                  <div className="relative group">
+                    <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-blue-500' : 'bg-blue-600'}`}></div>
+                    <img
+                      src={`https://flagcdn.com/w160/${game.questions[game.currentIndex].code}.png`}
+                      srcSet={`https://flagcdn.com/w320/${game.questions[game.currentIndex].code}.png 2x`}
+                      alt={`Bandeira de ${game.questions[game.currentIndex].name}`}
+                      className="relative h-28 w-auto rounded-lg shadow-lg object-cover border border-slate-200 dark:border-slate-600 transform transition-transform group-hover:scale-105 duration-300"
+                    />
+                  </div>
+                )}
 
                 <h2 className="text-3xl leading-tight text-center mt-2">
-                  {game.gameMode === 'classic' ? (
+                  {game.gameMode === 'classic' && (
                     <>Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?</>
-                  ) : (
+                  )}
+                  {game.gameMode === 'reverse' && (
+                    <>De qual país <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].capital}</span> é a capital?</>
+                  )}
+                  {game.gameMode === 'flags' && (
                     <>De qual país é <span className={`font-bold ${s.highlightText}`}>esta bandeira</span>?</>
                   )}
                 </h2>
@@ -243,17 +275,21 @@ export default function App() {
             <div className="grid grid-cols-1 gap-3">
               {game.currentOptions.map((opt, idx) => (
                 <OptionButton 
-                  key={opt.capital}
+                  // Usar o nome como chave é seguro e consistente
+                  key={opt.name}
                   option={opt}
                   idx={idx}
                   isDark={isDarkMode}
                   isAnswered={game.isAnswered}
+                  // Lógica de seleção
                   isSelected={game.selectedAnswer === (game.gameMode === 'classic' ? opt.capital : opt.name)}
+                  // Lógica de resposta correta
                   isCorrect={
                     game.gameMode === 'classic' 
                       ? opt.capital === game.questions[game.currentIndex].capital
                       : opt.name === game.questions[game.currentIndex].name
                   }
+                  // Ao clicar, envia a resposta correspondente ao modo
                   onSelect={() => game.handleAnswer(game.gameMode === 'classic' ? opt.capital : opt.name)}
                   mode={game.gameMode}
                 />

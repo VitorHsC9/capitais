@@ -4,7 +4,8 @@ import type { Country, Continent } from '../data/countries';
 import { useStatistics } from './useStatistics';
 
 // --- TIPO EXPORTADO ---
-export type GameMode = 'classic' | 'flags';
+// Adicionado 'reverse' para suportar o modo Capitais -> Países
+export type GameMode = 'classic' | 'flags' | 'reverse';
 
 // --- FUNÇÕES AUXILIARES ---
 
@@ -109,7 +110,9 @@ export const useQuizGame = () => {
     
     const currentQ = questions[currentIndex];
     
-    // Validação Dinâmica: Se modo clássico compara Capital, se modo bandeiras compara Nome do País
+    // Validação Dinâmica: 
+    // - Clássico: compara Capital (resposta certa é a capital)
+    // - Bandeiras e Reverse: compara Nome (resposta certa é o nome do país)
     const correctAnswer = gameMode === 'classic' ? currentQ.capital : currentQ.name;
     const isCorrect = answer === correctAnswer;
 
