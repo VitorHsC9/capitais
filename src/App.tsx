@@ -89,8 +89,8 @@ export default function App() {
               <div className="space-y-4">
                 <span className={`font-semibold tracking-wider text-sm uppercase ${s.subtleHighlight}`}>Bem-vindo ao desafio</span>
                 <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-                  Explore o mundo, <br />
-                  <span className={`font-bold ${s.highlightText}`}>uma questão por vez.</span>
+                  Você consegue zerar <br />
+                  <span className={`font-bold ${s.highlightText}`}>o mundo?</span>
                 </h2>
               </div>
               <button onClick={game.goToStats} className={`p-3 rounded-xl border transition-all ${s.card} ${isDarkMode ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-50 text-slate-500'}`}>

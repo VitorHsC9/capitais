@@ -1,4 +1,4 @@
-import { MapPin, Sun, Moon, X } from 'lucide-react';
+import { Globe, Sun, Moon, X } from 'lucide-react';
 
 interface HeaderProps {
   isDark: boolean;
@@ -12,7 +12,7 @@ export const Header = ({ isDark, toggleTheme, onExit, isPlaying }: HeaderProps) 
     <div className="flex items-center gap-2">
       {/* Ícone: Azul no modo claro / Zinc escuro no modo escuro */}
       <div className={`p-1.5 rounded-lg transition-colors ${isDark ? 'bg-zinc-800 text-white' : 'bg-blue-600 text-white'}`}>
-        <MapPin className="w-4 h-4" />
+        <Globe className="w-4 h-4" />
       </div>
       <h1 className="text-lg font-bold tracking-tight">Quiz Capitais</h1>
     </div>
