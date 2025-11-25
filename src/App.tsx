@@ -91,12 +91,27 @@ export default function App() {
             <ProgressBar current={game.currentIndex} total={game.questions.length} isDark={isDarkMode} />
 
             <div className={`mb-10 rounded-2xl p-8 border transition-colors ${s.card} ${s.cardShadow}`}>
-              <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full mb-4 ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-indigo-50 text-indigo-600'}`}>
-                {game.questions[game.currentIndex].continent}
-              </span>
-              <h2 className="text-3xl leading-tight">
-                Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?
-              </h2>
+              <div className="flex flex-col items-center gap-6">
+                
+                {/* --- BANDEIRA --- */}
+                <div className="relative group">
+                  <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-indigo-500' : 'bg-indigo-600'}`}></div>
+                  <img
+                    src={`https://flagcdn.com/w160/${game.questions[game.currentIndex].code}.png`}
+                    srcSet={`https://flagcdn.com/w320/${game.questions[game.currentIndex].code}.png 2x`}
+                    alt={`Bandeira de ${game.questions[game.currentIndex].name}`}
+                    className="relative h-28 w-auto rounded-lg shadow-lg object-cover border border-slate-200 dark:border-slate-600 transform transition-transform group-hover:scale-105 duration-300"
+                  />
+                  <span className={`absolute bottom-0 translate-y-1/2 left-1/2 -translate-x-1/2 inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border z-10 ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-indigo-600 border-slate-100'}`}>
+                    {game.questions[game.currentIndex].continent}
+                  </span> 
+                </div>
+
+                {/* --- PERGUNTA --- */}
+                <h2 className="text-3xl leading-tight text-center mt-2">
+                  Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?
+                </h2>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
@@ -118,7 +133,7 @@ export default function App() {
               {game.isAnswered && (
                 <button
                   onClick={game.nextQuestion}
-                  className={`px-6 py-3 rounded-xl font-bold transition-allQN flex items-center gap-2 hover:gap-3 ${isDarkMode ? 'bg-slate-200 text-slate-900 hover:bg-white shadow-lg' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30'}`}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 hover:gap-3 ${isDarkMode ? 'bg-slate-200 text-slate-900 hover:bg-white shadow-lg' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30'}`}
                 >
                   {game.currentIndex + 1 === game.questions.length ? 'Ver Resultado' : 'Próxima'} 
                   <ArrowRight className="w-5 h-5" />
