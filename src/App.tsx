@@ -20,6 +20,15 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('quiz-theme', isDarkMode ? 'dark' : 'light');
+    
+    // CORREÇÃO: Forçar o esquema de cores no navegador para evitar inversão automática
+    if (isDarkMode) {
+      document.documentElement.style.colorScheme = 'dark';
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.style.colorScheme = 'light';
+      document.documentElement.classList.remove('dark');
+    }
   }, [isDarkMode]);
 
   // 2. Lógica do Jogo importada do Hook
@@ -27,7 +36,8 @@ export default function App() {
 
   // 3. Estilos globais dinâmicos
   const s = {
-    bg: isDarkMode ? 'bg-zinc-950' : 'bg-slate-50',
+    // CORREÇÃO: Usar 'bg-white' em vez de 'bg-slate-50' para contraste máximo
+    bg: isDarkMode ? 'bg-zinc-950' : 'bg-white', 
     text: isDarkMode ? 'text-zinc-100' : 'text-slate-800',
     textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-500',
     card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-100',
