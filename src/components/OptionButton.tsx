@@ -44,9 +44,17 @@ export const OptionButton = ({
     }
 
     return {
-      container: `${base} ${isDark ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:border-slate-500' : 'bg-white border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-md'}`,
+      container: `${base} ${
+        isDark 
+          ? 'bg-zinc-800 border-zinc-700 text-zinc-200 hover:bg-zinc-700 hover:border-zinc-500' // <--- MUDAR AQUI (Modo Escuro)
+          : 'bg-white border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-md' // Mantenha o modo claro igual
+      }`,
       text: "font-medium text-base truncate flex-grow text-center",
-      badge: `flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors ${isDark ? 'bg-slate-700 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-900' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600'}`,
+      badge: `flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors ${
+        isDark 
+          ? 'bg-zinc-700 text-zinc-400 group-hover:bg-zinc-600 group-hover:text-white' // <--- MUDAR AQUI
+          : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+      }`,
       icon: null
     };
   };

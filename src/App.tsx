@@ -27,22 +27,22 @@ export default function App() {
 
   // 3. Estilos globais dinâmicos
   const s = {
-    bg: isDarkMode ? 'bg-slate-900' : 'bg-slate-50',
-    text: isDarkMode ? 'text-slate-100' : 'text-slate-800',
-    textSecondary: isDarkMode ? 'text-slate-400' : 'text-slate-500',
-    card: isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100',
+    bg: isDarkMode ? 'bg-zinc-950' : 'bg-slate-50',
+    text: isDarkMode ? 'text-zinc-100' : 'text-slate-800',
+    textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-500',
+    card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-100',
     cardShadow: isDarkMode ? 'shadow-none' : 'shadow-lg shadow-slate-200/50',
-    highlightText: isDarkMode ? 'text-indigo-400' : 'text-indigo-900',
-    subtleHighlight: isDarkMode ? 'text-slate-400' : 'text-indigo-600',
-    success: isDarkMode ? 'text-green-400' : 'text-green-600',
-    error: isDarkMode ? 'text-red-400' : 'text-red-600',
+    highlightText: isDarkMode ? 'text-blue-400' : 'text-indigo-900',
+    subtleHighlight: isDarkMode ? 'text-zinc-500' : 'text-indigo-600',
+    success: isDarkMode ? 'text-emerald-400' : 'text-green-600',
+    error: isDarkMode ? 'text-rose-400' : 'text-red-600',
   };
 
   return (
     <div className={`min-h-screen font-sans flex flex-col relative overflow-hidden transition-colors duration-500 ${s.bg} ${s.text}`}>
       
       {/* Background FX */}
-      <div className={`absolute top-0 left-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-indigo-900/20' : 'bg-indigo-200/30'} -translate-x-1/2 -translate-y-1/2`} />
+      <div className={`absolute top-0 left-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-200/30'} -translate-x-1/2 -translate-y-1/2`} />
       <div className={`absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-200/30'} translate-x-1/2 translate-y-1/2`} />
 
       <Header 
@@ -73,11 +73,11 @@ export default function App() {
                 <button
                   key={c}
                   onClick={() => game.startQuiz(c as Continent)}
-                  className={`group border rounded-xl p-5 flex items-center justify-between transition-all duration-300 ${s.card} ${isDarkMode ? 'hover:bg-slate-700 hover:border-slate-600' : 'hover:bg-indigo-50 hover:border-indigo-200 shadow-sm hover:shadow-md'}`}
+                  className={`group border rounded-xl p-5 flex items-center justify-between transition-all duration-300 ${s.card} ${isDarkMode ? 'hover:bg-slate-700 hover:border-slate-600' : 'hover:bg-blue-50 hover:border-blue-200 shadow-sm hover:shadow-md'}`}
                 >
-                  <span className={`font-medium ${isDarkMode ? 'group-hover:text-white' : 'group-hover:text-indigo-800'}`}>{c}</span>
-                  <div className={`p-1.5 rounded-full transition-colors ${isDarkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-indigo-100 group-hover:bg-indigo-100'}`}>
-                    <ArrowRight className={`w-4 h-4 ${isDarkMode ? 'text-slate-300 group-hover:text-white' : 'text-indigo-600'}`} />
+                  <span className={`font-medium ${isDarkMode ? 'group-hover:text-white' : 'group-hover:text-blue-800'}`}>{c}</span>
+                  <div className={`p-1.5 rounded-full transition-colors ${isDarkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-blue-100 group-hover:bg-blue-100'}`}>
+                    <ArrowRight className={`w-4 h-4 ${isDarkMode ? 'text-slate-300 group-hover:text-white' : 'text-blue-600'}`} />
                   </div>
                 </button>
               ))}
@@ -94,13 +94,13 @@ export default function App() {
               <div className="flex flex-col items-center gap-6">
                 
                 {/* 1. TÍTULO DO CONTINENTE (AGORA NO TOPO) */}
-                <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-indigo-600 border-slate-100'}`}>
+                <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-blue-600 border-slate-100'}`}>
                     {game.questions[game.currentIndex].continent}
                 </span>
 
                 {/* 2. BANDEIRA (LOGO ABAIXO) */}
                 <div className="relative group">
-                  <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-indigo-500' : 'bg-indigo-600'}`}></div>
+                  <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-blue-500' : 'bg-blue-600'}`}></div>
                   <img
                     src={`https://flagcdn.com/w160/${game.questions[game.currentIndex].code}.png`}
                     srcSet={`https://flagcdn.com/w320/${game.questions[game.currentIndex].code}.png 2x`}
@@ -135,7 +135,7 @@ export default function App() {
               {game.isAnswered && (
                 <button
                   onClick={game.nextQuestion}
-                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 hover:gap-3 ${isDarkMode ? 'bg-slate-200 text-slate-900 hover:bg-white shadow-lg' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30'}`}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 hover:gap-3 ${isDarkMode ? 'bg-slate-200 text-slate-900 hover:bg-white shadow-lg' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30'}`}
                 >
                   {game.currentIndex + 1 === game.questions.length ? 'Ver Resultado' : 'Próxima'} 
                   <ArrowRight className="w-5 h-5" />
@@ -169,14 +169,14 @@ export default function App() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => game.startQuiz(game.selectedContinent)}
-                className={`w-full py-4 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-lg ${isDarkMode ? 'bg-slate-200 text-slate-900 hover:bg-white' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/30'}`}
+                className={`w-full py-4 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-lg ${isDarkMode ? 'bg-slate-200 text-slate-900 hover:bg-white' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/30'}`}
               >
                 <RotateCcw className="w-5 h-5" />
                 Jogar Novamente
               </button>
               <button
                 onClick={game.restart}
-                className={`w-full py-4 border-2 rounded-xl transition-all font-bold flex items-center justify-center gap-2 ${isDarkMode ? 'bg-slate-900 border-slate-700 hover:border-slate-500' : 'bg-white border-slate-100 hover:border-indigo-100 hover:bg-indigo-50'}`}
+                className={`w-full py-4 border-2 rounded-xl transition-all font-bold flex items-center justify-center gap-2 ${isDarkMode ? 'bg-slate-900 border-slate-700 hover:border-slate-500' : 'bg-white border-slate-100 hover:border-blue-100 hover:bg-blue-50'}`}
               >
                 <Home className="w-5 h-5" />
                 Voltar ao Início
