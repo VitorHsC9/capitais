@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
-import { ArrowRight, RotateCcw, Home } from 'lucide-react';
-
+import { useState, useEffect, type ElementType } from 'react';
+import { 
+  ArrowRight, RotateCcw, Home, Trophy, Flame, 
+  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints 
+} from 'lucide-react';
 import { useQuizGame } from './hooks/useQuizGame';
 import { Header } from './components/Header';
 import { ProgressBar } from './components/ProgressBar';
 import { OptionButton } from './components/OptionButton';
 import type { Continent } from './data/countries';
+import { ACHIEVEMENTS_DB } from './data/achievements'; // Importe a DB de conquistas
 
 export default function App() {
-  // 1. Tema com Persistência (localStorage)
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Verifica se já existe preferência guardada
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('quiz-theme');
       return saved === 'dark';
@@ -20,8 +21,6 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('quiz-theme', isDarkMode ? 'dark' : 'light');
-    
-    // CORREÇÃO: Forçar o esquema de cores no navegador para evitar inversão automática
     if (isDarkMode) {
       document.documentElement.style.colorScheme = 'dark';
       document.documentElement.classList.add('dark');
@@ -31,21 +30,27 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  // 2. Lógica do Jogo importada do Hook
   const game = useQuizGame();
 
-  // 3. Estilos globais dinâmicos
+// Helper para renderizar ícones dinamicamente
+  const getIcon = (iconName: string, className: string) => {
+    // CORRIGIDO: Removido o erro de digitação 'HZ'
+    const icons: Record<string, ElementType> = { Globe, Target, Trophy, Flame, Footprints };
+    
+    const IconComp = icons[iconName] || Trophy;
+    return <IconComp className={className} />;
+  };
+
   const s = {
-    // CORREÇÃO: Usar 'bg-white' em vez de 'bg-slate-50' para contraste máximo
     bg: isDarkMode ? 'bg-zinc-950' : 'bg-white', 
-    text: isDarkMode ? 'text-zinc-100' : 'text-slate-800',
-    textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-500',
-    card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-100',
-    cardShadow: isDarkMode ? 'shadow-none' : 'shadow-lg shadow-slate-200/50',
-    highlightText: isDarkMode ? 'text-blue-400' : 'text-indigo-900',
-    subtleHighlight: isDarkMode ? 'text-zinc-500' : 'text-indigo-600',
-    success: isDarkMode ? 'text-emerald-400' : 'text-green-600',
-    error: isDarkMode ? 'text-rose-400' : 'text-red-600',
+    text: isDarkMode ? 'text-zinc-100' : 'text-slate-900',
+    textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-600',
+    card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200',
+    cardShadow: isDarkMode ? 'shadow-none' : 'shadow-xl shadow-slate-300/50',
+    highlightText: isDarkMode ? 'text-blue-400' : 'text-blue-700',
+    subtleHighlight: isDarkMode ? 'text-zinc-500' : 'text-blue-600',
+    success: isDarkMode ? 'text-emerald-400' : 'text-green-700',
+    error: isDarkMode ? 'text-rose-400' : 'text-red-700',
   };
 
   return (
@@ -54,6 +59,24 @@ export default function App() {
       {/* Background FX */}
       <div className={`absolute top-0 left-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-200/30'} -translate-x-1/2 -translate-y-1/2`} />
       <div className={`absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-200/30'} translate-x-1/2 translate-y-1/2`} />
+
+      {/* --- NOTIFICAÇÕES (TOAST) --- */}
+      <div className="fixed top-24 right-0 left-0 flex flex-col items-center gap-2 z-50 pointer-events-none px-4">
+        {game.newAchievements.map((ach) => (
+          <div 
+            key={ach.id} 
+            className="animate-bounce-in bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded shadow-2xl flex items-center gap-3 max-w-sm w-full pointer-events-auto"
+          >
+            <div className="bg-yellow-200 p-2 rounded-full">
+              <Trophy className="w-5 h-5 text-yellow-700" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">Conquista Desbloqueada!</p>
+              <p className="text-xs">{ach.title}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <Header 
         isDark={isDarkMode} 
@@ -64,19 +87,31 @@ export default function App() {
 
       <main className="flex-1 w-full max-w-2xl mx-auto p-6 flex flex-col justify-center relative z-10">
         
-        {/* TELA INICIAL */}
+        {/* === TELA INICIAL === */}
         {game.gameState === 'start' && (
           <div className="space-y-10 animate-fade-in">
-            <div className="space-y-4">
-              <span className={`font-semibold tracking-wider text-sm uppercase ${s.subtleHighlight}`}>Bem-vindo ao desafio</span>
-              <h2 className="text-4xl md:text-5xl font-light tracking-tight">
-                Explore o mundo, <br />
-                <span className={`font-bold ${s.highlightText}`}>uma capital por vez.</span>
-              </h2>
-              <p className={`max-w-md text-lg leading-relaxed ${s.textSecondary}`}>
-                Selecione uma região abaixo para iniciar o quiz completo.
-              </p>
+            <div className="flex justify-between items-start">
+              <div className="space-y-4">
+                <span className={`font-semibold tracking-wider text-sm uppercase ${s.subtleHighlight}`}>Bem-vindo ao desafio</span>
+                <h2 className="text-4xl md:text-5xl font-light tracking-tight">
+                  Explore o mundo, <br />
+                  <span className={`font-bold ${s.highlightText}`}>uma capital por vez.</span>
+                </h2>
+              </div>
+              
+              {/* BOTÃO DE ESTATÍSTICAS */}
+              <button 
+                onClick={game.goToStats}
+                className={`p-3 rounded-xl border transition-all ${s.card} ${isDarkMode ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-50 text-slate-500'}`}
+                title="Minhas Estatísticas"
+              >
+                <BarChart3 className="w-6 h-6" />
+              </button>
             </div>
+
+            <p className={`max-w-md text-lg leading-relaxed ${s.textSecondary}`}>
+              Selecione uma região abaixo para iniciar o quiz completo.
+            </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'].map((c) => (
@@ -95,20 +130,83 @@ export default function App() {
           </div>
         )}
 
-        {/* TELA JOGO */}
+        {/* === TELA DE ESTATÍSTICAS === */}
+        {game.gameState === 'stats' && (
+           <div className="animate-fade-in w-full space-y-8">
+             <div className="flex items-center gap-3 mb-6">
+                <button onClick={game.restart} className={`p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10`}>
+                   <ArrowRight className="w-6 h-6 rotate-180" />
+                </button>
+                <h2 className="text-3xl font-bold">Meu Progresso</h2>
+             </div>
+
+             {/* Cards de Resumo */}
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Jogos', val: game.stats.totalGames, icon: <RotateCcw className="w-4 h-4" /> },
+                  { label: 'Acertos', val: game.stats.totalCorrect, icon: <CheckCircle2 className="w-4 h-4 text-green-500" /> },
+                  { label: 'Melhor Streak', val: game.stats.bestStreak, icon: <Flame className="w-4 h-4 text-orange-500" /> },
+                  { label: 'Score Total', val: game.stats.totalScore, icon: <Trophy className="w-4 h-4 text-yellow-500" /> },
+                ].map((item, i) => (
+                  <div key={i} className={`p-4 rounded-2xl border ${s.card} flex flex-col gap-2`}>
+                    <div className={`flex items-center gap-2 text-xs font-bold uppercase ${s.textSecondary}`}>
+                      {item.icon} {item.label}
+                    </div>
+                    <span className="text-2xl font-bold">{item.val}</span>
+                  </div>
+                ))}
+             </div>
+
+             {/* Lista de Conquistas */}
+             <div className="space-y-4">
+                <h3 className={`text-sm font-bold uppercase tracking-wider ${s.subtleHighlight}`}>Conquistas</h3>
+                <div className="grid grid-cols-1 gap-3">
+                   {ACHIEVEMENTS_DB.map((ach) => {
+                      const isUnlocked = game.stats.unlockedAchievements.includes(ach.id);
+                      return (
+                        <div key={ach.id} className={`p-4 rounded-xl border flex items-center gap-4 transition-all ${s.card} ${isUnlocked ? (isDarkMode ? 'border-green-900/50 bg-green-900/10' : 'border-green-200 bg-green-50') : 'opacity-60 grayscale'}`}>
+                           <div className={`p-3 rounded-full ${isUnlocked ? (isDarkMode ? 'bg-green-900 text-green-400' : 'bg-green-100 text-green-600') : (isDarkMode ? 'bg-zinc-800' : 'bg-slate-100')}`}>
+                              {isUnlocked ? getIcon(ach.icon, "w-6 h-6") : <Lock className="w-6 h-6" />}
+                           </div>
+                           <div className="flex-1">
+                              <h4 className={`font-bold ${isUnlocked ? '' : s.textSecondary}`}>{ach.title}</h4>
+                              <p className={`text-sm ${s.textSecondary}`}>{ach.description}</p>
+                           </div>
+                           {isUnlocked && <CheckCircle2 className={`w-5 h-5 ${isDarkMode ? 'text-green-500' : 'text-green-600'}`} />}
+                        </div>
+                      )
+                   })}
+                </div>
+             </div>
+           </div>
+        )}
+
+        {/* === TELA JOGO === */}
         {game.gameState === 'playing' && game.questions[game.currentIndex] && (
           <div className="animate-fade-in w-full">
+            <div className="flex justify-between items-end mb-6 px-1">
+              <div className="flex flex-col">
+                <span className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${s.textSecondary}`}>Pontuação</span>
+                <span className={`text-2xl font-bold tabular-nums ${s.highlightText}`}>{game.score}</span>
+              </div>
+              {game.streak > 1 ? (
+                <div className="flex items-center gap-2 animate-pulse text-orange-500">
+                  <span className="font-bold text-xl tabular-nums">{game.streak}x</span>
+                  <Flame className="w-6 h-6 fill-orange-500" />
+                </div>
+              ) : (
+                <div className={`text-sm font-medium ${s.textSecondary}`}>Sem sequência</div>
+              )}
+            </div>
+
             <ProgressBar current={game.currentIndex} total={game.questions.length} isDark={isDarkMode} />
 
-            <div className={`mb-10 rounded-2xl p-8 border transition-colors ${s.card} ${s.cardShadow}`}>
+            <div className={`mb-8 rounded-2xl p-8 border transition-colors ${s.card} ${s.cardShadow}`}>
               <div className="flex flex-col items-center gap-6">
-                
-                {/* 1. TÍTULO DO CONTINENTE (AGORA NO TOPO) */}
                 <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-blue-600 border-slate-100'}`}>
                     {game.questions[game.currentIndex].continent}
                 </span>
 
-                {/* 2. BANDEIRA (LOGO ABAIXO) */}
                 <div className="relative group">
                   <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-blue-500' : 'bg-blue-600'}`}></div>
                   <img
@@ -119,7 +217,6 @@ export default function App() {
                   />
                 </div>
 
-                {/* 3. PERGUNTA */}
                 <h2 className="text-3xl leading-tight text-center mt-2">
                   Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?
                 </h2>
@@ -155,24 +252,31 @@ export default function App() {
           </div>
         )}
 
-        {/* TELA FINAL */}
+        {/* === TELA FINAL === */}
         {game.gameState === 'finished' && (
           <div className={`text-center space-y-8 animate-fade-in p-8 rounded-3xl border transition-colors ${s.card} ${s.cardShadow}`}>
-            <div className="space-y-2">
-               <span className={`font-bold uppercase tracking-widest text-xs ${s.subtleHighlight}`}>Resultado Final</span>
-              <h2 className="text-6xl font-bold tracking-tighter">
-                {Math.round((game.score / game.questions.length) * 100)}%
-              </h2>
+            <div className="space-y-1">
+               <span className={`font-bold uppercase tracking-widest text-xs ${s.subtleHighlight}`}>Pontuação Final</span>
+               <div className="flex items-center justify-center gap-3">
+                  <Trophy className={`w-8 h-8 ${isDarkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />
+                  <h2 className={`text-5xl font-bold tracking-tighter ${s.highlightText}`}>
+                    {game.score}
+                  </h2>
+               </div>
             </div>
 
-            <div className={`py-6 border-y grid grid-cols-2 gap-8 max-w-sm mx-auto ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+            <div className={`py-6 border-y grid grid-cols-3 gap-4 max-w-sm mx-auto ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
               <div>
-                <p className={`text-3xl font-bold ${s.success}`}>{game.score}</p>
-                <p className={`text-xs uppercase mt-1 font-bold ${s.textSecondary}`}>Acertos</p>
+                <p className={`text-2xl font-bold ${s.text}`}>{Math.round((game.correctCount / game.questions.length) * 100)}%</p>
+                <p className={`text-[10px] uppercase mt-1 font-bold ${s.textSecondary}`}>Precisão</p>
               </div>
               <div>
-                <p className={`text-3xl font-bold ${s.error}`}>{game.questions.length - game.score}</p>
-                <p className={`text-xs uppercase mt-1 font-bold ${s.textSecondary}`}>Erros</p>
+                <p className={`text-2xl font-bold ${s.success}`}>{game.correctCount}</p>
+                <p className={`text-[10px] uppercase mt-1 font-bold ${s.textSecondary}`}>Acertos</p>
+              </div>
+              <div>
+                <p className={`text-2xl font-bold ${s.error}`}>{game.questions.length - game.correctCount}</p>
+                <p className={`text-[10px] uppercase mt-1 font-bold ${s.textSecondary}`}>Erros</p>
               </div>
             </div>
 
