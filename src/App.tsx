@@ -36,7 +36,7 @@ export default function App() {
 
   // 3. Estilos globais dinâmicos
   const s = {
-    bg: isDarkMode ? 'bg-zinc-950' : 'bg-slate-50', 
+    bg: isDarkMode ? 'bg-zinc-950' : 'bg-white', 
     text: isDarkMode ? 'text-zinc-100' : 'text-slate-900',
     textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-600',
     card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200',
