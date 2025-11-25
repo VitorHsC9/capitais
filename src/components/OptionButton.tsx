@@ -1,6 +1,6 @@
 import { Check, X as XIcon } from 'lucide-react';
 import type { Country } from '../data/countries';
-import type { GameMode } from '../hooks/useQuizGame'; // Importe o tipo
+import type { GameMode } from '../hooks/useQuizGame';
 
 interface OptionButtonProps {
   option: Country;
@@ -10,14 +10,15 @@ interface OptionButtonProps {
   isAnswered: boolean;
   onSelect: () => void;
   isDark: boolean;
-  mode: GameMode; // <--- NOVA PROP
+  mode: GameMode;
 }
 
 export const OptionButton = ({ 
   option, idx, isSelected, isCorrect, isAnswered, onSelect, isDark, mode
 }: OptionButtonProps) => {
   
-  // Define o texto a ser exibido baseado no modo
+  // Se for clássico (País -> Capital), mostramos a Capital como opção.
+  // Nos modos Reverso (Capital -> País) e Bandeiras, mostramos o Nome do País.
   const label = mode === 'classic' ? option.capital : option.name;
 
   const getStyles = () => {
