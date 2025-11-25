@@ -36,16 +36,15 @@ export default function App() {
 
   // 3. Estilos globais dinâmicos
   const s = {
-    // CORREÇÃO: Usar 'bg-white' em vez de 'bg-slate-50' para contraste máximo
-    bg: isDarkMode ? 'bg-zinc-950' : 'bg-white', 
-    text: isDarkMode ? 'text-zinc-100' : 'text-slate-800',
-    textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-500',
-    card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-100',
-    cardShadow: isDarkMode ? 'shadow-none' : 'shadow-lg shadow-slate-200/50',
-    highlightText: isDarkMode ? 'text-blue-400' : 'text-indigo-900',
-    subtleHighlight: isDarkMode ? 'text-zinc-500' : 'text-indigo-600',
-    success: isDarkMode ? 'text-emerald-400' : 'text-green-600',
-    error: isDarkMode ? 'text-rose-400' : 'text-red-600',
+    bg: isDarkMode ? 'bg-zinc-950' : 'bg-slate-50', 
+    text: isDarkMode ? 'text-zinc-100' : 'text-slate-900',
+    textSecondary: isDarkMode ? 'text-zinc-400' : 'text-slate-600',
+    card: isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200',
+    cardShadow: isDarkMode ? 'shadow-none' : 'shadow-xl shadow-slate-300/50',
+    highlightText: isDarkMode ? 'text-blue-400' : 'text-blue-700',
+    subtleHighlight: isDarkMode ? 'text-zinc-500' : 'text-blue-600',
+    success: isDarkMode ? 'text-emerald-400' : 'text-green-700',
+    error: isDarkMode ? 'text-rose-400' : 'text-red-700',
   };
 
   return (
