@@ -1,7 +1,12 @@
 import { useState, useCallback } from 'react';
-// Separação de Imports de Tipos e Valores para evitar erros do Vite
 import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
+import { useStatistics } from './useStatistics';
+
+// --- TIPO EXPORTADO ---
+export type GameMode = 'classic' | 'flags';
+
+// --- FUNÇÕES AUXILIARES ---
 
 const shuffleArray = <T,>(array: T[]): T[] => [...array].sort(() => Math.random() - 0.5);
 
@@ -22,8 +27,6 @@ const getRandomItems = <T,>(arr: T[], count: number, excludeItem?: T): T[] => {
   return result;
 };
 
-// Função auxiliar extraída para fora do componente/Hook
-// Gera as opções de resposta baseadas na pergunta correta
 const generateRoundOptions = (correct: Country): Country[] => {
   const needed = CONFIG.OPTIONS_COUNT - 1;
 
@@ -42,16 +45,29 @@ const generateRoundOptions = (correct: Country): Country[] => {
   return shuffleArray([...distractors, correct]);
 };
 
+// --- HOOK PRINCIPAL ---
+
 export const useQuizGame = () => {
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'finished'>('start');
+  // Estados de Controle do Jogo
+  const [gameState, setGameState] = useState<'start' | 'playing' | 'finished' | 'stats'>('start');
+  const [gameMode, setGameMode] = useState<GameMode>('classic');
+  
+  // Estados da Rodada
   const [questions, setQuestions] = useState<Country[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  
   const [currentOptions, setCurrentOptions] = useState<Country[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [selectedContinent, setSelectedContinent] = useState<Continent>('Todos');
+  
+  // Estados de Pontuação e Estatísticas da Sessão
+  const [score, setScore] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
+  
+  // Integração com Estatísticas Globais (Persistência e Conquistas)
+  const { stats, updateStats, newAchievements, clearNotifications } = useStatistics();
 
   const startQuiz = useCallback((continent: Continent) => {
     setSelectedContinent(continent);
@@ -67,22 +83,50 @@ export const useQuizGame = () => {
     const shuffledQuestions = shuffleArray(pool);
     setQuestions(shuffledQuestions);
     setCurrentIndex(0);
+    
+    // Resetar estados da sessão
     setScore(0);
+    setCorrectCount(0);
+    setStreak(0);
+    setMaxStreak(0);
     setIsAnswered(false);
     setSelectedAnswer(null);
     
-    // CORREÇÃO: Gerar as opções imediatamente aqui, em vez de usar useEffect
+    // Limpar notificações antigas ao iniciar novo jogo
+    clearNotifications(); 
+    
+    // Gerar primeira rodada
     const firstRoundOptions = generateRoundOptions(shuffledQuestions[0]);
     setCurrentOptions(firstRoundOptions);
 
     setGameState('playing');
-  }, []);
+  }, [clearNotifications]);
 
-  const handleAnswer = (capital: string) => {
+  const handleAnswer = (answer: string) => {
     if (isAnswered) return;
     setIsAnswered(true);
-    setSelectedAnswer(capital);
-    if (capital === questions[currentIndex].capital) setScore(s => s + 1);
+    setSelectedAnswer(answer);
+    
+    const currentQ = questions[currentIndex];
+    
+    // Validação Dinâmica: Se modo clássico compara Capital, se modo bandeiras compara Nome do País
+    const correctAnswer = gameMode === 'classic' ? currentQ.capital : currentQ.name;
+    const isCorrect = answer === correctAnswer;
+
+    if (isCorrect) {
+      // Pontuação: Base 100 + Bônus de Sequência (20 pontos por nível de streak)
+      const points = 100 + (streak * 20);
+      setScore(s => s + points);
+      setCorrectCount(c => c + 1);
+      
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      if (newStreak > maxStreak) {
+        setMaxStreak(newStreak);
+      }
+    } else {
+      setStreak(0); // Quebra a sequência se errar
+    }
   };
 
   const nextQuestion = () => {
@@ -93,26 +137,56 @@ export const useQuizGame = () => {
       setIsAnswered(false);
       setSelectedAnswer(null);
       
-      // CORREÇÃO: Gerar as opções para a próxima pergunta aqui
       const nextRoundOptions = generateRoundOptions(questions[nextIndex]);
       setCurrentOptions(nextRoundOptions);
     } else {
       setGameState('finished');
+      
+      // Salva estatísticas globais e verifica conquistas ao fim do jogo
+      updateStats({
+        score: score,
+        correctCount: correctCount,
+        streak: maxStreak
+      }, questions.length);
     }
   };
 
+  // --- Funções de Navegação ---
+
+  const restart = () => {
+    clearNotifications(); // Garante que notificações sumam ao sair da tela de fim de jogo
+    setGameState('start');
+  };
+
+  const goToStats = () => {
+    clearNotifications();
+    setGameState('stats');
+  };
+
   return {
+    // Estados
     gameState,
+    gameMode,
     questions,
     currentIndex,
     score,
+    correctCount,
+    streak,
     currentOptions,
     selectedAnswer,
     isAnswered,
     selectedContinent,
+    
+    // Dados Globais
+    newAchievements,
+    stats,
+    
+    // Ações
+    setGameMode,
     startQuiz,
     handleAnswer,
     nextQuestion,
-    restart: () => setGameState('start')
+    restart,
+    goToStats
   };
 };
