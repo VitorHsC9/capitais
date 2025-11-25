@@ -93,30 +93,24 @@ export default function App() {
             <div className={`mb-10 rounded-2xl p-8 border transition-colors ${s.card} ${s.cardShadow}`}>
               <div className="flex flex-col items-center gap-6">
                 
-                {/* --- BLOCO IMAGEM + CONTINENTE --- */}
-                {/* Container para agrupar a bandeira e o rótulo com espaçamento */}
-                <div className="flex flex-col items-center gap-3">
-                  
-                  {/* Bandeira */}
-                  <div className="relative group">
-                    <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-indigo-500' : 'bg-indigo-600'}`}></div>
-                    <img
-                      src={`https://flagcdn.com/w160/${game.questions[game.currentIndex].code}.png`}
-                      srcSet={`https://flagcdn.com/w320/${game.questions[game.currentIndex].code}.png 2x`}
-                      alt={`Bandeira de ${game.questions[game.currentIndex].name}`}
-                      className="relative h-28 w-auto rounded-lg shadow-lg object-cover border border-slate-200 dark:border-slate-600 transform transition-transform group-hover:scale-105 duration-300"
-                    />
-                  </div>
-
-                  {/* Rótulo do Continente - No fluxo normal (sem absolute) */}
-                  <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-indigo-600 border-slate-100'}`}>
+                {/* 1. TÍTULO DO CONTINENTE (AGORA NO TOPO) */}
+                <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-indigo-600 border-slate-100'}`}>
                     {game.questions[game.currentIndex].continent}
-                  </span>
+                </span>
 
+                {/* 2. BANDEIRA (LOGO ABAIXO) */}
+                <div className="relative group">
+                  <div className={`absolute inset-0 rounded-lg blur opacity-25 ${isDarkMode ? 'bg-indigo-500' : 'bg-indigo-600'}`}></div>
+                  <img
+                    src={`https://flagcdn.com/w160/${game.questions[game.currentIndex].code}.png`}
+                    srcSet={`https://flagcdn.com/w320/${game.questions[game.currentIndex].code}.png 2x`}
+                    alt={`Bandeira de ${game.questions[game.currentIndex].name}`}
+                    className="relative h-28 w-auto rounded-lg shadow-lg object-cover border border-slate-200 dark:border-slate-600 transform transition-transform group-hover:scale-105 duration-300"
+                  />
                 </div>
 
-                {/* --- PERGUNTA --- */}
-                <h2 className="text-3xl leading-tight text-center">
+                {/* 3. PERGUNTA */}
+                <h2 className="text-3xl leading-tight text-center mt-2">
                   Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?
                 </h2>
               </div>
