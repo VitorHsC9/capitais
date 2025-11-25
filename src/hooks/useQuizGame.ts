@@ -1,14 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
 import { useStatistics } from './useStatistics';
 
-// --- TIPO EXPORTADO ---
-// Adicionado 'reverse' para suportar o modo Capitais -> Países
-export type GameMode = 'classic' | 'flags' | 'reverse';
+export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath';
+type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
 
 // --- FUNÇÕES AUXILIARES ---
-
 const shuffleArray = <T,>(array: T[]): T[] => [...array].sort(() => Math.random() - 0.5);
 
 const getRandomItems = <T,>(arr: T[], count: number, excludeItem?: T): T[] => {
@@ -30,12 +28,9 @@ const getRandomItems = <T,>(arr: T[], count: number, excludeItem?: T): T[] => {
 
 const generateRoundOptions = (correct: Country): Country[] => {
   const needed = CONFIG.OPTIONS_COUNT - 1;
-
-  // 1. Tentar arranjar distratores do mesmo continente
   const sameContinentPool = COUNTRIES_DB.filter(c => c.continent === correct.continent && c.name !== correct.name);
   let distractors = getRandomItems(sameContinentPool, needed);
 
-  // 2. Se não houver suficientes, preencher com outros
   if (distractors.length < needed) {
     const remainingNeeded = needed - distractors.length;
     const otherPool = COUNTRIES_DB.filter(c => c.continent !== correct.continent);
@@ -49,11 +44,9 @@ const generateRoundOptions = (correct: Country): Country[] => {
 // --- HOOK PRINCIPAL ---
 
 export const useQuizGame = () => {
-  // Estados de Controle do Jogo
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'finished' | 'stats'>('start');
+  const [gameState, setGameState] = useState<GameState>('start');
   const [gameMode, setGameMode] = useState<GameMode>('classic');
   
-  // Estados da Rodada
   const [questions, setQuestions] = useState<Country[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentOptions, setCurrentOptions] = useState<Country[]>([]);
@@ -61,14 +54,16 @@ export const useQuizGame = () => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [selectedContinent, setSelectedContinent] = useState<Continent>('Todos');
   
-  // Estados de Pontuação e Estatísticas da Sessão
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   
-  // Integração com Estatísticas Globais (Persistência e Conquistas)
+  const [timeLeft, setTimeLeft] = useState(5);
+  
   const { stats, updateStats, newAchievements, clearNotifications } = useStatistics();
+
+  // --- AÇÕES ---
 
   const startQuiz = useCallback((continent: Continent) => {
     setSelectedContinent(continent);
@@ -85,52 +80,21 @@ export const useQuizGame = () => {
     setQuestions(shuffledQuestions);
     setCurrentIndex(0);
     
-    // Resetar estados da sessão
     setScore(0);
     setCorrectCount(0);
     setStreak(0);
     setMaxStreak(0);
     setIsAnswered(false);
     setSelectedAnswer(null);
+    setTimeLeft(5);
     
-    // Limpar notificações antigas ao iniciar novo jogo
     clearNotifications(); 
     
-    // Gerar primeira rodada
     const firstRoundOptions = generateRoundOptions(shuffledQuestions[0]);
     setCurrentOptions(firstRoundOptions);
 
     setGameState('playing');
   }, [clearNotifications]);
-
-  const handleAnswer = (answer: string) => {
-    if (isAnswered) return;
-    setIsAnswered(true);
-    setSelectedAnswer(answer);
-    
-    const currentQ = questions[currentIndex];
-    
-    // Validação Dinâmica: 
-    // - Clássico: compara Capital (resposta certa é a capital)
-    // - Bandeiras e Reverse: compara Nome (resposta certa é o nome do país)
-    const correctAnswer = gameMode === 'classic' ? currentQ.capital : currentQ.name;
-    const isCorrect = answer === correctAnswer;
-
-    if (isCorrect) {
-      // Pontuação: Base 100 + Bônus de Sequência (20 pontos por nível de streak)
-      const points = 100 + (streak * 20);
-      setScore(s => s + points);
-      setCorrectCount(c => c + 1);
-      
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      if (newStreak > maxStreak) {
-        setMaxStreak(newStreak);
-      }
-    } else {
-      setStreak(0); // Quebra a sequência se errar
-    }
-  };
 
   const nextQuestion = () => {
     const nextIndex = currentIndex + 1;
@@ -139,13 +103,12 @@ export const useQuizGame = () => {
       setCurrentIndex(nextIndex);
       setIsAnswered(false);
       setSelectedAnswer(null);
+      setTimeLeft(5);
       
       const nextRoundOptions = generateRoundOptions(questions[nextIndex]);
       setCurrentOptions(nextRoundOptions);
     } else {
       setGameState('finished');
-      
-      // Salva estatísticas globais e verifica conquistas ao fim do jogo
       updateStats({
         score: score,
         correctCount: correctCount,
@@ -154,10 +117,73 @@ export const useQuizGame = () => {
     }
   };
 
-  // --- Funções de Navegação ---
+  const finishGameAsLoss = () => {
+    setGameState('game_over');
+    updateStats({
+      score: score,
+      correctCount: correctCount,
+      streak: maxStreak
+    }, correctCount + 1);
+  };
+
+  const handleAnswer = (answer: string) => {
+    if (isAnswered) return;
+    setIsAnswered(true);
+    setSelectedAnswer(answer);
+    
+    const currentQ = questions[currentIndex];
+    
+    const isCapitalMode = gameMode === 'classic' || gameMode === 'suddenDeath';
+    const correctAnswer = isCapitalMode ? currentQ.capital : currentQ.name;
+    const isCorrect = answer === correctAnswer;
+
+    if (isCorrect) {
+      const points = 100 + (streak * 20);
+      setScore(s => s + points);
+      setCorrectCount(c => c + 1);
+      
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      if (newStreak > maxStreak) setMaxStreak(newStreak);
+    } else {
+      setStreak(0);
+    }
+
+    if (gameMode === 'suddenDeath') {
+      setTimeout(() => {
+        if (isCorrect) {
+          nextQuestion();
+        } else {
+          finishGameAsLoss();
+        }
+      }, 1000);
+    }
+  };
+
+  // 1. Efeito apenas para o TICK do relógio (sem lógica de game over)
+  useEffect(() => {
+    if (gameMode !== 'suddenDeath' || gameState !== 'playing' || isAnswered) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameState, gameMode, isAnswered]);
+
+  // 2. Efeito separado para monitorar se o tempo acabou
+  useEffect(() => {
+    // Só dispara se o tempo for zero, estiver jogando e ainda não tiver respondido
+    if (timeLeft === 0 && gameMode === 'suddenDeath' && gameState === 'playing' && !isAnswered) {
+      handleAnswer('TIME_UP');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, gameMode, gameState, isAnswered]); 
+
+  // --- NAVEGAÇÃO ---
 
   const restart = () => {
-    clearNotifications(); // Garante que notificações sumam ao sair da tela de fim de jogo
+    clearNotifications();
     setGameState('start');
   };
 
@@ -167,7 +193,6 @@ export const useQuizGame = () => {
   };
 
   return {
-    // Estados
     gameState,
     gameMode,
     questions,
@@ -179,12 +204,9 @@ export const useQuizGame = () => {
     selectedAnswer,
     isAnswered,
     selectedContinent,
-    
-    // Dados Globais
+    timeLeft,
     newAchievements,
     stats,
-    
-    // Ações
     setGameMode,
     startQuiz,
     handleAnswer,
