@@ -3,7 +3,10 @@ import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
 import { useStatistics } from './useStatistics';
 
-// --- FUNÇÕES AUXILIARES (Fora do Hook) ---
+// --- TIPO EXPORTADO ---
+export type GameMode = 'classic' | 'flags';
+
+// --- FUNÇÕES AUXILIARES ---
 
 const shuffleArray = <T,>(array: T[]): T[] => [...array].sort(() => Math.random() - 0.5);
 
@@ -45,25 +48,25 @@ const generateRoundOptions = (correct: Country): Country[] => {
 // --- HOOK PRINCIPAL ---
 
 export const useQuizGame = () => {
-  // Estado do jogo agora inclui 'stats' para a tela de estatísticas
+  // Estados de Controle do Jogo
   const [gameState, setGameState] = useState<'start' | 'playing' | 'finished' | 'stats'>('start');
+  const [gameMode, setGameMode] = useState<GameMode>('classic');
   
+  // Estados da Rodada
   const [questions, setQuestions] = useState<Country[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentOptions, setCurrentOptions] = useState<Country[]>([]);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [selectedContinent, setSelectedContinent] = useState<Continent>('Todos');
   
-  // Estados de Pontuação
+  // Estados de Pontuação e Estatísticas da Sessão
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   
-  // Estados da Rodada Atual
-  const [currentOptions, setCurrentOptions] = useState<Country[]>([]);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isAnswered, setIsAnswered] = useState(false);
-  const [selectedContinent, setSelectedContinent] = useState<Continent>('Todos');
-
-  // Integração com Estatísticas Globais
+  // Integração com Estatísticas Globais (Persistência e Conquistas)
   const { stats, updateStats, newAchievements, clearNotifications } = useStatistics();
 
   const startQuiz = useCallback((continent: Continent) => {
@@ -89,7 +92,7 @@ export const useQuizGame = () => {
     setIsAnswered(false);
     setSelectedAnswer(null);
     
-    // IMPORTANTE: Limpa notificações antigas ao iniciar novo jogo
+    // Limpar notificações antigas ao iniciar novo jogo
     clearNotifications(); 
     
     // Gerar primeira rodada
@@ -99,15 +102,19 @@ export const useQuizGame = () => {
     setGameState('playing');
   }, [clearNotifications]);
 
-  const handleAnswer = (capital: string) => {
+  const handleAnswer = (answer: string) => {
     if (isAnswered) return;
     setIsAnswered(true);
-    setSelectedAnswer(capital);
+    setSelectedAnswer(answer);
     
-    const isCorrect = capital === questions[currentIndex].capital;
+    const currentQ = questions[currentIndex];
+    
+    // Validação Dinâmica: Se modo clássico compara Capital, se modo bandeiras compara Nome do País
+    const correctAnswer = gameMode === 'classic' ? currentQ.capital : currentQ.name;
+    const isCorrect = answer === correctAnswer;
 
     if (isCorrect) {
-      // Pontuação: Base 100 + Bônus de Sequência
+      // Pontuação: Base 100 + Bônus de Sequência (20 pontos por nível de streak)
       const points = 100 + (streak * 20);
       setScore(s => s + points);
       setCorrectCount(c => c + 1);
@@ -118,7 +125,7 @@ export const useQuizGame = () => {
         setMaxStreak(newStreak);
       }
     } else {
-      setStreak(0); // Zera a sequência se errar
+      setStreak(0); // Quebra a sequência se errar
     }
   };
 
@@ -135,7 +142,7 @@ export const useQuizGame = () => {
     } else {
       setGameState('finished');
       
-      // Salva estatísticas globais ao fim do jogo
+      // Salva estatísticas globais e verifica conquistas ao fim do jogo
       updateStats({
         score: score,
         correctCount: correctCount,
@@ -144,19 +151,22 @@ export const useQuizGame = () => {
     }
   };
 
-  // Funções de Navegação
+  // --- Funções de Navegação ---
+
   const restart = () => {
-    clearNotifications(); // Limpa notificações ao voltar para o início
+    clearNotifications(); // Garante que notificações sumam ao sair da tela de fim de jogo
     setGameState('start');
   };
 
   const goToStats = () => {
-    clearNotifications(); // Limpa notificações ao ir para estatísticas
+    clearNotifications();
     setGameState('stats');
   };
 
   return {
+    // Estados
     gameState,
+    gameMode,
     questions,
     currentIndex,
     score,
@@ -166,12 +176,17 @@ export const useQuizGame = () => {
     selectedAnswer,
     isAnswered,
     selectedContinent,
+    
+    // Dados Globais
     newAchievements,
-    stats,      // Dados globais para a tela de estatísticas
+    stats,
+    
+    // Ações
+    setGameMode,
     startQuiz,
     handleAnswer,
     nextQuestion,
     restart,
-    goToStats   // Função para navegar para a tela de estatísticas
+    goToStats
   };
 };

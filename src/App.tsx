@@ -1,14 +1,15 @@
 import { useState, useEffect, type ElementType } from 'react';
 import { 
   ArrowRight, RotateCcw, Home, Trophy, Flame, 
-  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints 
+  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints, Flag, MapPin
 } from 'lucide-react';
-import { useQuizGame } from './hooks/useQuizGame';
+
+import { useQuizGame} from './hooks/useQuizGame';
 import { Header } from './components/Header';
 import { ProgressBar } from './components/ProgressBar';
 import { OptionButton } from './components/OptionButton';
 import type { Continent } from './data/countries';
-import { ACHIEVEMENTS_DB } from './data/achievements'; // Importe a DB de conquistas
+import { ACHIEVEMENTS_DB } from './data/achievements';
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -32,11 +33,8 @@ export default function App() {
 
   const game = useQuizGame();
 
-// Helper para renderizar ícones dinamicamente
   const getIcon = (iconName: string, className: string) => {
-    // CORRIGIDO: Removido o erro de digitação 'HZ'
     const icons: Record<string, ElementType> = { Globe, Target, Trophy, Flame, Footprints };
-    
     const IconComp = icons[iconName] || Trophy;
     return <IconComp className={className} />;
   };
@@ -60,13 +58,10 @@ export default function App() {
       <div className={`absolute top-0 left-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-200/30'} -translate-x-1/2 -translate-y-1/2`} />
       <div className={`absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-200/30'} translate-x-1/2 translate-y-1/2`} />
 
-      {/* --- NOTIFICAÇÕES (TOAST) --- */}
+      {/* --- TOASTS --- */}
       <div className="fixed top-24 right-0 left-0 flex flex-col items-center gap-2 z-50 pointer-events-none px-4">
         {game.newAchievements.map((ach) => (
-          <div 
-            key={ach.id} 
-            className="animate-bounce-in bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded shadow-2xl flex items-center gap-3 max-w-sm w-full pointer-events-auto"
-          >
+          <div key={ach.id} className="animate-bounce-in bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded shadow-2xl flex items-center gap-3 max-w-sm w-full pointer-events-auto">
             <div className="bg-yellow-200 p-2 rounded-full">
               <Trophy className="w-5 h-5 text-yellow-700" />
             </div>
@@ -89,48 +84,69 @@ export default function App() {
         
         {/* === TELA INICIAL === */}
         {game.gameState === 'start' && (
-          <div className="space-y-10 animate-fade-in">
+          <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-start">
               <div className="space-y-4">
                 <span className={`font-semibold tracking-wider text-sm uppercase ${s.subtleHighlight}`}>Bem-vindo ao desafio</span>
                 <h2 className="text-4xl md:text-5xl font-light tracking-tight">
                   Explore o mundo, <br />
-                  <span className={`font-bold ${s.highlightText}`}>uma capital por vez.</span>
+                  <span className={`font-bold ${s.highlightText}`}>uma questão por vez.</span>
                 </h2>
               </div>
-              
-              {/* BOTÃO DE ESTATÍSTICAS */}
-              <button 
-                onClick={game.goToStats}
-                className={`p-3 rounded-xl border transition-all ${s.card} ${isDarkMode ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-50 text-slate-500'}`}
-                title="Minhas Estatísticas"
-              >
+              <button onClick={game.goToStats} className={`p-3 rounded-xl border transition-all ${s.card} ${isDarkMode ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-50 text-slate-500'}`}>
                 <BarChart3 className="w-6 h-6" />
               </button>
             </div>
 
-            <p className={`max-w-md text-lg leading-relaxed ${s.textSecondary}`}>
-              Selecione uma região abaixo para iniciar o quiz completo.
-            </p>
+            {/* SELETOR DE MODO */}
+            <div className="space-y-3">
+               <span className={`text-xs font-bold uppercase tracking-wider ${s.textSecondary}`}>Modo de Jogo</span>
+               <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => game.setGameMode('classic')}
+                    className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+                      game.gameMode === 'classic' 
+                        ? (isDarkMode ? 'bg-blue-900/30 border-blue-500 text-blue-400' : 'bg-blue-50 border-blue-500 text-blue-700') 
+                        : s.card
+                    }`}
+                  >
+                     <MapPin className="w-6 h-6" />
+                     <span className="font-bold">Capitais</span>
+                  </button>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'].map((c) => (
-                <button
-                  key={c}
-                  onClick={() => game.startQuiz(c as Continent)}
-                  className={`group border rounded-xl p-5 flex items-center justify-between transition-all duration-300 ${s.card} ${isDarkMode ? 'hover:bg-slate-700 hover:border-slate-600' : 'hover:bg-blue-50 hover:border-blue-200 shadow-sm hover:shadow-md'}`}
-                >
-                  <span className={`font-medium ${isDarkMode ? 'group-hover:text-white' : 'group-hover:text-blue-800'}`}>{c}</span>
-                  <div className={`p-1.5 rounded-full transition-colors ${isDarkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-blue-100 group-hover:bg-blue-100'}`}>
+                  <button 
+                    onClick={() => game.setGameMode('flags')}
+                    className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+                      game.gameMode === 'flags' 
+                        ? (isDarkMode ? 'bg-blue-900/30 border-blue-500 text-blue-400' : 'bg-blue-50 border-blue-500 text-blue-700') 
+                        : s.card
+                    }`}
+                  >
+                     <Flag className="w-6 h-6" />
+                     <span className="font-bold">Bandeiras</span>
+                  </button>
+               </div>
+            </div>
+
+            <div className="space-y-3">
+              <span className={`text-xs font-bold uppercase tracking-wider ${s.textSecondary}`}>Selecione a Região</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => game.startQuiz(c as Continent)}
+                    className={`group border rounded-xl p-4 flex items-center justify-between transition-all duration-300 ${s.card} ${isDarkMode ? 'hover:bg-slate-700 hover:border-slate-600' : 'hover:bg-blue-50 hover:border-blue-200 shadow-sm hover:shadow-md'}`}
+                  >
+                    <span className={`font-medium ${isDarkMode ? 'group-hover:text-white' : 'group-hover:text-blue-800'}`}>{c}</span>
                     <ArrowRight className={`w-4 h-4 ${isDarkMode ? 'text-slate-300 group-hover:text-white' : 'text-blue-600'}`} />
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
-        {/* === TELA DE ESTATÍSTICAS === */}
+        {/* === TELA ESTATÍSTICAS === */}
         {game.gameState === 'stats' && (
            <div className="animate-fade-in w-full space-y-8">
              <div className="flex items-center gap-3 mb-6">
@@ -139,8 +155,6 @@ export default function App() {
                 </button>
                 <h2 className="text-3xl font-bold">Meu Progresso</h2>
              </div>
-
-             {/* Cards de Resumo */}
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Jogos', val: game.stats.totalGames, icon: <RotateCcw className="w-4 h-4" /> },
@@ -156,8 +170,6 @@ export default function App() {
                   </div>
                 ))}
              </div>
-
-             {/* Lista de Conquistas */}
              <div className="space-y-4">
                 <h3 className={`text-sm font-bold uppercase tracking-wider ${s.subtleHighlight}`}>Conquistas</h3>
                 <div className="grid grid-cols-1 gap-3">
@@ -203,6 +215,7 @@ export default function App() {
 
             <div className={`mb-8 rounded-2xl p-8 border transition-colors ${s.card} ${s.cardShadow}`}>
               <div className="flex flex-col items-center gap-6">
+                
                 <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full whitespace-nowrap shadow-sm border ${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-600' : 'bg-white text-blue-600 border-slate-100'}`}>
                     {game.questions[game.currentIndex].continent}
                 </span>
@@ -218,7 +231,11 @@ export default function App() {
                 </div>
 
                 <h2 className="text-3xl leading-tight text-center mt-2">
-                  Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?
+                  {game.gameMode === 'classic' ? (
+                    <>Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?</>
+                  ) : (
+                    <>De qual país é <span className={`font-bold ${s.highlightText}`}>esta bandeira</span>?</>
+                  )}
                 </h2>
               </div>
             </div>
@@ -231,9 +248,14 @@ export default function App() {
                   idx={idx}
                   isDark={isDarkMode}
                   isAnswered={game.isAnswered}
-                  isSelected={game.selectedAnswer === opt.capital}
-                  isCorrect={opt.capital === game.questions[game.currentIndex].capital}
-                  onSelect={() => game.handleAnswer(opt.capital)}
+                  isSelected={game.selectedAnswer === (game.gameMode === 'classic' ? opt.capital : opt.name)}
+                  isCorrect={
+                    game.gameMode === 'classic' 
+                      ? opt.capital === game.questions[game.currentIndex].capital
+                      : opt.name === game.questions[game.currentIndex].name
+                  }
+                  onSelect={() => game.handleAnswer(game.gameMode === 'classic' ? opt.capital : opt.name)}
+                  mode={game.gameMode}
                 />
               ))}
             </div>
@@ -298,7 +320,6 @@ export default function App() {
             </div>
           </div>
         )}
-
       </main>
       
       <footer className={`p-6 text-center text-xs relative z-10 ${s.textSecondary}`}>
