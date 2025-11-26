@@ -1,13 +1,14 @@
 import { useState, useEffect, type ElementType } from 'react';
 import { 
   ArrowRight, RotateCcw, Home, Trophy, Flame, 
-  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints, Flag, MapPin, Building2, Zap, Skull 
+  BarChart3, Lock, CheckCircle2, Globe, Target, Footprints, Flag, MapPin, Building2, Zap, Skull, PenTool 
 } from 'lucide-react';
 
 import { useQuizGame } from './hooks/useQuizGame';
 import { Header } from './components/Header';
 import { ProgressBar } from './components/ProgressBar';
 import { OptionButton } from './components/OptionButton';
+import { InputAnswer } from './components/InputAnswer'; // Novo componente importado
 import type { Continent } from './data/countries';
 import { ACHIEVEMENTS_DB } from './data/achievements';
 
@@ -101,10 +102,26 @@ export default function App() {
             <div className="space-y-3">
                <span className={`text-xs font-bold uppercase tracking-wider ${s.textSecondary}`}>Modo de Jogo</span>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Modo Clássico */}
                   <button onClick={() => game.setGameMode('classic')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${game.gameMode === 'classic' ? (isDarkMode ? 'bg-blue-900/30 border-blue-500 text-blue-400' : 'bg-blue-50 border-blue-500 text-blue-700') : s.card}`}><MapPin className="w-6 h-6" /><div className="flex flex-col items-center leading-none"><span className="text-[10px] uppercase font-bold opacity-70">Países &rarr;</span><span className="font-bold">Capitais</span></div></button>
+                  
+                  {/* Modo Reverso */}
                   <button onClick={() => game.setGameMode('reverse')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${game.gameMode === 'reverse' ? (isDarkMode ? 'bg-blue-900/30 border-blue-500 text-blue-400' : 'bg-blue-50 border-blue-500 text-blue-700') : s.card}`}><Building2 className="w-6 h-6" /><div className="flex flex-col items-center leading-none"><span className="text-[10px] uppercase font-bold opacity-70">Capitais &rarr;</span><span className="font-bold">Países</span></div></button>
+                  
+                  {/* Modo Bandeiras */}
                   <button onClick={() => game.setGameMode('flags')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${game.gameMode === 'flags' ? (isDarkMode ? 'bg-blue-900/30 border-blue-500 text-blue-400' : 'bg-blue-50 border-blue-500 text-blue-700') : s.card}`}><Flag className="w-6 h-6" /><div className="flex flex-col items-center leading-none"><span className="text-[10px] uppercase font-bold opacity-70">Quiz de</span><span className="font-bold">Bandeiras</span></div></button>
+                  
+                  {/* Modo Morte Súbita */}
                   <button onClick={() => game.setGameMode('suddenDeath')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${game.gameMode === 'suddenDeath' ? (isDarkMode ? 'bg-red-900/30 border-red-500 text-red-400' : 'bg-red-50 border-red-500 text-red-700') : s.card}`}><Zap className="w-6 h-6" /><div className="flex flex-col items-center leading-none"><span className="text-[10px] uppercase font-bold opacity-70">5 Segundos</span><span className="font-bold">Morte Súbita</span></div></button>
+                  
+                  {/* NOVO: Modo Desafio de Escrita */}
+                  <button onClick={() => game.setGameMode('writing')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all sm:col-span-2 ${game.gameMode === 'writing' ? (isDarkMode ? 'bg-purple-900/30 border-purple-500 text-purple-400' : 'bg-purple-50 border-purple-500 text-purple-700') : s.card}`}>
+                    <PenTool className="w-6 h-6" />
+                    <div className="flex flex-col items-center leading-none">
+                       <span className="text-[10px] uppercase font-bold opacity-70">Desafio de</span>
+                       <span className="font-bold">Escrita</span>
+                    </div>
+                  </button>
                </div>
             </div>
 
@@ -115,7 +132,7 @@ export default function App() {
                   <button
                     key={c}
                     onClick={() => game.startQuiz(c as Continent)}
-                    className={`group border rounded-xl p-4 flex items-center justify-between transition-all duration-300 ${s.card} ${isDarkMode ? 'hover:bg-slate-700 hover:border-slate-600' : 'hover:bg-blue-50 hover:border-blue-200 shadow-sm hover:shadow-md'}`}
+                    className={`groupSx border rounded-xl p-4 flex items-center justify-between transition-all duration-300 ${s.card} ${isDarkMode ? 'hover:bg-slate-700 hover:border-slate-600' : 'hover:bg-blue-50 hover:border-blue-200 shadow-sm hover:shadow-md'}`}
                   >
                     <span className={`font-medium ${isDarkMode ? 'group-hover:text-white' : 'group-hover:text-blue-800'}`}>{c}</span>
                     <ArrowRight className={`w-4 h-4 ${isDarkMode ? 'text-slate-300 group-hover:text-white' : 'text-blue-600'}`} />
@@ -135,7 +152,7 @@ export default function App() {
                 </button>
                 <h2 className="text-3xl font-bold">Meu Progresso</h2>
              </div>
-             {/* ... (mantido igual, apenas resumindo para caber) ... */}
+             
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Jogos', val: game.stats.totalGames, icon: <RotateCcw className="w-4 h-4" /> },
@@ -151,7 +168,7 @@ export default function App() {
                   </div>
                 ))}
              </div>
-             {/* Lista de Conquistas (mantida igual) */}
+             
              <div className="space-y-4">
                 <h3 className={`text-sm font-bold uppercase tracking-wider ${s.subtleHighlight}`}>Conquistas</h3>
                 <div className="grid grid-cols-1 gap-3">
@@ -175,9 +192,7 @@ export default function App() {
            </div>
         )}
 
-        {/* === TELA JOGO === 
-            Alteração principal: Usamos (playing OU game_over) para manter o jogo renderizado no fundo 
-        */}
+        {/* === TELA JOGO === */}
         {(game.gameState === 'playing' || game.gameState === 'game_over') && game.questions[game.currentIndex] && (
           <div className="animate-fade-in w-full relative">
             
@@ -235,6 +250,9 @@ export default function App() {
                   {(game.gameMode === 'classic' || game.gameMode === 'suddenDeath') && (
                     <>Qual é a capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span>?</>
                   )}
+                  {game.gameMode === 'writing' && (
+                    <>Escreva o nome da capital de <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].name}</span></>
+                  )}
                   {game.gameMode === 'reverse' && (
                     <>De qual país <span className={`font-bold ${s.highlightText}`}>{game.questions[game.currentIndex].capital}</span> é a capital?</>
                   )}
@@ -245,26 +263,38 @@ export default function App() {
               </div>
             </div>
 
-            {/* Opções de Resposta */}
-            <div className="grid grid-cols-1 gap-3">
-              {game.currentOptions.map((opt, idx) => (
-                <OptionButton 
-                  key={opt.name}
-                  option={opt}
-                  idx={idx}
-                  isDark={isDarkMode}
-                  isAnswered={game.isAnswered}
-                  isSelected={game.selectedAnswer === ((game.gameMode === 'classic' || game.gameMode === 'suddenDeath') ? opt.capital : opt.name)}
-                  isCorrect={
-                    (game.gameMode === 'classic' || game.gameMode === 'suddenDeath')
-                      ? opt.capital === game.questions[game.currentIndex].capital
-                      : opt.name === game.questions[game.currentIndex].name
-                  }
-                  onSelect={() => game.handleAnswer((game.gameMode === 'classic' || game.gameMode === 'suddenDeath') ? opt.capital : opt.name)}
-                  mode={game.gameMode === 'suddenDeath' ? 'classic' : game.gameMode}
-                />
-              ))}
-            </div>
+            {/* Área de Resposta */}
+            {game.gameMode === 'writing' ? (
+              // Novo componente de escrita
+              <InputAnswer 
+                key={game.currentIndex}
+                onSubmit={game.handleAnswer}
+                isAnswered={game.isAnswered}
+                isDark={isDarkMode}
+                correctAnswer={game.questions[game.currentIndex].capital}
+              />
+            ) : (
+              // Botões de Múltipla Escolha Clássicos
+              <div className="grid grid-cols-1 gap-3">
+                {game.currentOptions.map((opt, idx) => (
+                  <OptionButton 
+                    key={opt.name}
+                    option={opt}
+                    idx={idx}
+                    isDark={isDarkMode}
+                    isAnswered={game.isAnswered}
+                    isSelected={game.selectedAnswer === ((game.gameMode === 'classic' || game.gameMode === 'suddenDeath') ? opt.capital : opt.name)}
+                    isCorrect={
+                      (game.gameMode === 'classic' || game.gameMode === 'suddenDeath')
+                        ? opt.capital === game.questions[game.currentIndex].capital
+                        : opt.name === game.questions[game.currentIndex].name
+                    }
+                    onSelect={() => game.handleAnswer((game.gameMode === 'classic' || game.gameMode === 'suddenDeath') ? opt.capital : opt.name)}
+                    mode={game.gameMode === 'suddenDeath' ? 'classic' : game.gameMode}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="mt-8 h-12 flex items-center justify-end">
               {game.isAnswered && game.gameMode !== 'suddenDeath' && game.gameState !== 'game_over' && (
@@ -283,16 +313,13 @@ export default function App() {
           </div>
         )}
 
-        {/* === MODAL DE GAME OVER (OVERLAY) === 
-            Renderizado por cima do jogo usando 'fixed' e backdrop-blur 
-        */}
+        {/* === MODAL DE GAME OVER (OVERLAY) === */}
         {game.gameState === 'game_over' && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
             <div className={`relative w-full max-w-sm rounded-3xl p-8 shadow-2xl animate-scale-up ${isDarkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-white border border-slate-200'}`}>
               
               <div className="flex flex-col items-center text-center space-y-6">
                 
-                {/* Ícone */}
                 <div className={`p-4 rounded-full ${isDarkMode ? 'bg-zinc-800' : 'bg-slate-100'}`}>
                    <Skull className={`w-10 h-10 ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`} />
                 </div>
@@ -304,7 +331,6 @@ export default function App() {
                   </p>
                 </div>
 
-                {/* Estatísticas Rápidas */}
                 <div className={`w-full py-4 border-y grid grid-cols-2 gap-4 ${isDarkMode ? 'border-zinc-800' : 'border-slate-100'}`}>
                   <div>
                     <p className={`text-2xl font-bold ${s.text}`}>{game.score}</p>
@@ -316,7 +342,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Botões */}
                 <div className="w-full space-y-3">
                   <button
                     onClick={() => game.startQuiz(game.selectedContinent)}
@@ -342,7 +367,6 @@ export default function App() {
         {/* === TELA FINAL (VITÓRIA NORMAL) === */}
         {game.gameState === 'finished' && (
           <div className={`text-center space-y-8 animate-fade-in p-8 rounded-3xl border transition-colors ${s.card} ${s.cardShadow}`}>
-            {/* ... Conteúdo de fim de jogo normal mantido ... */}
             <div className="space-y-1">
                <span className={`font-bold uppercase tracking-widest text-xs ${s.subtleHighlight}`}>Pontuação Final</span>
                <div className="flex items-center justify-center gap-3">

@@ -3,7 +3,16 @@ import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
 import { useStatistics } from './useStatistics';
 
-export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath';
+// --- FUNÇÃO DE NORMALIZAÇÃO ---
+const normalizeText = (text: string) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
+export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writing';
 type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
 
 // --- FUNÇÕES AUXILIARES ---
@@ -132,10 +141,11 @@ export const useQuizGame = () => {
     setSelectedAnswer(answer);
     
     const currentQ = questions[currentIndex];
-    
-    const isCapitalMode = gameMode === 'classic' || gameMode === 'suddenDeath';
+    const isCapitalMode = ['classic', 'suddenDeath', 'writing'].includes(gameMode);
     const correctAnswer = isCapitalMode ? currentQ.capital : currentQ.name;
-    const isCorrect = answer === correctAnswer;
+    
+    // CORREÇÃO AQUI: removido o "TZ" antes de normalizeText
+    const isCorrect = normalizeText(answer) === normalizeText(correctAnswer);
 
     if (isCorrect) {
       const points = 100 + (streak * 20);
@@ -160,7 +170,6 @@ export const useQuizGame = () => {
     }
   };
 
-  // 1. Efeito apenas para o TICK do relógio (sem lógica de game over)
   useEffect(() => {
     if (gameMode !== 'suddenDeath' || gameState !== 'playing' || isAnswered) return;
 
@@ -171,16 +180,12 @@ export const useQuizGame = () => {
     return () => clearInterval(timer);
   }, [gameState, gameMode, isAnswered]);
 
-  // 2. Efeito separado para monitorar se o tempo acabou
   useEffect(() => {
-    // Só dispara se o tempo for zero, estiver jogando e ainda não tiver respondido
     if (timeLeft === 0 && gameMode === 'suddenDeath' && gameState === 'playing' && !isAnswered) {
       handleAnswer('TIME_UP');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, gameMode, gameState, isAnswered]); 
-
-  // --- NAVEGAÇÃO ---
 
   const restart = () => {
     clearNotifications();
