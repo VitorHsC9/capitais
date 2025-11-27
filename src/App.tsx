@@ -313,43 +313,6 @@ export default function App() {
                 <p className="text-xs text-[var(--text-secondary)] uppercase font-bold mb-1">Versão</p>
                 <p className="text-sm font-mono text-[var(--text-primary)]">v2.1.0 (Daily)</p>
               </div>
-
-              {/* DEBUG: Reset Daily Progress */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => {
-                    if (confirm('Isso irá resetar todo o seu progresso diário. Tem certeza?')) {
-                      localStorage.removeItem('quiz_capitais_daily_v1');
-                      localStorage.removeItem('quiz_capitais_daily_anagram_v1');
-                      localStorage.removeItem('quiz_capitais_daily_wordle_v1');
-                      localStorage.removeItem('quiz_capitais_daily_map_v1');
-                      localStorage.removeItem('quiz_capitais_daily_country_v1');
-                      localStorage.removeItem('daily_mix_state');
-                      window.location.reload();
-                    }
-                  }}
-                  className="w-full py-3 text-[10px] font-bold text-[var(--color-error)] border-2 border-[var(--color-error)]/30 rounded-lg hover:bg-[var(--color-error)]/10 transition-colors"
-                >
-                  RESETAR PROGRESSO
-                </button>
-                <button
-                  onClick={() => {
-                    const randomSalt = Math.floor(Math.random() * 10000).toString();
-                    localStorage.setItem('debug_seed_salt', randomSalt);
-                    // Also clear progress to ensure new questions load cleanly
-                    localStorage.removeItem('quiz_capitais_daily_v1');
-                    localStorage.removeItem('quiz_capitais_daily_anagram_v1');
-                    localStorage.removeItem('quiz_capitais_daily_wordle_v1');
-                    localStorage.removeItem('quiz_capitais_daily_map_v1');
-                    localStorage.removeItem('quiz_capitais_daily_country_v1');
-                    localStorage.removeItem('daily_mix_state');
-                    window.location.reload();
-                  }}
-                  className="w-full py-3 text-[10px] font-bold text-[var(--text-primary)] border-2 border-[var(--text-secondary)] rounded-lg hover:bg-[var(--surface-color)] transition-colors"
-                >
-                  NOVA PERGUNTA (DEBUG)
-                </button>
-              </div>
             </div>
           </div>
         </div>
