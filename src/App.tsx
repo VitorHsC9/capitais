@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  X, MapPin, Building2, Flag, Zap, PenTool, ChevronLeft, Trophy, Globe,
-  Skull, Shuffle, Calendar
+  X, ChevronLeft, Trophy, Globe
 } from 'lucide-react';
 
 import { useQuizGame, type GameMode } from './hooks/useQuizGame';
@@ -9,8 +8,9 @@ import { Header } from './components/Header';
 import { OptionButton } from './components/OptionButton';
 import { InputAnswer } from './components/InputAnswer';
 import { ProgressBar } from './components/ProgressBar';
-import { PixelatedFlag } from './components/PixelatedFlag';
 import { DailyChallenge } from './components/DailyChallenge';
+import { Home } from './components/Home';
+import { PracticeModes } from './components/PracticeModes';
 import type { Continent } from './data/countries';
 
 const shuffleText = (text: string) => {
@@ -18,7 +18,7 @@ const shuffleText = (text: string) => {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'modes' | 'continents' | 'playing' | 'daily'>('modes');
+  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily'>('home');
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -73,17 +73,6 @@ export default function App() {
     }
   }, [game.gameState]);
 
-  const modes = [
-    { id: 'classic', icon: MapPin, title: 'CLÁSSICO', desc: 'País para Capital' },
-    { id: 'reverse', icon: Building2, title: 'REVERSO', desc: 'Capital para País' },
-    { id: 'flags', icon: Flag, title: 'BANDEIRAS', desc: 'Identifique a Bandeira' },
-    { id: 'suddenDeath', icon: Zap, title: 'MORTE SÚBITA', desc: '5 Segundos' },
-    { id: 'writing', icon: PenTool, title: 'ESCRITA', desc: 'Digite o nome' },
-    { id: 'survival', icon: Skull, title: 'SOBREVIVÊNCIA', desc: 'Errou, Perdeu!' },
-    { id: 'anagram', icon: Shuffle, title: 'ANAGRAMA', desc: 'Desembaralhe a Capital' },
-    { id: 'daily', icon: Calendar, title: 'DESAFIO DIÁRIO', desc: 'Adivinhe a bandeira pixelada' },
-  ];
-
   const continents: Continent[] = ['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'];
 
   return (
@@ -112,43 +101,36 @@ export default function App() {
 
       <main className="flex-1 flex flex-col py-6 overflow-hidden relative">
 
-        {/* MODOS */}
-        {screen === 'modes' && (
-          <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="mb-6">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-[var(--tone-2)] mb-1">Novo Jogo</h2>
-              <p className="text-2xl font-bold text-[var(--tone-1)]">Escolha o desafio</p>
+        {/* HOME */}
+        {screen === 'home' && (
+          <Home
+            onSelectDaily={() => setScreen('daily')}
+            onSelectPractice={() => setScreen('practice')}
+          />
+        )}
+
+        {/* PRACTICE MODES */}
+        {screen === 'practice' && (
+          <div className="flex flex-col h-full">
+            <div className="flex items-center gap-3 mb-2">
+              <button onClick={() => setScreen('home')} className="p-2 -ml-2 hover:bg-[var(--tone-5)] rounded-lg text-[var(--tone-2)] hover:text-[var(--tone-1)] transition-colors">
+                <ChevronLeft className="w-6 h-6" />
+              </button>
             </div>
-            <div className="flex-1 space-y-3 overflow-y-auto pr-2">
-              {modes.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => handleModeSelect(m.id as GameMode)}
-                  className="w-full text-left p-4 rounded-xl bg-[var(--tone-5)] hover:bg-[var(--tone-4)] border border-[var(--tone-4)] flex items-center gap-4 transition-all group active:scale-[0.98] hover:border-[var(--tone-3)] hover:shadow-lg"
-                >
-                  <div className="p-3 rounded-lg bg-[var(--bg-color)] text-[var(--tone-2)] group-hover:text-[var(--color-correct)] transition-colors">
-                    <m.icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-base text-[var(--tone-1)]">{m.title}</div>
-                    <div className="text-xs text-[var(--tone-2)] font-medium">{m.desc}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <PracticeModes onSelectMode={handleModeSelect} />
           </div>
         )}
 
         {/* DESAFIO DIÁRIO */}
         {screen === 'daily' && (
-          <DailyChallenge onBack={() => setScreen('modes')} />
+          <DailyChallenge onBack={() => setScreen('home')} />
         )}
 
         {/* CONTINENTES */}
         {screen === 'continents' && (
           <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="flex items-center gap-3 mb-6">
-              <button onClick={() => setScreen('modes')} className="p-2 -ml-2 hover:bg-[var(--tone-5)] rounded-lg text-[var(--tone-2)] hover:text-[var(--tone-1)] transition-colors">
+              <button onClick={() => setScreen('practice')} className="p-2 -ml-2 hover:bg-[var(--tone-5)] rounded-lg text-[var(--tone-2)] hover:text-[var(--tone-1)] transition-colors">
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <div>
@@ -176,7 +158,7 @@ export default function App() {
           <div className="flex flex-col h-full gap-4 animate-in fade-in duration-300">
 
             <div className="flex items-center justify-between bg-[var(--tone-5)] p-3 rounded-xl border border-[var(--tone-4)]">
-              <button onClick={() => { game.restart(); setScreen('modes'); }} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--tone-2)] hover:text-[var(--color-error)] transition-colors">
+              <button onClick={() => { game.restart(); setScreen('practice'); }} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--tone-2)] hover:text-[var(--color-error)] transition-colors">
                 <X className="w-4 h-4" /> Sair
               </button>
 
@@ -203,8 +185,6 @@ export default function App() {
                   />
                 </div>
               )}
-
-              {/* REMOVED OLD DAILY LOGIC FROM HERE, NOW HANDLED BY DailyChallenge COMPONENT */}
 
               <div className="text-center px-4 w-full">
                 <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight leading-tight text-[var(--tone-1)] drop-shadow-sm">
@@ -298,7 +278,7 @@ export default function App() {
 
               <div className="p-4 rounded-lg bg-[var(--bg-color)] border border-[var(--tone-4)] text-center">
                 <p className="text-xs text-[var(--tone-3)] uppercase font-bold mb-1">Versão</p>
-                <p className="text-sm font-mono text-[var(--tone-2)]">v2.0.0 (Midnight)</p>
+                <p className="text-sm font-mono text-[var(--tone-2)]">v2.1.0 (Daily)</p>
               </div>
             </div>
           </div>
@@ -343,7 +323,7 @@ export default function App() {
             <div className="flex justify-end mb-2">
               <button onClick={() => {
                 setModal('none');
-                if (game.gameState === 'finished' || game.gameState === 'game_over') { game.restart(); setScreen('modes'); }
+                if (game.gameState === 'finished' || game.gameState === 'game_over') { game.restart(); setScreen('practice'); }
               }}>
                 <X className="w-5 h-5 text-[var(--tone-2)] hover:text-[var(--tone-1)]" />
               </button>
@@ -377,7 +357,7 @@ export default function App() {
                     </p>
                   </div>
                   <button
-                    onClick={() => { game.restart(); setScreen('modes'); setModal('none'); }}
+                    onClick={() => { game.restart(); setScreen('practice'); setModal('none'); }}
                     className="w-full py-4 bg-[var(--color-correct)] text-white font-bold uppercase text-sm rounded-xl shadow-lg hover:brightness-110 hover:shadow-emerald-500/20 transition-all"
                   >
                     Jogar Novamente
