@@ -9,6 +9,7 @@ import { OptionButton } from './components/OptionButton';
 import { InputAnswer } from './components/InputAnswer';
 import { ProgressBar } from './components/ProgressBar';
 import { DailyChallenge } from './components/DailyChallenge';
+import { DailyAnagram } from './components/DailyAnagram';
 import { Home } from './components/Home';
 import { PracticeModes } from './components/PracticeModes';
 import type { Continent } from './data/countries';
@@ -18,7 +19,7 @@ const shuffleText = (text: string) => {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily'>('home');
+  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram'>('home');
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -105,6 +106,7 @@ export default function App() {
         {screen === 'home' && (
           <Home
             onSelectDaily={() => setScreen('daily')}
+            onSelectDailyAnagram={() => setScreen('daily-anagram')}
             onSelectPractice={() => setScreen('practice')}
           />
         )}
@@ -121,9 +123,14 @@ export default function App() {
           </div>
         )}
 
-        {/* DESAFIO DIÁRIO */}
+        {/* DESAFIO DIÁRIO - BANDEIRA */}
         {screen === 'daily' && (
           <DailyChallenge onBack={() => setScreen('home')} />
+        )}
+
+        {/* DESAFIO DIÁRIO - ANAGRAMA */}
+        {screen === 'daily-anagram' && (
+          <DailyAnagram onBack={() => setScreen('home')} />
         )}
 
         {/* CONTINENTES */}

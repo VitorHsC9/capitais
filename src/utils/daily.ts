@@ -13,11 +13,11 @@ const seededRandom = (seed: number) => {
     };
 };
 
-export const getDailyCountry = (countries: Country[]): Country => {
+export const getDailyCountry = (countries: Country[], salt: number = 0): Country => {
     // Create a seed from the current date (YYYYMMDD)
     const now = new Date();
     const seedString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-    const seed = parseInt(seedString);
+    const seed = parseInt(seedString) + salt;
 
     const random = seededRandom(seed);
 
