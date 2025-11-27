@@ -1,3 +1,108 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  
+  /* TEMA PADRÃO (Dark / Termo) */
+  --bg-color: #121213;
+  --text-color: #d7dadc;
+  --tone-1: #d7dadc;
+  --tone-2: #818384;
+  --tone-3: #565758;
+  --tone-4: #3a3a3c;
+  --tone-5: #272729;
+  --tone-6: #1a1a1b;
+  --tone-7: #121213;
+  
+  --color-correct: #538d4e; /* Verde Termo Original */
+  --color-error: #be1e37;
+  
+  --modal-bg: #121213;
+  --key-bg: #818384;
+}
+
+/* TEMA CLARO / ALTO CONTRASTE */
+.high-contrast {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --tone-1: #000000;
+  --tone-2: #565758;
+  --tone-3: #878a8c;
+  --tone-4: #d3d6da;
+  --tone-5: #edeff1;
+  --tone-6: #f6f7f8;
+  --tone-7: #ffffff;
+  
+  --color-correct: #85c0f9;
+  --color-error: #f5793a;
+  
+  --modal-bg: #ffffff;
+  --key-bg: #d3d6da;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+@layer components {
+  .btn-termo {
+    @apply font-bold uppercase rounded flex items-center justify-center select-none transition-all active:scale-95;
+    background-color: var(--tone-2);
+    color: var(--bg-color);
+  }
+  .btn-termo:hover { opacity: 0.9; }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm p-4;
+  }
+  
+  .modal-content {
+    @apply border rounded-lg shadow-2xl w-full max-w-sm relative overflow-hidden;
+    /* A linha abaixo foi corrigida para usar animação CSS pura */
+    animation: zoomIn 0.2s ease-out;
+    background-color: var(--modal-bg);
+    border-color: var(--tone-4);
+    color: var(--text-color);
+  }
+
+  .switch {
+    @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors;
+    background-color: var(--tone-3);
+  }
+  .switch.checked {
+    background-color: var(--color-correct);
+  }
+  .switch-thumb {
+    @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
+    translate: 4px;
+  }
+  .switch.checked .switch-thumb {
+    translate: 24px;
+  }
+}
+
+/* DEFINIÇÃO MANUAL DAS ANIMAÇÕES (Para não depender de plugins) */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideInBottom { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInTop { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Classes utilitárias para o App.tsx usar */
+.animate-in { animation-duration: 0.3s; animation-fill-mode: both; }
+.fade-in { animation-name: fadeIn; }
+.zoom-in-95 { animation-name: zoomIn; }
+.slide-in-from-bottom-2 { animation-name: slideInBottom; }
+.slide-in-from-bottom-4 { animation-name: slideInBottom; }
+.slide-in-from-top-4 { animation-name: slideInTop; }
+.slide-in-from-right-4 { animation-name: slideInRight; }
+.slide-in-from-right-8 { animation-name: slideInRight; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--tone-7); }
+::-webkit-scrollbar-thumb { background: var(--tone-3); border-radius: 3px; }

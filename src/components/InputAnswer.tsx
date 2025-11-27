@@ -1,14 +1,15 @@
-import { useState, type KeyboardEvent } from 'react'; // CORREÇÃO: Adicionado 'type'
-import { Send, Check, X as XIcon } from 'lucide-react';
+import { useState, type KeyboardEvent } from 'react';
+import { Check, CornerDownLeft } from 'lucide-react';
 
 interface InputAnswerProps {
   onSubmit: (answer: string) => void;
   isAnswered: boolean;
-  isDark: boolean;
   correctAnswer: string;
+  nextQuestion: () => void;
+  isDark: boolean;
 }
 
-export const InputAnswer = ({ onSubmit, isAnswered, isDark, correctAnswer }: InputAnswerProps) => {
+export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, nextQuestion }: InputAnswerProps) => {
   const [value, setValue] = useState('');
 
   const handleSubmit = () => {
@@ -18,70 +19,54 @@ export const InputAnswer = ({ onSubmit, isAnswered, isDark, correctAnswer }: Inp
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSubmit();
+      if (isAnswered) nextQuestion();
+      else handleSubmit();
     }
   };
 
-  const getStyles = () => {
-    if (isAnswered) {
-      const normalize = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-      
-      const isCorrect = normalize(value) === normalize(correctAnswer);
-
-      if (isCorrect) {
-        return {
-          container: isDark ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200',
-          input: `text-green-600 font-bold border-transparent bg-transparent placeholder-green-300`,
-          icon: <Check className="w-6 h-6 text-green-500" />
-        };
-      } else {
-        return {
-          container: isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200',
-          input: `text-red-500 font-bold border-transparent bg-transparent`,
-          icon: <XIcon className="w-6 h-6 text-red-500" />
-        };
-      }
-    }
-
-    return {
-      container: isDark ? 'bg-zinc-800/50' : 'bg-white',
-      input: `${isDark ? 'bg-zinc-800 border-zinc-700 text-white focus:border-blue-500' : 'bg-white border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`,
-      icon: <Send className={`w-5 h-5 ${isDark ? 'text-zinc-400' : 'text-slate-400'}`} />
-    };
-  };
-
-  const s = getStyles();
+  const normalize = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  const isCorrect = isAnswered && normalize(value) === normalize(correctAnswer);
 
   return (
-    <div className="w-full space-y-4">
-      <div className="relative">
+    <div className="w-full space-y-3">
+      <div className={`
+        flex items-center justify-between border-2 rounded px-4 py-3 transition-colors
+        ${isAnswered 
+          ? (isCorrect ? 'border-[var(--color-correct)] bg-[var(--color-correct)] text-white' : 'border-[var(--color-error)] text-[var(--color-error)]') 
+          : 'border-[var(--tone-4)] bg-transparent focus-within:border-[var(--tone-2)] text-[var(--tone-1)]'}
+      `}>
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isAnswered}
-          placeholder="Digite a resposta..."
-          className={`${s.input} w-full p-4 pr-12 rounded-xl border text-lg outline-none transition-all`}
+          placeholder="DIGITE AQUI..."
+          className="bg-transparent border-none outline-none w-full text-lg font-bold uppercase placeholder:text-[var(--tone-4)]"
           autoFocus
           autoComplete="off"
         />
-        <button 
-          onClick={handleSubmit}
-          disabled={isAnswered || !value.trim()}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
-        >
-          {s.icon}
-        </button>
+        {isAnswered && isCorrect && <Check className="w-6 h-6" />}
+        {!isAnswered && <CornerDownLeft className="w-4 h-4 text-[var(--tone-3)]" />}
       </div>
 
-      {isAnswered && (
-        <div className={`animate-fade-in text-center p-4 rounded-xl border ${isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-slate-50 border-slate-200'}`}>
-          <p className={`text-xs uppercase font-bold tracking-wider mb-1 ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
-            Resposta Correta
-          </p>
-          <p className="text-xl font-bold">{correctAnswer}</p>
+      {isAnswered && !isCorrect && (
+        <div className="flex flex-col items-center justify-center p-3 bg-[var(--tone-5)] rounded animate-bounce border border-[var(--tone-4)]">
+           <span className="text-[10px] font-bold text-[var(--tone-2)] uppercase tracking-widest">Resposta Correta</span>
+           <span className="text-lg font-black uppercase text-[var(--tone-1)]">{correctAnswer}</span>
         </div>
+      )}
+      
+      {!isAnswered && (
+         <button onClick={handleSubmit} disabled={!value.trim()} className="btn-termo py-4 w-full bg-[var(--tone-2)] text-[var(--bg-color)] font-black">
+           ENVIAR
+         </button>
+      )}
+
+      {isAnswered && (
+        <button onClick={nextQuestion} className="btn-termo py-4 w-full bg-[var(--tone-1)] text-[var(--bg-color)] font-black animate-pulse">
+           PRÓXIMA
+        </button>
       )}
     </div>
   );
