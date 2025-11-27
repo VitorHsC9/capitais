@@ -103,8 +103,8 @@ export default function App() {
 
         <main className={`flex-1 flex flex-col py-4 px-4 overflow-hidden relative transition-all duration-300 w-full`}>
 
-          {/* HOME */}
-          {screen === 'home' && (
+          {/* HOME - Keep mounted for performance */}
+          <div style={{ display: screen === 'home' ? 'block' : 'none', height: '100%' }}>
             <Home
               onSelectDaily={() => setScreen('daily')}
               onSelectDailyAnagram={() => setScreen('daily-anagram')}
@@ -114,7 +114,7 @@ export default function App() {
               onSelectDailyMix={() => setScreen('daily-mix')}
               onSelectPractice={() => setScreen('practice')}
             />
-          )}
+          </div>
 
           {/* PRACTICE MODES */}
           {screen === 'practice' && (
