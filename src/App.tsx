@@ -12,6 +12,7 @@ import { DailyChallenge } from './components/DailyChallenge';
 import { DailyAnagram } from './components/DailyAnagram';
 import { DailyWordle } from './components/DailyWordle';
 import { DailyMap } from './components/DailyMap';
+import { DailyCountry } from './components/DailyCountry';
 import { Home } from './components/Home';
 import { PracticeModes } from './components/PracticeModes';
 import type { Continent } from './data/countries';
@@ -21,7 +22,7 @@ const shuffleText = (text: string) => {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map'>('home');
+  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map' | 'daily-country'>('home');
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -55,10 +56,6 @@ export default function App() {
   }, [highContrast]);
 
   const handleModeSelect = (mode: GameMode) => {
-    if (mode === 'daily') {
-      setScreen('daily');
-      return;
-    }
     game.setGameMode(mode);
     setScreen('continents');
   };
@@ -111,6 +108,7 @@ export default function App() {
             onSelectDailyAnagram={() => setScreen('daily-anagram')}
             onSelectDailyWordle={() => setScreen('daily-wordle')}
             onSelectDailyMap={() => setScreen('daily-map')}
+            onSelectDailyCountry={() => setScreen('daily-country')}
             onSelectPractice={() => setScreen('practice')}
           />
         )}
@@ -145,6 +143,11 @@ export default function App() {
         {/* DESAFIO DIÁRIO - MAPA */}
         {screen === 'daily-map' && (
           <DailyMap onBack={() => setScreen('home')} />
+        )}
+
+        {/* DESAFIO DIÁRIO - PAÍS */}
+        {screen === 'daily-country' && (
+          <DailyCountry onBack={() => setScreen('home')} />
         )}
 
         {/* CONTINENTES */}
