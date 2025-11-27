@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  X, MapPin, Building2, Flag, Zap, PenTool, ChevronLeft, Trophy, Globe
+  X, MapPin, Building2, Flag, Zap, PenTool, ChevronLeft, Trophy, Globe,
+  Skull, Shuffle 
 } from 'lucide-react';
 
 import { useQuizGame, type GameMode } from './hooks/useQuizGame';
@@ -9,6 +10,10 @@ import { OptionButton } from './components/OptionButton';
 import { InputAnswer } from './components/InputAnswer';
 import { ProgressBar } from './components/ProgressBar';
 import type { Continent } from './data/countries';
+
+const shuffleText = (text: string) => {
+  return text.split('').sort(() => Math.random() - 0.5).join('').toUpperCase();
+};
 
 export default function App() {
   const [screen, setScreen] = useState<'modes' | 'continents' | 'playing'>('modes');
@@ -20,14 +25,17 @@ export default function App() {
   // Atalhos de Teclado Globais (1-4 para opções)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (screen !== 'playing' || game.isAnswered || game.gameMode === 'writing') return;
+      // Impede atalhos numéricos no modo escrita ou anagrama (pois o usuário precisa digitar números talvez ou focar no input)
+      if (screen !== 'playing' || game.isAnswered || ['writing', 'anagram'].includes(game.gameMode)) return;
       
       const key = e.key;
       if (['1', '2', '3', '4', '5'].includes(key)) {
         const idx = parseInt(key) - 1;
         if (game.currentOptions[idx]) {
           const opt = game.currentOptions[idx];
-          game.handleAnswer(game.gameMode === 'classic' || game.gameMode === 'suddenDeath' ? opt.capital : opt.name);
+          // Lógica para determinar qual campo enviar como resposta
+          const isCapitalMode = ['classic', 'suddenDeath', 'survival'].includes(game.gameMode);
+          game.handleAnswer(isCapitalMode ? opt.capital : opt.name);
         }
       }
     };
@@ -65,9 +73,10 @@ export default function App() {
     { id: 'flags', icon: Flag, title: 'BANDEIRAS', desc: 'Identifique a Bandeira' },
     { id: 'suddenDeath', icon: Zap, title: 'MORTE SÚBITA', desc: '5 Segundos' },
     { id: 'writing', icon: PenTool, title: 'ESCRITA', desc: 'Digite o nome' },
+    { id: 'survival', icon: Skull, title: 'SOBREVIVÊNCIA', desc: 'Errou, Perdeu!' },
+    { id: 'anagram', icon: Shuffle, title: 'ANAGRAMA', desc: 'Desembaralhe a Capital' },
   ];
 
-  // CORREÇÃO: Tipagem explícita para evitar 'any'
   const continents: Continent[] = ['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'];
 
   return (
@@ -139,7 +148,6 @@ export default function App() {
                 {continents.map((c) => (
                   <button 
                     key={c}
-                    // CORREÇÃO: Agora 'c' é do tipo Continent, não precisa de 'as any'
                     onClick={() => handleContinentSelect(c)}
                     className="w-full text-left p-4 rounded-xl bg-[var(--tone-5)] hover:bg-[var(--tone-4)] border border-[var(--tone-4)] flex items-center justify-between transition-all active:scale-[0.98] hover:border-[var(--tone-3)]"
                   >
@@ -186,11 +194,21 @@ export default function App() {
 
                <div className="text-center px-4 w-full">
                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight leading-tight text-[var(--tone-1)] drop-shadow-sm">
-                    {(game.gameMode === 'classic' || game.gameMode === 'suddenDeath') && game.questions[game.currentIndex].name}
+                    {(game.gameMode === 'classic' || game.gameMode === 'suddenDeath' || game.gameMode === 'survival') && game.questions[game.currentIndex].name}
+                    
                     {game.gameMode === 'writing' && game.questions[game.currentIndex].name}
+                    
                     {game.gameMode === 'reverse' && game.questions[game.currentIndex].capital}
+                    
                     {game.gameMode === 'flags' && "QUE PAÍS É ESSE?"}
+                    
+                    {game.gameMode === 'anagram' && (
+                      <span className="tracking-[0.2em]">
+                        {shuffleText(game.questions[game.currentIndex].capital)}
+                      </span>
+                    )}
                   </h2>
+                  {game.gameMode === 'anagram' && <p className="text-sm mt-2 text-[var(--tone-3)] font-bold">DESEMBARALHE A CAPITAL</p>}
                </div>
 
                {game.gameMode === 'suddenDeath' && (
@@ -202,7 +220,7 @@ export default function App() {
 
             {/* RESPOSTA */}
             <div className="pb-2">
-              {game.gameMode === 'writing' ? (
+              {['writing', 'anagram'].includes(game.gameMode) ? (
                  <InputAnswer 
                    onSubmit={game.handleAnswer}
                    isAnswered={game.isAnswered}
@@ -218,14 +236,14 @@ export default function App() {
                        option={opt}
                        idx={idx}
                        isAnswered={game.isAnswered}
-                       isSelected={game.selectedAnswer === ((game.gameMode === 'classic' || game.gameMode === 'suddenDeath') ? opt.capital : opt.name)}
+                       isSelected={game.selectedAnswer === ((['classic', 'suddenDeath', 'survival'].includes(game.gameMode)) ? opt.capital : opt.name)}
                        isCorrect={
-                         (game.gameMode === 'classic' || game.gameMode === 'suddenDeath')
+                         (['classic', 'suddenDeath', 'survival'].includes(game.gameMode))
                            ? opt.capital === game.questions[game.currentIndex].capital
                            : opt.name === game.questions[game.currentIndex].name
                        }
-                       onSelect={() => game.handleAnswer((game.gameMode === 'classic' || game.gameMode === 'suddenDeath') ? opt.capital : opt.name)}
-                       mode={game.gameMode === 'suddenDeath' ? 'classic' : game.gameMode}
+                       onSelect={() => game.handleAnswer((['classic', 'suddenDeath', 'survival'].includes(game.gameMode)) ? opt.capital : opt.name)}
+                       mode={game.gameMode}
                        isDark={true}
                      />
                    ))}

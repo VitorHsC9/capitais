@@ -16,7 +16,7 @@ export const OptionButton = ({
   option, idx, isSelected, isCorrect, isAnswered, onSelect, mode
 }: OptionButtonProps) => {
   
-  const label = mode === 'classic' ? option.capital : option.name;
+  const label = ['classic', 'suddenDeath', 'survival'].includes(mode) ? option.capital : option.name;
 
   let btnClass = "font-bold uppercase rounded flex items-center justify-center select-none transition-all text-sm sm:text-base min-h-[56px] w-full relative ";
 

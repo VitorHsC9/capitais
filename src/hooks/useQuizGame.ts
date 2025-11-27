@@ -12,7 +12,7 @@ const normalizeText = (text: string) => {
     .trim();
 };
 
-export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writing';
+export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writing' | 'survival' | 'anagram';
 type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
 
 // --- FUNÇÕES AUXILIARES ---
@@ -141,7 +141,7 @@ export const useQuizGame = () => {
     setSelectedAnswer(answer);
     
     const currentQ = questions[currentIndex];
-    const isCapitalMode = ['classic', 'suddenDeath', 'writing'].includes(gameMode);
+    const isCapitalMode = ['classic', 'suddenDeath', 'writing', 'survival', 'anagram'].includes(gameMode);
     const correctAnswer = isCapitalMode ? currentQ.capital : currentQ.name;
     
     // CORREÇÃO AQUI: removido o "TZ" antes de normalizeText
@@ -157,6 +157,11 @@ export const useQuizGame = () => {
       if (newStreak > maxStreak) setMaxStreak(newStreak);
     } else {
       setStreak(0);
+
+      if (gameMode === 'survival') {
+        finishGameAsLoss();
+        return; 
+      }
     }
 
     if (gameMode === 'suddenDeath') {
