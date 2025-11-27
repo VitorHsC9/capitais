@@ -10,6 +10,7 @@ import { InputAnswer } from './components/InputAnswer';
 import { ProgressBar } from './components/ProgressBar';
 import { DailyChallenge } from './components/DailyChallenge';
 import { DailyAnagram } from './components/DailyAnagram';
+import { DailyWordle } from './components/DailyWordle';
 import { Home } from './components/Home';
 import { PracticeModes } from './components/PracticeModes';
 import type { Continent } from './data/countries';
@@ -19,7 +20,7 @@ const shuffleText = (text: string) => {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram'>('home');
+  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle'>('home');
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -107,6 +108,7 @@ export default function App() {
           <Home
             onSelectDaily={() => setScreen('daily')}
             onSelectDailyAnagram={() => setScreen('daily-anagram')}
+            onSelectDailyWordle={() => setScreen('daily-wordle')}
             onSelectPractice={() => setScreen('practice')}
           />
         )}
@@ -131,6 +133,11 @@ export default function App() {
         {/* DESAFIO DIÁRIO - ANAGRAMA */}
         {screen === 'daily-anagram' && (
           <DailyAnagram onBack={() => setScreen('home')} />
+        )}
+
+        {/* DESAFIO DIÁRIO - TERMO */}
+        {screen === 'daily-wordle' && (
+          <DailyWordle onBack={() => setScreen('home')} />
         )}
 
         {/* CONTINENTES */}

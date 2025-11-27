@@ -1,12 +1,13 @@
-import { Calendar, Play, Trophy } from 'lucide-react';
+import { Calendar, Play, Trophy, LayoutGrid } from 'lucide-react';
 
 interface HomeProps {
     onSelectDaily: () => void;
     onSelectDailyAnagram: () => void;
+    onSelectDailyWordle: () => void;
     onSelectPractice: () => void;
 }
 
-export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectPractice }: HomeProps) {
+export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectPractice }: HomeProps) {
     return (
         <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="mb-8">
@@ -68,6 +69,35 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectPractice }: 
                         </p>
 
                         <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-blue-500 transition-colors">
+                            <span>JOGAR AGORA</span>
+                            <Play className="w-4 h-4 fill-current" />
+                        </div>
+                    </div>
+                </button>
+
+                {/* Daily Challenge Card - Wordle */}
+                <button
+                    onClick={onSelectDailyWordle}
+                    className="w-full text-left p-6 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <LayoutGrid className="w-24 h-24" />
+                    </div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-500">
+                                <LayoutGrid className="w-6 h-6" />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-wider text-purple-500">Disponível Agora</span>
+                        </div>
+
+                        <h3 className="text-xl font-black text-[var(--tone-1)] mb-2">Termo da Capital</h3>
+                        <p className="text-sm text-[var(--tone-2)] font-medium mb-6 max-w-[80%]">
+                            Descubra a capital do dia em 5 tentativas. Letras verdes indicam posição correta.
+                        </p>
+
+                        <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-purple-500 transition-colors">
                             <span>JOGAR AGORA</span>
                             <Play className="w-4 h-4 fill-current" />
                         </div>
