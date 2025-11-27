@@ -17,9 +17,11 @@ export function CountryAutocomplete({ onSelect, placeholder, disabled }: Country
 
     const filteredCountries = query.trim() === ''
         ? []
-        : COUNTRIES_DB.filter(c =>
-            c.name.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 5); // Limit to 5 suggestions
+        : COUNTRIES_DB.filter(c => {
+            const normalizedName = c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return normalizedName.includes(normalizedQuery);
+        }).slice(0, 5);
 
     useEffect(() => {
         setSelectedIndex(0);
@@ -49,7 +51,7 @@ export function CountryAutocomplete({ onSelect, placeholder, disabled }: Country
     };
 
     return (
-        <div className="relative w-full">
+        <div className="relative w-full z-[500]">
             <div className="relative">
                 <input
                     ref={inputRef}
@@ -67,7 +69,7 @@ export function CountryAutocomplete({ onSelect, placeholder, disabled }: Country
             </div>
 
             {isOpen && filteredCountries.length > 0 && (
-                <ul ref={listRef} className="absolute bottom-full mb-2 w-full bg-[var(--tone-5)] border border-[var(--tone-4)] rounded-lg shadow-xl overflow-hidden z-50 max-h-[200px] overflow-y-auto">
+                <ul ref={listRef} className="absolute bottom-full mb-2 w-full bg-[var(--tone-5)] border border-[var(--tone-4)] rounded-lg shadow-xl overflow-hidden z-[1000] max-h-[200px] overflow-y-auto">
                     {filteredCountries.map((country, index) => (
                         <li
                             key={country.code}

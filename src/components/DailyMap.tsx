@@ -25,8 +25,14 @@ function MapZoomer({ targetCountry, geoJsonData }: { targetCountry: Country | nu
         const feature = geoJsonData.features.find((f: any) => {
             const props = f.properties || {};
             const name = props.name || '';
-            // Loose matching again
-            return name.toLowerCase().includes(targetCountry.name.toLowerCase()) || targetCountry.name.toLowerCase().includes(name.toLowerCase());
+            const iso = props.iso_a2 || props.ISO_A2 || '';
+
+            const targetName = targetCountry.mapName || targetCountry.name;
+
+            const matchName = name.toLowerCase() === targetName.toLowerCase();
+            const matchIso = iso && iso.toLowerCase() === targetCountry.code.toLowerCase();
+
+            return matchName || matchIso;
         });
 
         if (feature) {
@@ -113,22 +119,29 @@ export function DailyMap({ onBack }: DailyMapProps) {
                 <div className="w-8"></div>
             </div>
 
-            <div className="flex-1 rounded-xl overflow-hidden border border-[var(--tone-4)] relative bg-[var(--tone-5)]">
+            <div className="flex-1 rounded-xl overflow-hidden border border-[var(--tone-4)] relative bg-[var(--tone-5)] z-0">
                 {loadingMap && <div className="absolute inset-0 flex items-center justify-center text-[var(--tone-2)]">Carregando mapa...</div>}
 
                 {!loadingMap && geoJsonData && (
                     <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%', background: 'transparent' }} attributionControl={false}>
                         <TileLayer
-                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
                         />
                         <GeoJSON
                             data={geoJsonData}
                             style={(feature) => {
                                 const props = feature?.properties || {};
                                 const name = props.name || '';
-                                const matchName = name.toLowerCase().includes(targetCountry.name.toLowerCase()) || targetCountry.name.toLowerCase().includes(name.toLowerCase());
+                                const iso = props.iso_a2 || props.ISO_A2 || ''; // Try to find ISO code in GeoJSON
 
-                                if (matchName) {
+                                // Check mapName first (English name), then name (Portuguese)
+                                const targetName = targetCountry.mapName || targetCountry.name;
+
+                                // Strict matching logic
+                                const matchName = name.toLowerCase() === targetName.toLowerCase();
+                                const matchIso = iso && iso.toLowerCase() === targetCountry.code.toLowerCase();
+
+                                if (matchName || matchIso) {
                                     return { fillColor: '#ef4444', weight: 2, color: 'white', fillOpacity: 0.8 };
                                 }
                                 return { fillColor: '#3f3f46', weight: 1, color: '#52525b', fillOpacity: 0.4 };
@@ -145,9 +158,9 @@ export function DailyMap({ onBack }: DailyMapProps) {
             </div>
 
             {/* Input Area */}
-            <div className="mt-4 relative">
+            <div className="mt-4 relative z-10">
                 {lastIncorrectGuess && (
-                    <div className="absolute -top-12 left-0 right-0 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="absolute -top-12 left-0 right-0 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300 z-[100]">
                         <div className="bg-[var(--color-error)] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2">
                             <AlertCircle className="w-4 h-4" />
                             Não é {lastIncorrectGuess}

@@ -8,6 +8,7 @@ export interface Country {
   population?: number;
   neighboringCountries?: string[];
   mainLanguage?: string;
+  mapName?: string; // Nome em inglês para o mapa (GeoJSON)
 }
 
 // ISTO É IMPORTANTE TER AQUI:
@@ -18,6 +19,7 @@ export const CONFIG = {
 export const COUNTRIES_DB: Country[] = [
   {
     name: 'Afeganistão',
+    mapName: 'Afghanistan',
     capital: 'Cabul',
     continent: 'Ásia',
     code: 'af',
@@ -28,6 +30,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Angola',
+    mapName: 'Angola',
     capital: 'Luanda',
     continent: 'África',
     code: 'ao',
@@ -38,6 +41,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Albânia',
+    mapName: 'Albania',
     capital: 'Tirana',
     continent: 'Europa',
     code: 'al',
@@ -48,6 +52,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Andorra',
+    mapName: 'Andorra',
     capital: 'Andorra-a-Velha',
     continent: 'Europa',
     code: 'ad',
@@ -58,6 +63,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Emirados Árabes Unidos',
+    mapName: 'United Arab Emirates',
     capital: 'Abu Dhabi',
     continent: 'Ásia',
     code: 'ae',
@@ -68,6 +74,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Armênia',
+    mapName: 'Armenia',
     capital: 'Erevã',
     continent: 'Europa',
     code: 'am',
@@ -78,6 +85,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Austrália',
+    mapName: 'Australia',
     capital: 'Camberra',
     continent: 'Oceania',
     code: 'au',
@@ -88,6 +96,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Áustria',
+    mapName: 'Austria',
     capital: 'Viena',
     continent: 'Europa',
     code: 'at',
@@ -98,6 +107,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Azerbaijão',
+    mapName: 'Azerbaijan',
     capital: 'Baku',
     continent: 'Europa',
     code: 'az',
@@ -108,6 +118,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Burundi',
+    mapName: 'Burundi',
     capital: 'Gitega',
     continent: 'África',
     code: 'bi',
@@ -118,6 +129,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bélgica',
+    mapName: 'Belgium',
     capital: 'Bruxelas',
     continent: 'Europa',
     code: 'be',
@@ -128,6 +140,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Benin',
+    mapName: 'Benin',
     capital: 'Porto-Novo',
     continent: 'África',
     code: 'bj',
@@ -138,6 +151,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Burkina Faso',
+    mapName: 'Burkina Faso',
     capital: 'Ouagadougou',
     continent: 'África',
     code: 'bf',
@@ -148,6 +162,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bangladesh',
+    mapName: 'Bangladesh',
     capital: 'Daca',
     continent: 'Ásia',
     code: 'bd',
@@ -158,6 +173,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bulgária',
+    mapName: 'Bulgaria',
     capital: 'Sófia',
     continent: 'Europa',
     code: 'bg',
@@ -168,6 +184,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bahrein',
+    mapName: 'Bahrain',
     capital: 'Manama',
     continent: 'Ásia',
     code: 'bh',
@@ -178,6 +195,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bahamas',
+    mapName: 'The Bahamas',
     capital: 'Nassau',
     continent: 'América Central',
     code: 'bs',
@@ -188,6 +206,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bósnia e Herzegovina',
+    mapName: 'Bosnia and Herzegovina',
     capital: 'Sarajevo',
     continent: 'Europa',
     code: 'ba',
@@ -198,6 +217,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Bielorrússia',
+    mapName: 'Belarus',
     capital: 'Minsk',
     continent: 'Europa',
     code: 'by',
@@ -208,6 +228,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Belize',
+    mapName: 'Belize',
     capital: 'Belmopan',
     continent: 'América Central',
     code: 'bz',
@@ -218,6 +239,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Brasil',
+    mapName: 'Brazil',
     capital: 'Brasília',
     continent: 'América do Sul',
     code: 'br',
@@ -228,6 +250,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Barbados',
+    mapName: 'Barbados',
     capital: 'Bridgetown',
     continent: 'América Central',
     code: 'bb',
@@ -238,6 +261,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Butão',
+    mapName: 'Bhutan',
     capital: 'Timbu',
     continent: 'Ásia',
     code: 'bt',
@@ -248,6 +272,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Botsuana',
+    mapName: 'Botswana',
     capital: 'Gaborone',
     continent: 'África',
     code: 'bw',
@@ -258,6 +283,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'República Centro-Africana',
+    mapName: 'Central African Republic',
     capital: 'Bangui',
     continent: 'África',
     code: 'cf',
@@ -268,6 +294,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Canadá',
+    mapName: 'Canada',
     capital: 'Ottawa',
     continent: 'América do Norte',
     code: 'ca',
@@ -278,6 +305,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Suíça',
+    mapName: 'Switzerland',
     capital: 'Berna',
     continent: 'Europa',
     code: 'ch',
@@ -288,6 +316,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Chile',
+    mapName: 'Chile',
     capital: 'Santiago',
     continent: 'América do Sul',
     code: 'cl',
@@ -298,6 +327,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'China',
+    mapName: 'China',
     capital: 'Pequim',
     continent: 'Ásia',
     code: 'cn',
@@ -308,6 +338,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Camarões',
+    mapName: 'Cameroon',
     capital: 'Yaoundé',
     continent: 'África',
     code: 'cm',
@@ -318,6 +349,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'República do Congo',
+    mapName: 'Republic of Congo',
     capital: 'Brazzaville',
     continent: 'África',
     code: 'cg',
@@ -328,6 +360,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Colômbia',
+    mapName: 'Colombia',
     capital: 'Bogotá',
     continent: 'América do Sul',
     code: 'co',
@@ -338,6 +371,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Comores',
+    mapName: 'Comoros',
     capital: 'Moroni',
     continent: 'África',
     code: 'km',
@@ -348,6 +382,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Costa Rica',
+    mapName: 'Costa Rica',
     capital: 'San José',
     continent: 'América Central',
     code: 'cr',
@@ -358,6 +393,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Cuba',
+    mapName: 'Cuba',
     capital: 'Havana',
     continent: 'América Central',
     code: 'cu',
@@ -368,6 +404,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Chipre',
+    mapName: 'Cyprus',
     capital: 'Nicósia',
     continent: 'Europa',
     code: 'cy',
@@ -378,6 +415,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Chéquia',
+    mapName: 'Czech Republic',
     capital: 'Praga',
     continent: 'Europa',
     code: 'cz',
@@ -388,6 +426,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Alemanha',
+    mapName: 'Germany',
     capital: 'Berlim',
     continent: 'Europa',
     code: 'de',
@@ -398,6 +437,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Djibouti',
+    mapName: 'Djibouti',
     capital: 'Djibouti',
     continent: 'África',
     code: 'dj',
@@ -408,6 +448,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Dominica',
+    mapName: 'Dominica',
     capital: 'Roseau',
     continent: 'América Central',
     code: 'dm',
@@ -418,6 +459,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Dinamarca',
+    mapName: 'Denmark',
     capital: 'Copenhague',
     continent: 'Europa',
     code: 'dk',
@@ -428,6 +470,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'República Dominicana',
+    mapName: 'Dominican Republic',
     capital: 'Santo Domingo',
     continent: 'América Central',
     code: 'do',
@@ -438,6 +481,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Argélia',
+    mapName: 'Algeria',
     capital: 'Argel',
     continent: 'África',
     code: 'dz',
@@ -448,6 +492,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Equador',
+    mapName: 'Ecuador',
     capital: 'Quito',
     continent: 'América do Sul',
     code: 'ec',
@@ -458,6 +503,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Egito',
+    mapName: 'Egypt',
     capital: 'Cairo',
     continent: 'África',
     code: 'eg',
@@ -468,6 +514,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Eritreia',
+    mapName: 'Eritrea',
     capital: 'Asmara',
     continent: 'África',
     code: 'er',
@@ -478,6 +525,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Espanha',
+    mapName: 'Spain',
     capital: 'Madri',
     continent: 'Europa',
     code: 'es',
@@ -488,6 +536,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Estônia',
+    mapName: 'Estonia',
     capital: 'Tallinn',
     continent: 'Europa',
     code: 'ee',
@@ -498,6 +547,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Etiópia',
+    mapName: 'Ethiopia',
     capital: 'Adis Abeba',
     continent: 'África',
     code: 'et',
@@ -508,6 +558,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Finlândia',
+    mapName: 'Finland',
     capital: 'Helsinque',
     continent: 'Europa',
     code: 'fi',
@@ -518,6 +569,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Fiji',
+    mapName: 'Fiji',
     capital: 'Suva',
     continent: 'Oceania',
     code: 'fj',
@@ -528,6 +580,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'França',
+    mapName: 'France',
     capital: 'Paris',
     continent: 'Europa',
     code: 'fr',
@@ -538,6 +591,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Gabão',
+    mapName: 'Gabon',
     capital: 'Libreville',
     continent: 'África',
     code: 'ga',
@@ -548,6 +602,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Reino Unido',
+    mapName: 'United Kingdom',
     capital: 'Londres',
     continent: 'Europa',
     code: 'gb',
@@ -558,6 +613,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Geórgia',
+    mapName: 'Georgia',
     capital: 'Tbilisi',
     continent: 'Europa',
     code: 'ge',
@@ -568,6 +624,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Gana',
+    mapName: 'Ghana',
     capital: 'Acra',
     continent: 'África',
     code: 'gh',
@@ -578,6 +635,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Guiné',
+    mapName: 'Guinea',
     capital: 'Conacri',
     continent: 'África',
     code: 'gn',
@@ -588,6 +646,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Gâmbia',
+    mapName: 'The Gambia',
     capital: 'Banjul',
     continent: 'África',
     code: 'gm',
@@ -598,6 +657,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Guiné-Bissau',
+    mapName: 'Guinea-Bissau',
     capital: 'Bissau',
     continent: 'África',
     code: 'gw',
@@ -608,6 +668,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Guiné Equatorial',
+    mapName: 'Equatorial Guinea',
     capital: 'Malabo',
     continent: 'África',
     code: 'jq',
@@ -618,6 +679,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Grécia',
+    mapName: 'Greece',
     capital: 'Atenas',
     continent: 'Europa',
     code: 'gr',
@@ -628,6 +690,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Guatemala',
+    mapName: 'Guatemala',
     capital: 'Cidade da Guatemala',
     continent: 'América Central',
     code: 'gt',
@@ -638,6 +701,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Guiana',
+    mapName: 'Guyana',
     capital: 'Georgetown',
     continent: 'América do Sul',
     code: 'gy',
@@ -648,6 +712,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Honduras',
+    mapName: 'Honduras',
     capital: 'Tegucigalpa',
     continent: 'América Central',
     code: 'hn',
@@ -658,6 +723,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Croácia',
+    mapName: 'Croatia',
     capital: 'Zagrebe',
     continent: 'Europa',
     code: 'hr',
@@ -668,6 +734,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Haiti',
+    mapName: 'Haiti',
     capital: 'Porto Príncipe',
     continent: 'América Central',
     code: 'ht',
@@ -678,6 +745,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Hungria',
+    mapName: 'Hungary',
     capital: 'Budapeste',
     continent: 'Europa',
     code: 'hu',
@@ -688,6 +756,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Indonésia',
+    mapName: 'Indonesia',
     capital: 'Jacarta',
     continent: 'Ásia',
     code: 'id',
@@ -698,6 +767,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Índia',
+    mapName: 'India',
     capital: 'Nova Delhi',
     continent: 'Ásia',
     code: 'in',
@@ -708,6 +778,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Irlanda',
+    mapName: 'Ireland',
     capital: 'Dublin',
     continent: 'Europa',
     code: 'ie',
@@ -718,6 +789,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Iraque',
+    mapName: 'Iraq',
     capital: 'Bagdá',
     continent: 'Ásia',
     code: 'iq',
@@ -728,6 +800,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Islândia',
+    mapName: 'Iceland',
     capital: 'Reykjavik',
     continent: 'Europa',
     code: 'is',
@@ -738,6 +811,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Israel',
+    mapName: 'Israel',
     capital: 'Jerusalém',
     continent: 'Ásia',
     code: 'il',
@@ -748,6 +822,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Itália',
+    mapName: 'Italy',
     capital: 'Roma',
     continent: 'Europa',
     code: 'it',
@@ -758,6 +833,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Jamaica',
+    mapName: 'Jamaica',
     capital: 'Kingston',
     continent: 'América Central',
     code: 'jm',
@@ -768,6 +844,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Jordânia',
+    mapName: 'Jordan',
     capital: 'Amã',
     continent: 'Ásia',
     code: 'jo',
@@ -778,6 +855,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Japão',
+    mapName: 'Japan',
     capital: 'Tóquio',
     continent: 'Ásia',
     code: 'jp',
@@ -788,6 +866,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Cazaquistão',
+    mapName: 'Kazakhstan',
     capital: 'Astana',
     continent: 'Ásia',
     code: 'kz',
@@ -798,6 +877,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Quênia',
+    mapName: 'Kenya',
     capital: 'Nairóbi',
     continent: 'África',
     code: 'ke',
@@ -808,6 +888,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Quirguistão',
+    mapName: 'Kyrgyzstan',
     capital: 'Bishkek',
     continent: 'Ásia',
     code: 'kg',
@@ -818,6 +899,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Camboja',
+    mapName: 'Cambodia',
     capital: 'Phnom Penh',
     continent: 'Ásia',
     code: 'kh',
@@ -828,6 +910,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Kiribati',
+    mapName: 'Kiribati',
     capital: 'Tarawa do Sul',
     continent: 'Oceania',
     code: 'ki',
@@ -838,6 +921,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'São Cristóvão e Neves',
+    mapName: 'Saint Kitts and Nevis',
     capital: 'Basseterre',
     continent: 'América Central',
     code: 'kn',
@@ -848,6 +932,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Kuwait',
+    mapName: 'Kuwait',
     capital: 'Cidade do Kuwait',
     continent: 'Ásia',
     code: 'kw',
@@ -858,6 +943,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Laos',
+    mapName: 'Laos',
     capital: 'Vientiane',
     continent: 'Ásia',
     code: 'la',
@@ -868,6 +954,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Líbano',
+    mapName: 'Lebanon',
     capital: 'Beirute',
     continent: 'Ásia',
     code: 'lb',
@@ -878,6 +965,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Libéria',
+    mapName: 'Liberia',
     capital: 'Monróvia',
     continent: 'África',
     code: 'lr',
@@ -888,6 +976,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Líbia',
+    mapName: 'Libya',
     capital: 'Trípoli',
     continent: 'África',
     code: 'ly',
@@ -898,6 +987,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Santa Lúcia',
+    mapName: 'Saint Lucia',
     capital: 'Castries',
     continent: 'América Central',
     code: 'lc',
@@ -908,6 +998,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Liechtenstein',
+    mapName: 'Liechtenstein',
     capital: 'Vaduz',
     continent: 'Europa',
     code: 'li',
@@ -918,6 +1009,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Sri Lanka',
+    mapName: 'Sri Lanka',
     capital: 'Sri Jayawardenepura Kotte',
     continent: 'Ásia',
     code: 'lk',
@@ -928,6 +1020,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Lesoto',
+    mapName: 'Lesotho',
     capital: 'Maseru',
     continent: 'África',
     code: 'ls',
@@ -938,6 +1031,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Lituânia',
+    mapName: 'Lithuania',
     capital: 'Vilnius',
     continent: 'Europa',
     code: 'lt',
@@ -948,6 +1042,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Luxemburgo',
+    mapName: 'Luxembourg',
     capital: 'Luxemburgo',
     continent: 'Europa',
     code: 'lu',
@@ -958,6 +1053,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Letônia',
+    mapName: 'Latvia',
     capital: 'Riga',
     continent: 'Europa',
     code: 'lv',
@@ -968,6 +1064,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Marrocos',
+    mapName: 'Morocco',
     capital: 'Rabat',
     continent: 'África',
     code: 'ma',
@@ -978,6 +1075,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Mônaco',
+    mapName: 'Monaco',
     capital: 'Mônaco',
     continent: 'Europa',
     code: 'mc',
@@ -988,6 +1086,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Madagascar',
+    mapName: 'Madagascar',
     capital: 'Antananarivo',
     continent: 'África',
     code: 'mg',
@@ -998,6 +1097,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Maldivas',
+    mapName: 'Maldives',
     capital: 'Malé',
     continent: 'Ásia',
     code: 'mv',
@@ -1008,6 +1108,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'México',
+    mapName: 'Mexico',
     capital: 'Cidade do México',
     continent: 'América do Norte',
     code: 'mx',
@@ -1018,6 +1119,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Ilhas Marshall',
+    mapName: 'Marshall Islands',
     capital: 'Majuro',
     continent: 'Oceania',
     code: 'mh',
@@ -1028,6 +1130,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Macedônia do Norte',
+    mapName: 'North Macedonia',
     capital: 'Escópia',
     continent: 'Europa',
     code: 'mk',
@@ -1038,6 +1141,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Mali',
+    mapName: 'Mali',
     capital: 'Bamako',
     continent: 'África',
     code: 'ml',
@@ -1048,6 +1152,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Malta',
+    mapName: 'Malta',
     capital: 'Valeta',
     continent: 'Europa',
     code: 'mt',
@@ -1058,6 +1163,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Mianmar',
+    mapName: 'Myanmar',
     capital: 'Naypyidaw',
     continent: 'Ásia',
     code: 'mm',
@@ -1068,6 +1174,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Montenegro',
+    mapName: 'Montenegro',
     capital: 'Podgorica',
     continent: 'Europa',
     code: 'me',
@@ -1078,6 +1185,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Mongólia',
+    mapName: 'Mongolia',
     capital: 'Ulaanbaatar',
     continent: 'Ásia',
     code: 'mn',
@@ -1088,6 +1196,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Moçambique',
+    mapName: 'Mozambique',
     capital: 'Maputo',
     continent: 'África',
     code: 'mz',
@@ -1098,6 +1207,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Maurício',
+    mapName: 'Mauritius',
     capital: 'Port Louis',
     continent: 'África',
     code: 'mu',
@@ -1108,6 +1218,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Malawi',
+    mapName: 'Malawi',
     capital: 'Lilongwe',
     continent: 'África',
     code: 'mw',
@@ -1118,6 +1229,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Malásia',
+    mapName: 'Malaysia',
     capital: 'Kuala Lumpur',
     continent: 'Ásia',
     code: 'my',
@@ -1128,6 +1240,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Namíbia',
+    mapName: 'Namibia',
     capital: 'Windhoek',
     continent: 'África',
     code: 'na',
@@ -1138,6 +1251,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Níger',
+    mapName: 'Niger',
     capital: 'Niamey',
     continent: 'África',
     code: 'ne',
@@ -1148,6 +1262,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Nigéria',
+    mapName: 'Nigeria',
     capital: 'Abuja',
     continent: 'África',
     code: 'ng',
@@ -1158,6 +1273,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Nicarágua',
+    mapName: 'Nicaragua',
     capital: 'Manágua',
     continent: 'América Central',
     code: 'ni',
@@ -1168,6 +1284,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Países Baixos',
+    mapName: 'Netherlands',
     capital: 'Amsterdã',
     continent: 'Europa',
     code: 'nl',
@@ -1178,6 +1295,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Noruega',
+    mapName: 'Norway',
     capital: 'Oslo',
     continent: 'Europa',
     code: 'no',
@@ -1188,6 +1306,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Nepal',
+    mapName: 'Nepal',
     capital: 'Catmandu',
     continent: 'Ásia',
     code: 'np',
@@ -1198,6 +1317,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Nauru',
+    mapName: 'Nauru',
     capital: 'Yaren',
     continent: 'Oceania',
     code: 'nr',
@@ -1208,6 +1328,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Nova Zelândia',
+    mapName: 'New Zealand',
     capital: 'Wellington',
     continent: 'Oceania',
     code: 'nz',
@@ -1218,6 +1339,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Omã',
+    mapName: 'Oman',
     capital: 'Mascate',
     continent: 'Ásia',
     code: 'om',
@@ -1228,6 +1350,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Paquistão',
+    mapName: 'Pakistan',
     capital: 'Islamabad',
     continent: 'Ásia',
     code: 'pk',
@@ -1238,6 +1361,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Panamá',
+    mapName: 'Panama',
     capital: 'Cidade do Panamá',
     continent: 'América Central',
     code: 'pa',
@@ -1248,6 +1372,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Peru',
+    mapName: 'Peru',
     capital: 'Lima',
     continent: 'América do Sul',
     code: 'pe',
@@ -1258,6 +1383,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Filipinas',
+    mapName: 'Philippines',
     capital: 'Manila',
     continent: 'Ásia',
     code: 'ph',
@@ -1268,6 +1394,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Palau',
+    mapName: 'Palau',
     capital: 'Ngerulmud',
     continent: 'Oceania',
     code: 'pw',
@@ -1278,6 +1405,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Papua-Nova Guiné',
+    mapName: 'Papua New Guinea',
     capital: 'Port Moresby',
     continent: 'Oceania',
     code: 'pg',
@@ -1288,6 +1416,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Polônia',
+    mapName: 'Poland',
     capital: 'Varsóvia',
     continent: 'Europa',
     code: 'pl',
@@ -1298,6 +1427,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Portugal',
+    mapName: 'Portugal',
     capital: 'Lisboa',
     continent: 'Europa',
     code: 'pt',
@@ -1308,6 +1438,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Paraguai',
+    mapName: 'Paraguay',
     capital: 'Assunção',
     continent: 'América do Sul',
     code: 'py',
@@ -1318,6 +1449,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Catar',
+    mapName: 'Qatar',
     capital: 'Doha',
     continent: 'Ásia',
     code: 'qa',
@@ -1328,6 +1460,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Romênia',
+    mapName: 'Romania',
     capital: 'Bucareste',
     continent: 'Europa',
     code: 'ro',
@@ -1338,6 +1471,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Rússia',
+    mapName: 'Russia',
     capital: 'Moscou',
     continent: 'Europa',
     code: 'ru',
@@ -1348,6 +1482,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Ruanda',
+    mapName: 'Rwanda',
     capital: 'Kigali',
     continent: 'África',
     code: 'rw',
@@ -1358,6 +1493,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Arábia Saudita',
+    mapName: 'Saudi Arabia',
     capital: 'Riad',
     continent: 'Ásia',
     code: 'sa',
@@ -1368,6 +1504,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Sudão',
+    mapName: 'Sudan',
     capital: 'Cartum',
     continent: 'África',
     code: 'sd',
@@ -1378,6 +1515,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Senegal',
+    mapName: 'Senegal',
     capital: 'Dakar',
     continent: 'África',
     code: 'sn',
@@ -1388,6 +1526,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Cingapura',
+    mapName: 'Singapore',
     capital: 'Cingapura',
     continent: 'Ásia',
     code: 'sg',
@@ -1398,6 +1537,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Ilhas Salomão',
+    mapName: 'Solomon Islands',
     capital: 'Honiara',
     continent: 'Oceania',
     code: 'sb',
@@ -1408,6 +1548,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Serra Leoa',
+    mapName: 'Sierra Leone',
     capital: 'Freetown',
     continent: 'África',
     code: 'sl',
@@ -1418,6 +1559,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'El Salvador',
+    mapName: 'El Salvador',
     capital: 'San Salvador',
     continent: 'América Central',
     code: 'sv',
@@ -1428,6 +1570,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'San Marino',
+    mapName: 'San Marino',
     capital: 'San Marino',
     continent: 'Europa',
     code: 'sm',
@@ -1438,6 +1581,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Somália',
+    mapName: 'Somalia',
     capital: 'Mogadíscio',
     continent: 'África',
     code: 'so',
@@ -1448,6 +1592,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Sérvia',
+    mapName: 'Serbia',
     capital: 'Belgrado',
     continent: 'Europa',
     code: 'rs',
@@ -1458,6 +1603,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Sudão do Sul',
+    mapName: 'South Sudan',
     capital: 'Juba',
     continent: 'África',
     code: 'ss',
@@ -1468,6 +1614,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Suriname',
+    mapName: 'Suriname',
     capital: 'Paramaribo',
     continent: 'América do Sul',
     code: 'sr',
@@ -1478,6 +1625,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Eslováquia',
+    mapName: 'Slovakia',
     capital: 'Bratislava',
     continent: 'Europa',
     code: 'sk',
@@ -1488,6 +1636,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Eslovênia',
+    mapName: 'Slovenia',
     capital: 'Liubliana',
     continent: 'Europa',
     code: 'si',
@@ -1498,6 +1647,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Suécia',
+    mapName: 'Sweden',
     capital: 'Estocolmo',
     continent: 'Europa',
     code: 'se',
@@ -1508,6 +1658,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Eswatini',
+    mapName: 'Eswatini',
     capital: 'Mbabane',
     continent: 'África',
     code: 'sz',
@@ -1518,6 +1669,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Seychelles',
+    mapName: 'Seychelles',
     capital: 'Victoria',
     continent: 'África',
     code: 'sc',
@@ -1528,6 +1680,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Síria',
+    mapName: 'Syria',
     capital: 'Damasco',
     continent: 'Ásia',
     code: 'sy',
@@ -1538,6 +1691,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Togo',
+    mapName: 'Togo',
     capital: 'Lomé',
     continent: 'África',
     code: 'tg',
@@ -1548,6 +1702,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Tailândia',
+    mapName: 'Thailand',
     capital: 'Bangkok',
     continent: 'Ásia',
     code: 'th',
@@ -1558,6 +1713,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Tajiquistão',
+    mapName: 'Tajikistan',
     capital: 'Dushanbe',
     continent: 'Ásia',
     code: 'tj',
@@ -1568,6 +1724,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Turcomenistão',
+    mapName: 'Turkmenistan',
     capital: 'Ashgabat',
     continent: 'Ásia',
     code: 'tm',
@@ -1578,6 +1735,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Timor-Leste',
+    mapName: 'Timor-Leste',
     capital: 'Díli',
     continent: 'Ásia',
     code: 'tl',
@@ -1588,6 +1746,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Trinidad e Tobago',
+    mapName: 'Trinidad and Tobago',
     capital: 'Port of Spain',
     continent: 'América Central',
     code: 'tt',
@@ -1598,6 +1757,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Tunísia',
+    mapName: 'Tunisia',
     capital: 'Túnis',
     continent: 'África',
     code: 'tn',
@@ -1608,6 +1768,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Tuvalu',
+    mapName: 'Tuvalu',
     capital: 'Funafuti',
     continent: 'Oceania',
     code: 'tv',
@@ -1618,6 +1779,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Uganda',
+    mapName: 'Uganda',
     capital: 'Campala',
     continent: 'África',
     code: 'ug',
@@ -1628,6 +1790,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Ucrânia',
+    mapName: 'Ukraine',
     capital: 'Kiev',
     continent: 'Europa',
     code: 'ua',
@@ -1638,6 +1801,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Uruguai',
+    mapName: 'Uruguay',
     capital: 'Montevidéu',
     continent: 'América do Sul',
     code: 'uy',
@@ -1648,6 +1812,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Estados Unidos',
+    mapName: 'United States of America',
     capital: 'Washington, D.C.',
     continent: 'América do Norte',
     code: 'us',
@@ -1658,6 +1823,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Uzbequistão',
+    mapName: 'Uzbekistan',
     capital: 'Tashkent',
     continent: 'Ásia',
     code: 'uz',
@@ -1668,6 +1834,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'São Vicente e Granadinas',
+    mapName: 'Saint Vincent and the Grenadines',
     capital: 'Kingstown',
     continent: 'América Central',
     code: 'vc',
@@ -1678,6 +1845,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Samoa',
+    mapName: 'Samoa',
     capital: 'Apia',
     continent: 'Oceania',
     code: 'ws',
@@ -1688,6 +1856,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Iêmen',
+    mapName: 'Yemen',
     capital: 'Sana',
     continent: 'Ásia',
     code: 'ye',
@@ -1698,6 +1867,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'África do Sul',
+    mapName: 'South Africa',
     capital: 'Pretória',
     continent: 'África',
     code: 'za',
@@ -1708,6 +1878,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Zâmbia',
+    mapName: 'Zambia',
     capital: 'Lusaka',
     continent: 'África',
     code: 'zm',
@@ -1718,6 +1889,7 @@ export const COUNTRIES_DB: Country[] = [
 
   {
     name: 'Zimbábue',
+    mapName: 'Zimbabwe',
     capital: 'Harare',
     continent: 'África',
     code: 'zw',

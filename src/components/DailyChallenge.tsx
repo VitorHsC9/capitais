@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PixelatedFlag } from './PixelatedFlag';
-import { InputAnswer } from './InputAnswer';
+import { CountryAutocomplete } from './CountryAutocomplete';
 import { useDailyGame } from '../hooks/useDailyGame';
 import { Clock, CheckCircle, XCircle, Share2, ArrowLeft } from 'lucide-react';
 
@@ -127,14 +127,12 @@ export function DailyChallenge({ onBack }: DailyChallengeProps) {
                 {/* Input Area */}
                 {!isFinished && (
                     <div className="w-full pb-4">
-                        <InputAnswer
-                            onSubmit={submitGuess}
-                            isAnswered={false} // Always false to allow input until game over
-                            correctAnswer={targetCountry.name} // Not used for validation in this component context directly, but needed for prop
-                            nextQuestion={() => { }} // No next question
-                            isDark={true}
+                        <CountryAutocomplete
+                            onSelect={submitGuess}
+                            placeholder="Que país é esse?"
+                            disabled={isFinished}
                         />
-                        {/* Previous Guesses List (Optional, maybe just show last wrong guess?) */}
+                        {/* Previous Guesses List */}
                         {guesses.length > 0 && (
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
                                 {guesses.map((g, i) => (

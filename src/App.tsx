@@ -13,6 +13,7 @@ import { DailyAnagram } from './components/DailyAnagram';
 import { DailyWordle } from './components/DailyWordle';
 import { DailyMap } from './components/DailyMap';
 import { DailyCountry } from './components/DailyCountry';
+import { DailyMix } from './components/DailyMix';
 import { Home } from './components/Home';
 import { PracticeModes } from './components/PracticeModes';
 import type { Continent } from './data/countries';
@@ -22,7 +23,7 @@ const shuffleText = (text: string) => {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map' | 'daily-country'>('home');
+  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map' | 'daily-country' | 'daily-mix'>('home');
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -76,7 +77,7 @@ export default function App() {
   const continents: Continent[] = ['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'];
 
   return (
-    <div className="flex flex-col h-screen max-w-[500px] mx-auto px-4 relative font-sans transition-colors duration-300">
+    <div className="flex flex-col h-screen mx-auto px-4 relative font-sans transition-colors duration-300 max-w-5xl">
 
       {/* TOASTS */}
       <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[80] flex flex-col gap-2 w-full max-w-[320px] pointer-events-none px-4">
@@ -99,7 +100,7 @@ export default function App() {
         onOpenSettings={() => setModal('settings')}
       />
 
-      <main className="flex-1 flex flex-col py-6 overflow-hidden relative">
+      <main className={`flex-1 flex flex-col py-6 overflow-hidden relative transition-all duration-300 ${screen !== 'home' ? 'max-w-[500px] mx-auto w-full' : 'w-full'}`}>
 
         {/* HOME */}
         {screen === 'home' && (
@@ -109,6 +110,7 @@ export default function App() {
             onSelectDailyWordle={() => setScreen('daily-wordle')}
             onSelectDailyMap={() => setScreen('daily-map')}
             onSelectDailyCountry={() => setScreen('daily-country')}
+            onSelectDailyMix={() => setScreen('daily-mix')}
             onSelectPractice={() => setScreen('practice')}
           />
         )}
@@ -148,6 +150,11 @@ export default function App() {
         {/* DESAFIO DIÁRIO - PAÍS */}
         {screen === 'daily-country' && (
           <DailyCountry onBack={() => setScreen('home')} />
+        )}
+
+        {/* DESAFIO DIÁRIO - MIX */}
+        {screen === 'daily-mix' && (
+          <DailyMix onBack={() => setScreen('home')} />
         )}
 
         {/* CONTINENTES */}
@@ -303,6 +310,43 @@ export default function App() {
               <div className="p-4 rounded-lg bg-[var(--bg-color)] border border-[var(--tone-4)] text-center">
                 <p className="text-xs text-[var(--tone-3)] uppercase font-bold mb-1">Versão</p>
                 <p className="text-sm font-mono text-[var(--tone-2)]">v2.1.0 (Daily)</p>
+              </div>
+
+              {/* DEBUG: Reset Daily Progress */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => {
+                    if (confirm('Isso irá resetar todo o seu progresso diário. Tem certeza?')) {
+                      localStorage.removeItem('quiz_capitais_daily_v1');
+                      localStorage.removeItem('quiz_capitais_daily_anagram_v1');
+                      localStorage.removeItem('quiz_capitais_daily_wordle_v1');
+                      localStorage.removeItem('quiz_capitais_daily_map_v1');
+                      localStorage.removeItem('quiz_capitais_daily_country_v1');
+                      localStorage.removeItem('daily_mix_state');
+                      window.location.reload();
+                    }
+                  }}
+                  className="w-full py-3 text-[10px] font-bold text-[var(--color-error)] border border-[var(--color-error)]/30 rounded-lg hover:bg-[var(--color-error)]/10 transition-colors"
+                >
+                  RESETAR PROGRESSO
+                </button>
+                <button
+                  onClick={() => {
+                    const randomSalt = Math.floor(Math.random() * 10000).toString();
+                    localStorage.setItem('debug_seed_salt', randomSalt);
+                    // Also clear progress to ensure new questions load cleanly
+                    localStorage.removeItem('quiz_capitais_daily_v1');
+                    localStorage.removeItem('quiz_capitais_daily_anagram_v1');
+                    localStorage.removeItem('quiz_capitais_daily_wordle_v1');
+                    localStorage.removeItem('quiz_capitais_daily_map_v1');
+                    localStorage.removeItem('quiz_capitais_daily_country_v1');
+                    localStorage.removeItem('daily_mix_state');
+                    window.location.reload();
+                  }}
+                  className="w-full py-3 text-[10px] font-bold text-[var(--tone-1)] border border-[var(--tone-3)] rounded-lg hover:bg-[var(--tone-5)] transition-colors"
+                >
+                  NOVA PERGUNTA (DEBUG)
+                </button>
               </div>
             </div>
           </div>

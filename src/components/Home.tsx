@@ -1,4 +1,4 @@
-import { Calendar, Play, Trophy, LayoutGrid, Map as MapIcon, Globe2 } from 'lucide-react';
+import { Calendar, Play, Trophy, LayoutGrid, Map as MapIcon, Globe2, Shuffle } from 'lucide-react';
 
 interface HomeProps {
     onSelectDaily: () => void;
@@ -6,10 +6,11 @@ interface HomeProps {
     onSelectDailyWordle: () => void;
     onSelectDailyMap: () => void;
     onSelectDailyCountry: () => void;
+    onSelectDailyMix: () => void;
     onSelectPractice: () => void;
 }
 
-export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectPractice }: HomeProps) {
+export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectPractice }: HomeProps) {
     return (
         <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="mb-8">
@@ -17,152 +18,183 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                 <p className="text-2xl font-bold text-[var(--tone-1)]">Desafios de Hoje</p>
             </div>
 
-            <div className="flex-1 space-y-6 overflow-y-auto pr-2">
+            <div className="flex-1 overflow-y-auto pr-2">
 
-                {/* Daily Challenge Card - Flag */}
-                <button
-                    onClick={onSelectDaily}
-                    className="w-full text-left p-6 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden"
-                >
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Calendar className="w-24 h-24" />
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    {/* Daily Challenge Card - Mix */}
+                    <button
+                        onClick={onSelectDailyMix}
+                        className="w-full h-full text-left p-5 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden flex flex-col"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Shuffle className="w-20 h-20" />
+                        </div>
 
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-lg bg-[var(--color-correct)]/20 text-[var(--color-correct)]">
-                                <Calendar className="w-6 h-6" />
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-1.5 rounded-lg bg-pink-500/20 text-pink-500">
+                                    <Shuffle className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-pink-500">Disponível Agora</span>
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-correct)]">Disponível Agora</span>
-                        </div>
 
-                        <h3 className="text-xl font-black text-[var(--tone-1)] mb-2">Bandeira Pixelada</h3>
-                        <p className="text-sm text-[var(--tone-2)] font-medium mb-6 max-w-[80%]">
-                            Adivinhe o país baseando-se em uma versão pixelada de sua bandeira.
-                        </p>
+                            <h3 className="text-lg font-black text-[var(--tone-1)] mb-1">Desafio Mix</h3>
+                            <p className="text-xs text-[var(--tone-2)] font-medium mb-4 flex-1">
+                                10 perguntas variadas. Errou, perdeu! Você só tem uma chance por dia.
+                            </p>
 
-                        <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-[var(--color-correct)] transition-colors">
-                            <span>JOGAR AGORA</span>
-                            <Play className="w-4 h-4 fill-current" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* Daily Challenge Card - Anagram */}
-                <button
-                    onClick={onSelectDailyAnagram}
-                    className="w-full text-left p-6 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden"
-                >
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Trophy className="w-24 h-24" />
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-500">
-                                <Trophy className="w-6 h-6" />
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--tone-1)] group-hover:text-pink-500 transition-colors mt-auto">
+                                <span>JOGAR AGORA</span>
+                                <Play className="w-3 h-3 fill-current" />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-blue-500">Disponível Agora</span>
+                        </div>
+                    </button>
+
+                    {/* Daily Challenge Card - Flag */}
+                    <button
+                        onClick={onSelectDaily}
+                        className="w-full h-full text-left p-5 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden flex flex-col"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Calendar className="w-20 h-20" />
                         </div>
 
-                        <h3 className="text-xl font-black text-[var(--tone-1)] mb-2">Desafio da Capital</h3>
-                        <p className="text-sm text-[var(--tone-2)] font-medium mb-6 max-w-[80%]">
-                            Desembaralhe as letras para descobrir qual é a capital do dia.
-                        </p>
-
-                        <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-blue-500 transition-colors">
-                            <span>JOGAR AGORA</span>
-                            <Play className="w-4 h-4 fill-current" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* Daily Challenge Card - Wordle */}
-                <button
-                    onClick={onSelectDailyWordle}
-                    className="w-full text-left p-6 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden"
-                >
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <LayoutGrid className="w-24 h-24" />
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-500">
-                                <LayoutGrid className="w-6 h-6" />
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-1.5 rounded-lg bg-[var(--color-correct)]/20 text-[var(--color-correct)]">
+                                    <Calendar className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-correct)]">Disponível Agora</span>
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-purple-500">Disponível Agora</span>
-                        </div>
 
-                        <h3 className="text-xl font-black text-[var(--tone-1)] mb-2">Termo da Capital</h3>
-                        <p className="text-sm text-[var(--tone-2)] font-medium mb-6 max-w-[80%]">
-                            Descubra a capital do dia em 5 tentativas. Letras verdes indicam posição correta.
-                        </p>
+                            <h3 className="text-lg font-black text-[var(--tone-1)] mb-1">Bandeira Pixelada</h3>
+                            <p className="text-xs text-[var(--tone-2)] font-medium mb-4 flex-1">
+                                Adivinhe o país baseando-se em uma versão pixelada de sua bandeira.
+                            </p>
 
-                        <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-purple-500 transition-colors">
-                            <span>JOGAR AGORA</span>
-                            <Play className="w-4 h-4 fill-current" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* Daily Challenge Card - Map */}
-                <button
-                    onClick={onSelectDailyMap}
-                    className="w-full text-left p-6 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden"
-                >
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <MapIcon className="w-24 h-24" />
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-500">
-                                <MapIcon className="w-6 h-6" />
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--tone-1)] group-hover:text-[var(--color-correct)] transition-colors mt-auto">
+                                <span>JOGAR AGORA</span>
+                                <Play className="w-3 h-3 fill-current" />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-500">Disponível Agora</span>
+                        </div>
+                    </button>
+
+                    {/* Daily Challenge Card - Anagram */}
+                    <button
+                        onClick={onSelectDailyAnagram}
+                        className="w-full h-full text-left p-5 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden flex flex-col"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Trophy className="w-20 h-20" />
                         </div>
 
-                        <h3 className="text-xl font-black text-[var(--tone-1)] mb-2">Mapa do Dia</h3>
-                        <p className="text-sm text-[var(--tone-2)] font-medium mb-6 max-w-[80%]">
-                            Identifique qual país está destacado no mapa interativo.
-                        </p>
-
-                        <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-emerald-500 transition-colors">
-                            <span>JOGAR AGORA</span>
-                            <Play className="w-4 h-4 fill-current" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* Daily Challenge Card - Country */}
-                <button
-                    onClick={onSelectDailyCountry}
-                    className="w-full text-left p-6 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden"
-                >
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Globe2 className="w-24 h-24" />
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-lg bg-orange-500/20 text-orange-500">
-                                <Globe2 className="w-6 h-6" />
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-500">
+                                    <Trophy className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500">Disponível Agora</span>
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-orange-500">Disponível Agora</span>
+
+                            <h3 className="text-lg font-black text-[var(--tone-1)] mb-1">Desafio da Capital</h3>
+                            <p className="text-xs text-[var(--tone-2)] font-medium mb-4 flex-1">
+                                Desembaralhe as letras para descobrir qual é a capital do dia.
+                            </p>
+
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--tone-1)] group-hover:text-blue-500 transition-colors mt-auto">
+                                <span>JOGAR AGORA</span>
+                                <Play className="w-3 h-3 fill-current" />
+                            </div>
+                        </div>
+                    </button>
+
+                    {/* Daily Challenge Card - Wordle */}
+                    <button
+                        onClick={onSelectDailyWordle}
+                        className="w-full h-full text-left p-5 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden flex flex-col"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <LayoutGrid className="w-20 h-20" />
                         </div>
 
-                        <h3 className="text-xl font-black text-[var(--tone-1)] mb-2">Adivinhe o País</h3>
-                        <p className="text-sm text-[var(--tone-2)] font-medium mb-6 max-w-[80%]">
-                            Descubra o país do dia com dicas progressivas: continente, população, vizinhos e idioma.
-                        </p>
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-500">
+                                    <LayoutGrid className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-500">Disponível Agora</span>
+                            </div>
 
-                        <div className="flex items-center gap-2 text-xs font-bold text-[var(--tone-1)] group-hover:text-orange-500 transition-colors">
-                            <span>JOGAR AGORA</span>
-                            <Play className="w-4 h-4 fill-current" />
+                            <h3 className="text-lg font-black text-[var(--tone-1)] mb-1">Termo da Capital</h3>
+                            <p className="text-xs text-[var(--tone-2)] font-medium mb-4 flex-1">
+                                Descubra a capital do dia em 5 tentativas. Letras verdes indicam posição correta.
+                            </p>
+
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--tone-1)] group-hover:text-purple-500 transition-colors mt-auto">
+                                <span>JOGAR AGORA</span>
+                                <Play className="w-3 h-3 fill-current" />
+                            </div>
                         </div>
-                    </div>
-                </button>
+                    </button>
+
+                    {/* Daily Challenge Card - Map */}
+                    <button
+                        onClick={onSelectDailyMap}
+                        className="w-full h-full text-left p-5 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden flex flex-col"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <MapIcon className="w-20 h-20" />
+                        </div>
+
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-500">
+                                    <MapIcon className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">Disponível Agora</span>
+                            </div>
+
+                            <h3 className="text-lg font-black text-[var(--tone-1)] mb-1">Mapa do Dia</h3>
+                            <p className="text-xs text-[var(--tone-2)] font-medium mb-4 flex-1">
+                                Identifique qual país está destacado no mapa interativo.
+                            </p>
+
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--tone-1)] group-hover:text-emerald-500 transition-colors mt-auto">
+                                <span>JOGAR AGORA</span>
+                                <Play className="w-3 h-3 fill-current" />
+                            </div>
+                        </div>
+                    </button>
+
+                    {/* Daily Challenge Card - Country */}
+                    <button
+                        onClick={onSelectDailyCountry}
+                        className="w-full h-full text-left p-5 rounded-2xl bg-gradient-to-br from-[var(--tone-5)] to-[var(--bg-color)] border border-[var(--tone-4)] shadow-xl hover:shadow-2xl hover:border-[var(--color-correct)] transition-all group relative overflow-hidden flex flex-col"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Globe2 className="w-20 h-20" />
+                        </div>
+
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-1.5 rounded-lg bg-orange-500/20 text-orange-500">
+                                    <Globe2 className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-500">Disponível Agora</span>
+                            </div>
+
+                            <h3 className="text-lg font-black text-[var(--tone-1)] mb-1">Adivinhe o País</h3>
+                            <p className="text-xs text-[var(--tone-2)] font-medium mb-4 flex-1">
+                                Descubra o país do dia com dicas progressivas: continente, população, vizinhos e idioma.
+                            </p>
+
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--tone-1)] group-hover:text-orange-500 transition-colors mt-auto">
+                                <span>JOGAR AGORA</span>
+                                <Play className="w-3 h-3 fill-current" />
+                            </div>
+                        </div>
+                    </button>
+                </div>
 
                 {/* Practice Mode Link */}
                 <div className="pt-4 border-t border-[var(--tone-5)]">

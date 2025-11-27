@@ -14,18 +14,20 @@ interface DailyWordleState {
 }
 
 const STORAGE_KEY = 'quiz_capitais_daily_wordle_v1';
+const MAX_ATTEMPTS = 5;
 
 export const useDailyWordle = () => {
     const [targetCountry, setTargetCountry] = useState<Country | null>(null);
     const [guesses, setGuesses] = useState<string[]>([]);
-    const [currentGuess, setCurrentGuess] = useState<string>('');
+    const [currentGuess, setCurrentGuess] = useState<string[]>([]);
     const [gameStatus, setGameStatus] = useState<DailyGameState>('playing');
     const [nextDailyTime, setNextDailyTime] = useState<number>(0);
+    const [cursorIndex, setCursorIndex] = useState(0);
 
     // Load or Initialize Game
     useEffect(() => {
         const todaySeed = getDailySeed();
-        // Use salt 2 for Wordle mode
+        // Use salt 2 for Wordle
         const dailyCountry = getDailyCountry(COUNTRIES_DB, 2);
         setTargetCountry(dailyCountry);
 
@@ -54,7 +56,8 @@ export const useDailyWordle = () => {
         // New day or no save
         setGuesses([]);
         setGameStatus('playing');
-        setCurrentGuess('');
+        setCurrentGuess([]);
+        setCursorIndex(0);
     }, []);
 
     // Save to storage
@@ -69,42 +72,70 @@ export const useDailyWordle = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [guesses, gameStatus, targetCountry]);
 
+    const targetWord = targetCountry ? targetCountry.capital.replace(/\s/g, '').toUpperCase() : '';
+    const wordLength = targetWord.length;
+
     const handleKey = useCallback((key: string) => {
         if (gameStatus !== 'playing' || !targetCountry) return;
 
-        if (key === 'Backspace') {
-            setCurrentGuess(prev => prev.slice(0, -1));
-            return;
-        }
+        const currentGuessFilledLength = currentGuess.filter(Boolean).length;
 
         if (key === 'Enter') {
-            if (currentGuess.length !== targetCountry.capital.length) return;
-
-            const newGuesses = [...guesses, currentGuess];
+            if (currentGuessFilledLength !== wordLength) {
+                return;
+            }
+            // Submit guess
+            const newGuesses = [...guesses, currentGuess.join('')];
             setGuesses(newGuesses);
-            setCurrentGuess('');
+            setCurrentGuess([]);
+            setCursorIndex(0);
 
-            const normalizedGuess = currentGuess.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const normalizedTarget = targetCountry.capital.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normalizedGuess = currentGuess.join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normalizedTarget = targetWord.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
             if (normalizedGuess === normalizedTarget) {
                 setGameStatus('won');
-            } else if (newGuesses.length >= 5) {
+            } else if (newGuesses.length >= MAX_ATTEMPTS) {
                 setGameStatus('lost');
             }
-            return;
+        } else if (key === 'Backspace') {
+            const newGuess = [...currentGuess];
+            if (cursorIndex > 0 && !newGuess[cursorIndex]) { // If cursor is at an empty spot, move back and delete
+                setCursorIndex(prev => prev - 1);
+                newGuess[cursorIndex - 1] = '';
+                setCurrentGuess(newGuess);
+            } else if (newGuess[cursorIndex]) { // If there's a char at cursor, delete it
+                newGuess[cursorIndex] = '';
+                setCurrentGuess(newGuess);
+            } else if (cursorIndex === wordLength && newGuess[cursorIndex - 1]) { // If cursor is at the end and previous char exists
+                setCursorIndex(prev => prev - 1);
+                newGuess[cursorIndex - 1] = '';
+                setCurrentGuess(newGuess);
+            }
+        } else if (key === 'ArrowLeft') {
+            setCursorIndex(prev => Math.max(0, prev - 1));
+        } else if (key === 'ArrowRight') {
+            setCursorIndex(prev => Math.min(wordLength, prev + 1));
+        } else if (/^[a-zA-Z]$/.test(key)) {
+            if (cursorIndex < wordLength) {
+                const newGuess = [...currentGuess];
+                // Ensure the array is long enough
+                while (newGuess.length <= cursorIndex) {
+                    newGuess.push('');
+                }
+                newGuess[cursorIndex] = key.toUpperCase();
+                setCurrentGuess(newGuess);
+                // Move cursor forward if not at end
+                if (cursorIndex < wordLength) {
+                    setCursorIndex(prev => prev + 1);
+                }
+            }
         }
+    }, [gameStatus, targetCountry, currentGuess, guesses, cursorIndex, targetWord, wordLength]);
 
-        // Add letter if not full
-        if (currentGuess.length < targetCountry.capital.length && /^[a-zA-Z]$/.test(key)) {
-            setCurrentGuess(prev => prev + key.toUpperCase());
-        }
-    }, [currentGuess, gameStatus, targetCountry, guesses]);
-
-    // Helper to check letters
     const checkGuess = (guess: string) => {
         if (!targetCountry) return [];
-        const target = targetCountry.capital.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const target = targetWord.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const g = guess.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         const status: LetterStatus[] = new Array(g.length).fill('absent');
@@ -140,7 +171,10 @@ export const useDailyWordle = () => {
         gameStatus,
         handleKey,
         checkGuess,
-        attemptsLeft: 5 - guesses.length,
-        nextDailyTime
+        attemptsLeft: MAX_ATTEMPTS - guesses.length,
+        nextDailyTime,
+        cursorIndex,
+        setCursorIndex,
+        wordLength // Export wordLength
     };
 };
