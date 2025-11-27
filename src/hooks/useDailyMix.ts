@@ -45,7 +45,7 @@ export const useDailyMix = () => {
         for (let i = 0; i < 10; i++) {
             if (availableCountries.length === 0) break;
             const randomIndex = Math.floor(random() * availableCountries.length);
-            const country = availableCountries.splice(randomIndex, 1)[0];
+            const country = availableCountries.splice(randomIndex, 1)[0] || COUNTRIES_DB[0];
 
             // Select a random mode
             const modes: MixGameMode[] = ['classic', 'reverse', 'flags'];
