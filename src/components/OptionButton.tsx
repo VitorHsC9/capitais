@@ -12,10 +12,10 @@ interface OptionButtonProps {
   isDark: boolean; // Mantido por compatibilidade
 }
 
-export const OptionButton = ({ 
+export const OptionButton = ({
   option, idx, isSelected, isCorrect, isAnswered, onSelect, mode
 }: OptionButtonProps) => {
-  
+
   const label = ['classic', 'suddenDeath', 'survival'].includes(mode) ? option.capital : option.name;
 
   let btnClass = "font-bold uppercase rounded flex items-center justify-center select-none transition-all text-sm sm:text-base min-h-[56px] w-full relative ";
@@ -24,12 +24,12 @@ export const OptionButton = ({
     if (isCorrect) {
       btnClass += "bg-[var(--color-correct)] text-white border-transparent";
     } else if (isSelected) {
-      btnClass += "bg-[var(--tone-4)] text-[var(--color-error)] border-2 border-[var(--color-error)]"; 
+      btnClass += "bg-[var(--tone-4)] text-[var(--color-error)] border-2 border-[var(--color-error)]";
     } else {
       btnClass += "bg-[var(--tone-4)] opacity-40";
     }
   } else {
-    btnClass += "bg-[var(--key-bg)] text-[var(--bg-color)] hover:opacity-90 active:bg-[var(--tone-3)]";
+    btnClass += "bg-[var(--key-bg)] text-[var(--text-primary)] hover:opacity-90 active:bg-[var(--tone-3)]";
   }
 
   return (
