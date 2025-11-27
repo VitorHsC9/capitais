@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  BarChart3, HelpCircle, Settings, X, MapPin, Building2, Flag, Zap, PenTool, ChevronLeft, Trophy, Globe, Check, RotateCcw
+  X, MapPin, Building2, Flag, Zap, PenTool, ChevronLeft, Trophy, Globe
 } from 'lucide-react';
 
 import { useQuizGame, type GameMode } from './hooks/useQuizGame';
@@ -17,9 +17,11 @@ export default function App() {
   
   const game = useQuizGame();
 
+  // Atalhos de Teclado Globais (1-4 para opções)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (screen !== 'playing' || game.isAnswered || game.gameMode === 'writing') return;
+      
       const key = e.key;
       if (['1', '2', '3', '4', '5'].includes(key)) {
         const idx = parseInt(key) - 1;
@@ -33,6 +35,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [screen, game.isAnswered, game.currentOptions, game.gameMode]);
 
+  // Aplica o tema
   useEffect(() => {
     if (highContrast) document.body.classList.add('high-contrast');
     else document.body.classList.remove('high-contrast');
@@ -49,9 +52,10 @@ export default function App() {
     setModal('none');
   };
 
+  // Abre stats ao finalizar
   useEffect(() => {
     if (game.gameState === 'finished' || game.gameState === 'game_over') {
-      setTimeout(() => setModal('stats'), 800); // Pequeno delay para ver a resposta
+      setTimeout(() => setModal('stats'), 800);
     }
   }, [game.gameState]);
 
@@ -63,7 +67,8 @@ export default function App() {
     { id: 'writing', icon: PenTool, title: 'ESCRITA', desc: 'Digite o nome' },
   ];
 
-  const continents = ['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'];
+  // CORREÇÃO: Tipagem explícita para evitar 'any'
+  const continents: Continent[] = ['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'];
 
   return (
     <div className="flex flex-col h-screen max-w-[500px] mx-auto px-4 relative font-sans transition-colors duration-300">
@@ -134,7 +139,8 @@ export default function App() {
                 {continents.map((c) => (
                   <button 
                     key={c}
-                    onClick={() => handleContinentSelect(c as any)}
+                    // CORREÇÃO: Agora 'c' é do tipo Continent, não precisa de 'as any'
+                    onClick={() => handleContinentSelect(c)}
                     className="w-full text-left p-4 rounded-xl bg-[var(--tone-5)] hover:bg-[var(--tone-4)] border border-[var(--tone-4)] flex items-center justify-between transition-all active:scale-[0.98] hover:border-[var(--tone-3)]"
                   >
                     <span className="font-bold text-sm text-[var(--tone-1)]">{c}</span>
@@ -319,7 +325,7 @@ export default function App() {
                    { label: 'Jogos', val: game.stats.totalGames },
                    { label: 'Vitórias', val: `${Math.round((game.stats.totalCorrect / (game.stats.totalQuestions || 1)) * 100) || 0}%` },
                    { label: 'Sequência', val: game.stats.bestStreak },
-                   { label: 'Pontos', val: game.stats.score || game.score },
+                   { label: 'Pontos', val: game.stats.totalScore || game.score }, // Usa totalScore das stats ou score da sessão
                  ].map((stat, i) => (
                    <div key={i} className="flex flex-col items-center">
                      <div className="text-xl sm:text-2xl font-bold text-[var(--tone-1)]">{stat.val}</div>
