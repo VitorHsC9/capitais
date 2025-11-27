@@ -53,14 +53,14 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
         <div className="flex flex-col h-full animate-in fade-in duration-300">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-                <button onClick={onBack} className="p-2 -ml-2 hover:bg-[var(--tone-5)] rounded-lg text-[var(--tone-2)] hover:text-[var(--tone-1)] transition-colors">
+                <button onClick={onBack} className="btn-neutral w-10 h-10 rounded-xl">
                     <ArrowLeft className="w-6 h-6" />
                 </button>
                 <div className="text-center">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--tone-2)]">Termo da Capital</h2>
-                    <p className="text-sm font-bold text-[var(--tone-1)]">{new Date().toLocaleDateString()}</p>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">Termo da Capital</h2>
+                    <p className="text-sm font-black text-[var(--text-primary)]">{new Date().toLocaleDateString()}</p>
                 </div>
-                <div className="w-8"></div>
+                <div className="w-10"></div>
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center gap-4 overflow-y-auto">
@@ -75,10 +75,10 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
                                 {guess.split('').map((char, j) => (
                                     <div
                                         key={j}
-                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-bold rounded border-2 uppercase transition-all
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)]
                                             ${status[j] === 'correct' ? 'bg-[var(--color-correct)] border-[var(--color-correct)] text-white' :
                                                 status[j] === 'present' ? 'bg-yellow-500 border-yellow-500 text-white' :
-                                                    'bg-[var(--tone-4)] border-[var(--tone-4)] text-[var(--tone-2)]'
+                                                    'bg-[var(--surface-color)] border-[var(--border-color)] text-[var(--text-secondary)]'
                                             }`}
                                     >
                                         {char}
@@ -95,9 +95,9 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
                                 <div
                                     key={i}
                                     onClick={() => setCursorIndex(i)}
-                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-bold rounded border-2 uppercase cursor-pointer transition-all
-                                        ${i === cursorIndex ? 'border-[var(--tone-1)] ring-2 ring-[var(--tone-1)]/50' : 'border-[var(--tone-4)]'}
-                                        ${currentGuess[i] ? 'bg-[var(--tone-5)] text-[var(--tone-1)]' : 'bg-transparent'}
+                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
+                                        ${i === cursorIndex ? 'border-[var(--text-primary)] bg-[var(--surface-color)] shadow-[0_0_0_2px_var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-color)]'}
+                                        ${currentGuess[i] ? 'text-[var(--text-primary)]' : ''}
                                     `}
                                 >
                                     {currentGuess[i] || ''}
@@ -112,7 +112,7 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
                             {[...Array(wordLength)].map((_, j) => (
                                 <div
                                     key={j}
-                                    className="w-8 h-8 sm:w-10 sm:h-10 rounded border-2 border-[var(--tone-5)] bg-transparent"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-color)] opacity-50"
                                 />
                             ))}
                         </div>
@@ -121,33 +121,33 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
 
                 {/* Result Message */}
                 {isFinished && (
-                    <div className="bg-[var(--tone-5)] p-4 rounded-xl border border-[var(--tone-4)] animate-in slide-in-from-bottom-4 duration-500 text-center w-full max-w-sm">
-                        <div className="mb-4">
+                    <div className="bg-[var(--surface-color)] p-6 rounded-2xl border-2 border-[var(--border-color)] shadow-[4px_4px_0_var(--border-color)] animate-in slide-in-from-bottom-4 duration-500 text-center w-full max-w-sm">
+                        <div className="mb-6">
                             {gameStatus === 'won' ? (
-                                <div className="flex items-center justify-center gap-2 text-[var(--color-correct)] font-bold mb-2">
+                                <div className="flex items-center justify-center gap-2 text-[var(--color-correct)] font-black mb-2">
                                     <CheckCircle className="w-6 h-6" />
-                                    <span>VOCÊ ACERTOU!</span>
+                                    <span className="uppercase tracking-wide">VOCÊ ACERTOU!</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-center gap-2 text-[var(--color-error)] font-bold mb-2">
+                                <div className="flex items-center justify-center gap-2 text-[var(--color-error)] font-black mb-2">
                                     <XCircle className="w-6 h-6" />
-                                    <span>NÃO FOI DESSA VEZ</span>
+                                    <span className="uppercase tracking-wide">NÃO FOI DESSA VEZ</span>
                                 </div>
                             )}
-                            <p className="text-[var(--tone-2)] text-sm">A capital era <strong className="text-[var(--tone-1)] uppercase">{targetCountry.capital}</strong> ({targetCountry.name})</p>
+                            <p className="text-[var(--text-secondary)] text-sm font-bold">A capital era <strong className="text-[var(--text-primary)] uppercase">{targetCountry.capital}</strong> ({targetCountry.name})</p>
                         </div>
 
-                        <div className="flex items-center justify-center gap-8 mb-4">
+                        <div className="flex items-center justify-center gap-8 mb-6">
                             <div className="text-center">
-                                <div className="text-xs font-bold text-[var(--tone-3)] mb-1">PRÓXIMO</div>
-                                <div className="text-lg font-mono font-bold text-[var(--tone-1)] flex items-center gap-2">
+                                <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">PRÓXIMO</div>
+                                <div className="text-lg font-mono font-bold text-[var(--text-primary)] flex items-center gap-2">
                                     <Clock className="w-4 h-4" />
                                     {timeLeftStr}
                                 </div>
                             </div>
                         </div>
 
-                        <button className="w-full py-3 bg-[var(--tone-1)] text-[var(--bg-color)] font-bold rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                        <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                             <Share2 className="w-4 h-4" /> Compartilhar
                         </button>
                     </div>
@@ -155,14 +155,14 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
 
                 {/* Virtual Keyboard */}
                 {!isFinished && (
-                    <div className="w-full max-w-md px-1">
+                    <div className="w-full max-w-md px-1 pb-4">
                         {keyboardRows.map((row, i) => (
                             <div key={i} className="flex justify-center gap-1 mb-1">
                                 {row.map((key) => (
                                     <button
                                         key={key}
                                         onClick={() => handleKey(key)}
-                                        className="h-10 sm:h-12 min-w-[30px] sm:min-w-[36px] flex-1 rounded bg-[var(--tone-5)] text-[var(--tone-1)] font-bold text-sm sm:text-base hover:bg-[var(--tone-4)] active:scale-95 transition-all"
+                                        className="h-10 sm:h-12 min-w-[30px] sm:min-w-[36px] flex-1 rounded-lg bg-[var(--surface-color)] border-b-4 border-[var(--border-color)] text-[var(--text-primary)] font-black text-sm sm:text-base hover:brightness-110 active:border-b-0 active:translate-y-[4px] transition-all"
                                     >
                                         {key}
                                     </button>
@@ -172,13 +172,13 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
                         <div className="flex justify-center gap-1 mt-1">
                             <button
                                 onClick={() => handleKey('Backspace')}
-                                className="h-10 sm:h-12 px-4 rounded bg-[var(--tone-5)] text-[var(--tone-1)] font-bold hover:bg-[var(--tone-4)] active:scale-95 transition-all flex items-center justify-center"
+                                className="h-10 sm:h-12 px-4 rounded-lg bg-[var(--surface-color)] border-b-4 border-[var(--border-color)] text-[var(--text-primary)] font-bold hover:brightness-110 active:border-b-0 active:translate-y-[4px] transition-all flex items-center justify-center"
                             >
                                 <Delete className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={() => handleKey('Enter')}
-                                className="h-10 sm:h-12 px-6 flex-1 rounded bg-[var(--tone-1)] text-[var(--bg-color)] font-bold hover:opacity-90 active:scale-95 transition-all flex items-center justify-center"
+                                className="h-10 sm:h-12 px-6 flex-1 rounded-lg bg-[var(--text-primary)] border-b-4 border-black/20 text-[var(--bg-color)] font-black hover:brightness-110 active:border-b-0 active:translate-y-[4px] transition-all flex items-center justify-center uppercase tracking-wider"
                             >
                                 ENTER
                             </button>

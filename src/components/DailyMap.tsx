@@ -109,18 +109,18 @@ export function DailyMap({ onBack }: DailyMapProps) {
         <div className="flex flex-col h-full animate-in fade-in duration-300 relative">
             {/* Header */}
             <div className="flex items-center justify-between mb-4 z-10 relative">
-                <button onClick={onBack} className="p-2 -ml-2 hover:bg-[var(--tone-5)] rounded-lg text-[var(--tone-2)] hover:text-[var(--tone-1)] transition-colors">
+                <button onClick={onBack} className="btn-neutral w-10 h-10 rounded-xl">
                     <ArrowLeft className="w-6 h-6" />
                 </button>
                 <div className="text-center">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--tone-2)]">Mapa do Dia</h2>
-                    <p className="text-sm font-bold text-[var(--tone-1)]">{new Date().toLocaleDateString()}</p>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">Mapa do Dia</h2>
+                    <p className="text-sm font-black text-[var(--text-primary)]">{new Date().toLocaleDateString()}</p>
                 </div>
-                <div className="w-8"></div>
+                <div className="w-10"></div>
             </div>
 
-            <div className="flex-1 rounded-xl overflow-hidden border border-[var(--tone-4)] relative bg-[var(--tone-5)] z-0">
-                {loadingMap && <div className="absolute inset-0 flex items-center justify-center text-[var(--tone-2)]">Carregando mapa...</div>}
+            <div className="flex-1 rounded-2xl overflow-hidden border-2 border-[var(--border-color)] relative bg-[var(--surface-color)] shadow-[4px_4px_0_var(--border-color)] z-0">
+                {loadingMap && <div className="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] font-bold">Carregando mapa...</div>}
 
                 {!loadingMap && geoJsonData && (
                     <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%', background: 'transparent' }} attributionControl={false}>
@@ -152,16 +152,16 @@ export function DailyMap({ onBack }: DailyMapProps) {
                 )}
 
                 {/* Overlay for "Where is this?" */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur px-4 py-2 rounded-full text-white font-bold text-sm pointer-events-none z-[400]">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur px-4 py-2 rounded-xl text-white font-black text-sm pointer-events-none z-[400] border-2 border-white/20 uppercase tracking-wide">
                     QUE PAÍS É ESSE?
                 </div>
             </div>
 
             {/* Input Area */}
-            <div className="mt-4 relative z-10">
+            <div className="mt-6 relative z-10 px-4 pb-4">
                 {lastIncorrectGuess && (
-                    <div className="absolute -top-12 left-0 right-0 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300 z-[100]">
-                        <div className="bg-[var(--color-error)] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2">
+                    <div className="absolute -top-16 left-0 right-0 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300 z-[100]">
+                        <div className="bg-[var(--color-error)] text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 border-2 border-white/20">
                             <AlertCircle className="w-4 h-4" />
                             Não é {lastIncorrectGuess}
                         </div>
@@ -169,22 +169,22 @@ export function DailyMap({ onBack }: DailyMapProps) {
                 )}
 
                 {isFinished ? (
-                    <div className="bg-[var(--tone-5)] p-4 rounded-xl border border-[var(--tone-4)] animate-in slide-in-from-bottom-4 duration-500 text-center">
-                        <div className="flex items-center justify-center gap-2 text-[var(--color-correct)] font-bold mb-2">
+                    <div className="bg-[var(--surface-color)] p-6 rounded-2xl border-2 border-[var(--border-color)] shadow-[4px_4px_0_var(--border-color)] animate-in slide-in-from-bottom-4 duration-500 text-center">
+                        <div className="flex items-center justify-center gap-2 text-[var(--color-correct)] font-black mb-2">
                             <CheckCircle className="w-6 h-6" />
-                            <span>VOCÊ ACERTOU!</span>
+                            <span className="uppercase tracking-wide">VOCÊ ACERTOU!</span>
                         </div>
-                        <p className="text-[var(--tone-2)] text-sm mb-4">O país era <strong className="text-[var(--tone-1)] uppercase">{targetCountry.name}</strong></p>
+                        <p className="text-[var(--text-secondary)] text-sm mb-6 font-bold">O país era <strong className="text-[var(--text-primary)] uppercase">{targetCountry.name}</strong></p>
 
-                        <div className="text-center mb-4">
-                            <div className="text-xs font-bold text-[var(--tone-3)] mb-1">PRÓXIMO</div>
-                            <div className="text-lg font-mono font-bold text-[var(--tone-1)] flex items-center justify-center gap-2">
+                        <div className="text-center mb-6">
+                            <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">PRÓXIMO</div>
+                            <div className="text-lg font-mono font-bold text-[var(--text-primary)] flex items-center justify-center gap-2">
                                 <Clock className="w-4 h-4" />
                                 {timeLeftStr}
                             </div>
                         </div>
 
-                        <button className="w-full py-3 bg-[var(--tone-1)] text-[var(--bg-color)] font-bold rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                        <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                             <Share2 className="w-4 h-4" /> Compartilhar
                         </button>
                     </div>

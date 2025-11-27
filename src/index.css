@@ -2,107 +2,159 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  
-  /* TEMA PADRÃO (Dark / Termo) */
-  --bg-color: #121213;
-  --text-color: #d7dadc;
-  --tone-1: #d7dadc;
-  --tone-2: #818384;
-  --tone-3: #565758;
-  --tone-4: #3a3a3c;
-  --tone-5: #272729;
-  --tone-6: #1a1a1b;
-  --tone-7: #121213;
-  
-  --color-correct: #538d4e; /* Verde Termo Original */
-  --color-error: #be1e37;
-  
-  --modal-bg: #121213;
-  --key-bg: #818384;
-}
+/* IMPORTANTE: Fonte arredondada para o tema "Playful" */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
-/* TEMA CLARO / ALTO CONTRASTE */
-.high-contrast {
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --tone-1: #000000;
-  --tone-2: #565758;
-  --tone-3: #878a8c;
-  --tone-4: #d3d6da;
-  --tone-5: #edeff1;
-  --tone-6: #f6f7f8;
-  --tone-7: #ffffff;
+:root {
+  font-family: 'Nunito', sans-serif;
   
-  --color-correct: #85c0f9;
-  --color-error: #f5793a;
+  /* PALETA DE CORES "BOLD & PLAYFUL" */
+  --bg-color: #131F24;       /* Fundo Escuro Azulado */
+  --surface-color: #202F36;  /* Superfície dos Cards */
+  --border-color: #37464F;   /* Bordas */
   
-  --modal-bg: #ffffff;
-  --key-bg: #d3d6da;
+  --text-primary: #FFFFFF;
+  --text-secondary: #AFAFAF;
+  
+  /* CORES DE AÇÃO (COM SOMBRA PARA EFEITO 3D) */
+  --color-primary: #58CC02;  /* Verde Vibrante */
+  --color-primary-dark: #58A700;
+  
+  --color-secondary: #1CB0F6; /* Azul Vibrante */
+  --color-secondary-dark: #1899D6;
+  
+  --color-accent: #FFC800;    /* Amarelo/Ouro */
+  --color-accent-dark: #D9AA00;
+  
+  --color-error: #FF4B4B;     /* Vermelho */
+  --color-error-dark: #EA2B2B;
+  
+  --color-neutral: #E5E5E5;   /* Cinza Claro (Botões inativos/teclas) */
+  --color-neutral-dark: #CECECE;
+
+  /* COMPATIBILIDADE COM CÓDIGO ANTIGO (Mapeando para o novo tema) */
+  --tone-1: var(--text-primary);
+  --tone-2: var(--text-secondary);
+  --tone-3: var(--border-color);
+  --tone-4: var(--border-color);
+  --tone-5: var(--surface-color);
+  --tone-6: var(--bg-color);
+  --tone-7: var(--bg-color);
+  
+  --color-correct: var(--color-primary);
+  --modal-bg: var(--surface-color);
+  --key-bg: var(--surface-color);
 }
 
 body {
   margin: 0;
   background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
+  color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer components {
-  .btn-termo {
-    @apply font-bold uppercase rounded flex items-center justify-center select-none transition-all active:scale-95;
-    background-color: var(--tone-2);
-    color: var(--bg-color);
+  /* BOTÃO 3D GENÉRICO */
+  .btn-3d {
+    @apply relative flex items-center justify-center font-extrabold uppercase tracking-wide transition-all active:translate-y-[4px] active:shadow-none select-none;
+    border-radius: 12px;
+    border-bottom-width: 4px;
   }
-  .btn-termo:hover { opacity: 0.9; }
 
+  /* VARIAÇÕES DE BOTÕES */
+  .btn-primary {
+    @apply btn-3d text-white;
+    background-color: var(--color-primary);
+    border-color: var(--color-primary-dark);
+  }
+  .btn-primary:hover { background-color: #61E002; }
+
+  .btn-secondary {
+    @apply btn-3d text-white;
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary-dark);
+  }
+  .btn-secondary:hover { background-color: #21C0FF; }
+
+  .btn-accent {
+    @apply btn-3d text-[var(--bg-color)];
+    background-color: var(--color-accent);
+    border-color: var(--color-accent-dark);
+  }
+  
+  .btn-neutral {
+    @apply btn-3d text-[var(--bg-color)];
+    background-color: var(--color-neutral);
+    border-color: var(--color-neutral-dark);
+  }
+
+  /* CARD ESTILO JOGO */
+  .game-card {
+    @apply relative overflow-hidden transition-transform hover:-translate-y-1 cursor-pointer;
+    background-color: var(--surface-color);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 0 var(--border-color);
+  }
+  .game-card:active {
+    transform: translateY(2px);
+    box-shadow: none;
+  }
+
+  /* INPUT ESTILO JOGO */
+  .game-input {
+    @apply w-full bg-[var(--surface-color)] text-[var(--text-primary)] font-bold rounded-xl outline-none transition-colors;
+    border: 2px solid var(--border-color);
+    padding: 12px 16px;
+  }
+  .game-input:focus {
+    border-color: var(--color-secondary);
+  }
+
+  /* MODAL */
   .modal-overlay {
-    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm p-4;
+    @apply fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4;
+    backdrop-filter: blur(4px);
   }
   
   .modal-content {
-    @apply border rounded-lg shadow-2xl w-full max-w-sm relative overflow-hidden;
-    /* A linha abaixo foi corrigida para usar animação CSS pura */
-    animation: zoomIn 0.2s ease-out;
-    background-color: var(--modal-bg);
-    border-color: var(--tone-4);
-    color: var(--text-color);
+    @apply w-full max-w-sm relative overflow-hidden;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.5);
+    animation: zoomIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy animation */
   }
 
   .switch {
-    @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors;
-    background-color: var(--tone-3);
+    @apply relative inline-flex h-7 w-12 items-center rounded-full transition-colors border-2 border-transparent;
+    background-color: var(--border-color);
   }
   .switch.checked {
-    background-color: var(--color-correct);
+    background-color: var(--color-primary);
   }
   .switch-thumb {
-    @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
-    translate: 4px;
+    @apply inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm;
+    translate: 2px;
   }
   .switch.checked .switch-thumb {
-    translate: 24px;
+    translate: 22px;
   }
 }
 
-/* DEFINIÇÃO MANUAL DAS ANIMAÇÕES (Para não depender de plugins) */
+/* ANIMAÇÕES */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideInBottom { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideInTop { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Classes utilitárias para o App.tsx usar */
 .animate-in { animation-duration: 0.3s; animation-fill-mode: both; }
 .fade-in { animation-name: fadeIn; }
-.zoom-in-95 { animation-name: zoomIn; }
-.slide-in-from-bottom-2 { animation-name: slideInBottom; }
-.slide-in-from-bottom-4 { animation-name: slideInBottom; }
-.slide-in-from-top-4 { animation-name: slideInTop; }
-.slide-in-from-right-4 { animation-name: slideInRight; }
-.slide-in-from-right-8 { animation-name: slideInRight; }
+.zoom-in { animation-name: zoomIn; }
+.slide-up { animation-name: slideUp; }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--tone-7); }
-::-webkit-scrollbar-thumb { background: var(--tone-3); border-radius: 3px; }
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-color); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--tone-2); }
