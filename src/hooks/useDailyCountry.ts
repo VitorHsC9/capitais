@@ -24,7 +24,7 @@ export const useDailyCountry = () => {
     useEffect(() => {
         const todaySeed = getDailySeed();
         // Use salt 4 for Country mode
-        const dailyCountry = getDailyCountry(COUNTRIES_DB, 4);
+        const dailyCountry = getDailyCountry(COUNTRIES_DB, 4) || COUNTRIES_DB[0];
         setTargetCountry(dailyCountry);
 
         // Calculate next midnight

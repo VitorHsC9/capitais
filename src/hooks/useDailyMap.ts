@@ -22,7 +22,7 @@ export const useDailyMap = () => {
     useEffect(() => {
         const todaySeed = getDailySeed();
         // Use salt 3 for Map mode
-        const dailyCountry = getDailyCountry(COUNTRIES_DB, 3);
+        const dailyCountry = getDailyCountry(COUNTRIES_DB, 3) || COUNTRIES_DB[0];
         setTargetCountry(dailyCountry);
 
         // Calculate next midnight

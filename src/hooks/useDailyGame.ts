@@ -22,7 +22,7 @@ export const useDailyGame = () => {
     // Load or Initialize Game
     useEffect(() => {
         const todaySeed = getDailySeed();
-        const dailyCountry = getDailyCountry(COUNTRIES_DB);
+        const dailyCountry = getDailyCountry(COUNTRIES_DB) || COUNTRIES_DB[0];
         setTargetCountry(dailyCountry);
 
         // Calculate next midnight

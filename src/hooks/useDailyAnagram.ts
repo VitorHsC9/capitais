@@ -24,7 +24,7 @@ export const useDailyAnagram = () => {
     useEffect(() => {
         const todaySeed = getDailySeed();
         // Use salt 1 for Anagram mode to get a different country than the flag mode
-        const dailyCountry = getDailyCountry(COUNTRIES_DB, 1);
+        const dailyCountry = getDailyCountry(COUNTRIES_DB, 1) || COUNTRIES_DB[0];
         setTargetCountry(dailyCountry);
 
         // Shuffle capital

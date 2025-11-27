@@ -28,7 +28,7 @@ export const useDailyWordle = () => {
     useEffect(() => {
         const todaySeed = getDailySeed();
         // Use salt 2 for Wordle
-        const dailyCountry = getDailyCountry(COUNTRIES_DB, 2);
+        const dailyCountry = getDailyCountry(COUNTRIES_DB, 2) || COUNTRIES_DB[0];
         setTargetCountry(dailyCountry);
 
         // Calculate next midnight

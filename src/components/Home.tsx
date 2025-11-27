@@ -1,4 +1,5 @@
-import { Play, Trophy } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Trophy, Loader2 } from 'lucide-react';
 
 interface HomeProps {
     onSelectDaily: () => void;
@@ -8,6 +9,46 @@ interface HomeProps {
     onSelectDailyCountry: () => void;
     onSelectDailyMix: () => void;
     onSelectPractice: () => void;
+}
+
+interface GameCardProps {
+    title: string;
+    description: string;
+    imageSrc: string;
+    onClick: () => void;
+    colorClass: string; // e.g., "group-hover:bg-pink-500"
+}
+
+function GameCard({ title, description, imageSrc, onClick, colorClass }: GameCardProps) {
+    const [isLoading, setIsLoading] = useState(true);
+
+    return (
+        <button
+            onClick={onClick}
+            className="game-card p-4 group flex flex-col items-start text-left h-full"
+        >
+            <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-[var(--surface-color)] z-10">
+                        <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
+                    </div>
+                )}
+                <img
+                    src={imageSrc}
+                    className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                    alt={title}
+                    onLoad={() => setIsLoading(false)}
+                />
+            </div>
+            <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">{title}</h3>
+            <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
+                {description}
+            </p>
+            <div className={`w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:text-white transition-colors ${colorClass}`}>
+                JOGAR
+            </div>
+        </button>
+    );
 }
 
 export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectPractice }: HomeProps) {
@@ -21,107 +62,53 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
             <div className="flex-1 overflow-y-auto pr-2 pb-20">
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    {/* Daily Challenge Card - Mix */}
-                    <button
+                    <GameCard
+                        title="Desafio Mix"
+                        description="10 perguntas variadas. Errou, perdeu!"
+                        imageSrc="/assets/home_mix.png"
                         onClick={onSelectDailyMix}
-                        className="game-card p-4 group flex flex-col items-start text-left"
-                    >
-                        <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
-                            <img src="/assets/home_mix.png" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Desafio Mix" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">Desafio Mix</h3>
-                        <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
-                            10 perguntas variadas. Errou, perdeu!
-                        </p>
-                        <div className="w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:bg-pink-500 group-hover:text-white transition-colors">
-                            JOGAR
-                        </div>
-                    </button>
+                        colorClass="group-hover:bg-pink-500"
+                    />
 
-                    {/* Daily Challenge Card - Flag */}
-                    <button
+                    <GameCard
+                        title="Bandeiras"
+                        description="Adivinhe o país pela bandeira pixelada."
+                        imageSrc="/assets/BandeiraDoBrasil.png"
                         onClick={onSelectDaily}
-                        className="game-card p-4 group flex flex-col items-start text-left"
-                    >
-                        <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
-                            <img src="/assets/BandeiraDoBrasil.png" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Bandeiras" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">Bandeiras</h3>
-                        <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
-                            Adivinhe o país pela bandeira pixelada.
-                        </p>
-                        <div className="w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:bg-[var(--color-primary)] group-hover:text-white transition-colors">
-                            JOGAR
-                        </div>
-                    </button>
+                        colorClass="group-hover:bg-[var(--color-primary)]"
+                    />
 
-                    {/* Daily Challenge Card - Anagram */}
-                    <button
+                    <GameCard
+                        title="Capital"
+                        description="Desembaralhe as letras da capital."
+                        imageSrc="/assets/Tajmahal.jpg"
                         onClick={onSelectDailyAnagram}
-                        className="game-card p-4 group flex flex-col items-start text-left"
-                    >
-                        <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
-                            <img src="/assets/Tajmahal.jpg" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Capital" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">Capital</h3>
-                        <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
-                            Desembaralhe as letras da capital.
-                        </p>
-                        <div className="w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:bg-[var(--color-secondary)] group-hover:text-white transition-colors">
-                            JOGAR
-                        </div>
-                    </button>
+                        colorClass="group-hover:bg-[var(--color-secondary)]"
+                    />
 
-                    {/* Daily Challenge Card - Wordle */}
-                    <button
+                    <GameCard
+                        title="Termo"
+                        description="Descubra a capital em 5 tentativas."
+                        imageSrc="/assets/wordle.jpg"
                         onClick={onSelectDailyWordle}
-                        className="game-card p-4 group flex flex-col items-start text-left"
-                    >
-                        <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
-                            <img src="/assets/wordle.jpg" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Termo" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">Termo</h3>
-                        <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
-                            Descubra a capital em 5 tentativas.
-                        </p>
-                        <div className="w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                            JOGAR
-                        </div>
-                    </button>
+                        colorClass="group-hover:bg-purple-500"
+                    />
 
-                    {/* Daily Challenge Card - Map */}
-                    <button
+                    <GameCard
+                        title="Mapa"
+                        description="Identifique o país no mapa."
+                        imageSrc="/assets/mapapais.jpg"
                         onClick={onSelectDailyMap}
-                        className="game-card p-4 group flex flex-col items-start text-left"
-                    >
-                        <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
-                            <img src="/assets/mapapais.jpg" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Mapa" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">Mapa</h3>
-                        <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
-                            Identifique o país no mapa.
-                        </p>
-                        <div className="w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                            JOGAR
-                        </div>
-                    </button>
+                        colorClass="group-hover:bg-emerald-500"
+                    />
 
-                    {/* Daily Challenge Card - Country */}
-                    <button
+                    <GameCard
+                        title="País"
+                        description="Descubra o país com dicas."
+                        imageSrc="/assets/globalmap.jpg"
                         onClick={onSelectDailyCountry}
-                        className="game-card p-4 group flex flex-col items-start text-left"
-                    >
-                        <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
-                            <img src="/assets/globalmap.jpg" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="País" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">País</h3>
-                        <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
-                            Descubra o país com dicas.
-                        </p>
-                        <div className="w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                            JOGAR
-                        </div>
-                    </button>
+                        colorClass="group-hover:bg-orange-500"
+                    />
                 </div>
 
                 {/* Practice Mode Link */}

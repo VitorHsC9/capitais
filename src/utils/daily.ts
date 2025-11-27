@@ -9,7 +9,7 @@ const seededRandom = (seed: number) => {
 
     return () => {
         state = (a * state + c) % m;
-        return state / (m - 1);
+        return state / m;
     };
 };
 

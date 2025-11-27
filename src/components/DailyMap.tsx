@@ -9,7 +9,6 @@ import type { Country } from '../data/countries';
 
 // We need a GeoJSON of the world. For this example, I'll fetch a simplified one.
 // In a real production app, this should be a local asset.
-const GEOJSON_URL = 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
 
 interface DailyMapProps {
     onBack: () => void;
@@ -75,7 +74,7 @@ export function DailyMap({ onBack }: DailyMapProps) {
 
     // Fetch GeoJSON
     useEffect(() => {
-        fetch(GEOJSON_URL)
+        fetch('/assets/world.geo.json')
             .then(res => res.json())
             .then(data => {
                 setGeoJsonData(data);
