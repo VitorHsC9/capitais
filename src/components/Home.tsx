@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, Trophy, Loader2, CheckCircle, Clock } from 'lucide-react';
+import { Play, Trophy, Loader2, CheckCircle, Clock, Crown } from 'lucide-react';
 import { useDailyStatus } from '../hooks/useDailyStatus';
 
 interface HomeProps {
@@ -178,8 +178,44 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                     />
                 </div>
 
+                {/* Supreme Mode Section */}
+                <div className="mb-8">
+                    <button
+                        onClick={onSelectSupreme}
+                        className="w-full relative overflow-hidden rounded-2xl border-2 border-yellow-500/50 bg-[var(--surface-color)] p-6 text-left transition-all hover:border-yellow-500 hover:shadow-[0_0_20px_-5px_rgba(234,179,8,0.3)] group"
+                    >
+                        {/* Background Pattern */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-50" />
+
+                        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-5">
+                                <div className="p-4 rounded-2xl bg-yellow-500/10 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                    <Crown className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-black uppercase tracking-wider text-yellow-600">
+                                            Hardcore
+                                        </span>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight italic">
+                                        Desafios <span className="text-yellow-600">Supremos</span>
+                                    </h3>
+                                    <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
+                                        O teste definitivo. Complete o mapa mundi.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="w-12 h-12 rounded-full bg-[var(--bg-color)] border-2 border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] group-hover:border-yellow-500 group-hover:text-yellow-600 transition-all group-hover:scale-110 self-end sm:self-center">
+                                <Play className="w-5 h-5 fill-current ml-0.5" />
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
                 {/* Practice Mode Link */}
-                <div className="pt-4 border-t-2 border-[var(--border-color)] flex flex-col gap-4">
+                <div className="pt-4 border-t-2 border-[var(--border-color)]">
                     <button
                         onClick={onSelectPractice}
                         className="game-card w-full p-4 flex items-center justify-between group"
@@ -191,24 +227,6 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                             <div className="text-left">
                                 <div className="font-extrabold text-lg text-[var(--text-primary)] uppercase">Modos de Prática</div>
                                 <div className="text-xs font-bold text-[var(--text-secondary)]">Treine sem limites</div>
-                            </div>
-                        </div>
-                        <div className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform">
-                            <Play className="w-6 h-6 fill-current" />
-                        </div>
-                    </button>
-
-                    <button
-                        onClick={onSelectSupreme}
-                        className="game-card w-full p-4 flex items-center justify-between group border-yellow-500/50 hover:border-yellow-500"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
-                                <Trophy className="w-6 h-6" />
-                            </div>
-                            <div className="text-left">
-                                <div className="font-extrabold text-lg text-[var(--text-primary)] uppercase">Desafios Supremos</div>
-                                <div className="text-xs font-bold text-[var(--text-secondary)]">Complete o mapa mundi</div>
                             </div>
                         </div>
                         <div className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform">
