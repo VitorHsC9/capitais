@@ -1,15 +1,12 @@
 import type { Country } from '../data/countries';
 
-// Simple Linear Congruential Generator (LCG) for seeded random
+// Mulberry32 - a fast, high-quality PRNG
 const seededRandom = (seed: number) => {
-    const m = 0x80000000;
-    const a = 1103515245;
-    const c = 12345;
-    let state = seed ? seed : Math.floor(Math.random() * (m - 1));
-
     return () => {
-        state = (a * state + c) % m;
-        return state / m;
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
 };
 

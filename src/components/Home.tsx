@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Play, Trophy, Loader2 } from 'lucide-react';
+import { Play, Trophy, Loader2, CheckCircle, Clock } from 'lucide-react';
+import { useDailyStatus } from '../hooks/useDailyStatus';
 
 interface HomeProps {
     onSelectDaily: () => void;
@@ -17,15 +18,17 @@ interface GameCardProps {
     imageSrc: string;
     onClick: () => void;
     colorClass: string; // e.g., "group-hover:bg-pink-500"
+    isCompleted?: boolean;
+    timeLeft?: string;
 }
 
-function GameCard({ title, description, imageSrc, onClick, colorClass }: GameCardProps) {
+function GameCard({ title, description, imageSrc, onClick, colorClass, isCompleted, timeLeft }: GameCardProps) {
     const [isLoading, setIsLoading] = useState(true);
 
     return (
         <button
             onClick={onClick}
-            className="game-card p-4 group flex flex-col items-start text-left h-full"
+            className="game-card p-4 group flex flex-col items-start text-left h-full relative overflow-hidden"
         >
             <div className="mb-4 w-full aspect-video rounded-xl overflow-hidden border-2 border-[var(--border-color)] shadow-sm relative bg-[var(--surface-color)]">
                 {isLoading && (
@@ -39,19 +42,35 @@ function GameCard({ title, description, imageSrc, onClick, colorClass }: GameCar
                     alt={title}
                     onLoad={() => setIsLoading(false)}
                 />
+
+                {/* Completed Overlay */}
+                {isCompleted && (
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center text-white z-20 animate-in fade-in duration-300">
+                        <div className="bg-[var(--color-correct)] p-1.5 rounded-full mb-1 shadow-lg">
+                            <CheckCircle className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="font-black uppercase tracking-widest text-[10px] mb-1">Completo</div>
+                        <div className="flex items-center gap-1.5 font-mono font-bold text-xs bg-black/40 px-2 py-1 rounded-lg border border-white/20">
+                            <Clock className="w-3 h-3" />
+                            {timeLeft}
+                        </div>
+                    </div>
+                )}
             </div>
             <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-1 uppercase tracking-wide">{title}</h3>
             <p className="text-sm text-[var(--text-secondary)] font-bold mb-6 flex-1">
                 {description}
             </p>
             <div className={`w-full py-2 rounded-lg bg-[var(--bg-color)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest text-center group-hover:text-white transition-colors ${colorClass}`}>
-                JOGAR
+                {isCompleted ? 'VER RESULTADO' : 'JOGAR'}
             </div>
         </button>
     );
 }
 
 export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectPractice }: HomeProps) {
+    const dailyStatus = useDailyStatus();
+
     return (
         <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="mb-8">
@@ -68,6 +87,8 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         imageSrc="/assets/home_mix.png"
                         onClick={onSelectDailyMix}
                         colorClass="group-hover:bg-pink-500"
+                        isCompleted={dailyStatus.mix.isCompleted}
+                        timeLeft={dailyStatus.mix.timeLeft}
                     />
 
                     <GameCard
@@ -76,6 +97,8 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         imageSrc="/assets/BandeiraDoBrasil.png"
                         onClick={onSelectDaily}
                         colorClass="group-hover:bg-[var(--color-primary)]"
+                        isCompleted={dailyStatus.flag.isCompleted}
+                        timeLeft={dailyStatus.flag.timeLeft}
                     />
 
                     <GameCard
@@ -84,6 +107,8 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         imageSrc="/assets/Tajmahal.jpg"
                         onClick={onSelectDailyAnagram}
                         colorClass="group-hover:bg-[var(--color-secondary)]"
+                        isCompleted={dailyStatus.anagram.isCompleted}
+                        timeLeft={dailyStatus.anagram.timeLeft}
                     />
 
                     <GameCard
@@ -92,6 +117,8 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         imageSrc="/assets/wordle.jpg"
                         onClick={onSelectDailyWordle}
                         colorClass="group-hover:bg-purple-500"
+                        isCompleted={dailyStatus.wordle.isCompleted}
+                        timeLeft={dailyStatus.wordle.timeLeft}
                     />
 
                     <GameCard
@@ -100,6 +127,8 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         imageSrc="/assets/mapapais.jpg"
                         onClick={onSelectDailyMap}
                         colorClass="group-hover:bg-emerald-500"
+                        isCompleted={dailyStatus.map.isCompleted}
+                        timeLeft={dailyStatus.map.timeLeft}
                     />
 
                     <GameCard
@@ -108,6 +137,8 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         imageSrc="/assets/globalmap.jpg"
                         onClick={onSelectDailyCountry}
                         colorClass="group-hover:bg-orange-500"
+                        isCompleted={dailyStatus.country.isCompleted}
+                        timeLeft={dailyStatus.country.timeLeft}
                     />
                 </div>
 

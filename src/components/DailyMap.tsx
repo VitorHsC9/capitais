@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDailyMap } from '../hooks/useDailyMap';
-import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, ArrowRight } from 'lucide-react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -12,6 +12,7 @@ import type { Country } from '../data/countries';
 
 interface DailyMapProps {
     onBack: () => void;
+    onNextChallenge: () => void;
 }
 
 function MapZoomer({ targetCountry, geoJsonData }: { targetCountry: Country | null, geoJsonData: any }) {
@@ -46,7 +47,7 @@ function MapZoomer({ targetCountry, geoJsonData }: { targetCountry: Country | nu
     return null;
 }
 
-export function DailyMap({ onBack }: DailyMapProps) {
+export function DailyMap({ onBack, onNextChallenge }: DailyMapProps) {
     const { targetCountry, gameStatus, setGameStatus, nextDailyTime } = useDailyMap();
     const [timeLeftStr, setTimeLeftStr] = useState('');
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
@@ -185,6 +186,10 @@ export function DailyMap({ onBack }: DailyMapProps) {
 
                         <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                             <Share2 className="w-4 h-4" /> Compartilhar
+                        </button>
+
+                        <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
+                            <ArrowRight className="w-4 h-4" /> Próximo Desafio
                         </button>
                     </div>
                 ) : (

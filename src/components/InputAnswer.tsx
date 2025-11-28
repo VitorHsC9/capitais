@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useState, useEffect, type KeyboardEvent } from 'react';
 import { Check, CornerDownLeft } from 'lucide-react';
 
 interface InputAnswerProps {
@@ -12,6 +12,10 @@ interface InputAnswerProps {
 
 export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, nextQuestion, placeholder }: InputAnswerProps) => {
   const [value, setValue] = useState('');
+
+  useEffect(() => {
+    setValue('');
+  }, [correctAnswer]);
 
   const handleSubmit = () => {
     if (!value.trim() || isAnswered) return;

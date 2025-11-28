@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useDailyCountry } from '../hooks/useDailyCountry';
-import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, Users, Globe, Languages, Map } from 'lucide-react';
+import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, Users, Globe, Languages, Map, ArrowRight } from 'lucide-react';
 import { CountryAutocomplete } from './CountryAutocomplete';
 
 interface DailyCountryProps {
     onBack: () => void;
+    onNextChallenge: () => void;
 }
 
 function formatPopulation(pop: number): string {
@@ -17,7 +18,7 @@ function formatPopulation(pop: number): string {
     return `Entre ${lower} e ${upper} milhões`;
 }
 
-export function DailyCountry({ onBack }: DailyCountryProps) {
+export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
     const { targetCountry, gameStatus, guesses, submitGuess, nextDailyTime, maxAttempts } = useDailyCountry();
     const [timeLeftStr, setTimeLeftStr] = useState('');
     const [lastIncorrectGuess, setLastIncorrectGuess] = useState<string | null>(null);
@@ -163,6 +164,10 @@ export function DailyCountry({ onBack }: DailyCountryProps) {
 
                         <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                             <Share2 className="w-4 h-4" /> Compartilhar
+                        </button>
+
+                        <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
+                            <ArrowRight className="w-4 h-4" /> Próximo Desafio
                         </button>
                     </div>
                 ) : (

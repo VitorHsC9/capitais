@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { InputAnswer } from './InputAnswer';
 import { useDailyAnagram } from '../hooks/useDailyAnagram';
-import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, Shuffle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, Shuffle, ArrowRight } from 'lucide-react';
 
 interface DailyAnagramProps {
     onBack: () => void;
+    onNextChallenge: () => void;
 }
 
-export function DailyAnagram({ onBack }: DailyAnagramProps) {
+export function DailyAnagram({ onBack, onNextChallenge }: DailyAnagramProps) {
     const { targetCountry, shuffledCapital, guesses, gameStatus, submitGuess, attemptsLeft, nextDailyTime } = useDailyAnagram();
     const [timeLeftStr, setTimeLeftStr] = useState('');
 
@@ -113,6 +114,10 @@ export function DailyAnagram({ onBack }: DailyAnagramProps) {
 
                             <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                                 <Share2 className="w-4 h-4" /> Compartilhar Resultado
+                            </button>
+
+                            <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
+                                <ArrowRight className="w-4 h-4" /> Próximo Desafio
                             </button>
                         </div>
                     ) : (

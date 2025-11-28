@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { PixelatedFlag } from './PixelatedFlag';
 import { CountryAutocomplete } from './CountryAutocomplete';
 import { useDailyGame } from '../hooks/useDailyGame';
-import { Clock, CheckCircle, XCircle, Share2, ArrowLeft } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface DailyChallengeProps {
     onBack: () => void;
+    onNextChallenge: () => void;
 }
 
-export function DailyChallenge({ onBack }: DailyChallengeProps) {
+export function DailyChallenge({ onBack, onNextChallenge }: DailyChallengeProps) {
     const { targetCountry, guesses, gameStatus, submitGuess, attemptsLeft, nextDailyTime } = useDailyGame();
     const [timeLeftStr, setTimeLeftStr] = useState('');
 
@@ -105,6 +106,10 @@ export function DailyChallenge({ onBack }: DailyChallengeProps) {
 
                             <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                                 <Share2 className="w-4 h-4" /> Compartilhar Resultado
+                            </button>
+
+                            <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
+                                <ArrowRight className="w-4 h-4" /> Próximo Desafio
                             </button>
                         </div>
                     ) : (

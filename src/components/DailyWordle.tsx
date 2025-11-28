@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useDailyWordle } from '../hooks/useDailyWordle';
-import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, Delete } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, Delete, ArrowRight } from 'lucide-react';
 
 interface DailyWordleProps {
     onBack: () => void;
+    onNextChallenge: () => void;
 }
 
-export function DailyWordle({ onBack }: DailyWordleProps) {
+export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
     const { targetCountry, guesses, currentGuess, gameStatus, handleKey, checkGuess, nextDailyTime, cursorIndex, setCursorIndex, wordLength } = useDailyWordle();
     const [timeLeftStr, setTimeLeftStr] = useState('');
 
@@ -66,16 +67,16 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
             <div className="flex-1 flex flex-col items-center justify-center gap-4 overflow-y-auto">
 
                 {/* Grid */}
-                <div className="flex flex-col gap-2 mb-4 w-full max-w-2xl px-4">
+                <div className="flex flex-col gap-2 mb-4 w-full max-w-2xl px-4 overflow-x-auto">
                     {/* Previous Guesses */}
                     {guesses.map((guess, i) => {
                         const status = checkGuess(guess);
                         return (
-                            <div key={i} className="flex gap-1 justify-center flex-wrap">
+                            <div key={i} className="flex gap-1 justify-center min-w-min mx-auto">
                                 {guess.split('').map((char, j) => (
                                     <div
                                         key={j}
-                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)]
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)]
                                             ${status[j] === 'correct' ? 'bg-[var(--color-correct)] border-[var(--color-correct)] text-white' :
                                                 status[j] === 'present' ? 'bg-yellow-500 border-yellow-500 text-white' :
                                                     'bg-[var(--surface-color)] border-[var(--border-color)] text-[var(--text-secondary)]'
@@ -90,12 +91,12 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
 
                     {/* Current Guess */}
                     {!isFinished && guesses.length < 5 && (
-                        <div className="flex gap-1 justify-center flex-wrap">
+                        <div className="flex gap-1 justify-center min-w-min mx-auto">
                             {[...Array(wordLength)].map((_, i) => (
                                 <div
                                     key={i}
                                     onClick={() => setCursorIndex(i)}
-                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
+                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
                                         ${i === cursorIndex ? 'border-[var(--text-primary)] bg-[var(--surface-color)] shadow-[0_0_0_2px_var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-color)]'}
                                         ${currentGuess[i] ? 'text-[var(--text-primary)]' : ''}
                                     `}
@@ -108,11 +109,11 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
 
                     {/* Empty Rows */}
                     {[...Array(Math.max(0, 5 - guesses.length - (isFinished ? 0 : 1)))].map((_, i) => (
-                        <div key={`empty-${i}`} className="flex gap-1 justify-center flex-wrap">
+                        <div key={`empty-${i}`} className="flex gap-1 justify-center min-w-min mx-auto">
                             {[...Array(wordLength)].map((_, j) => (
                                 <div
                                     key={j}
-                                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-color)] opacity-50"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-color)] opacity-50"
                                 />
                             ))}
                         </div>
@@ -149,6 +150,10 @@ export function DailyWordle({ onBack }: DailyWordleProps) {
 
                         <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
                             <Share2 className="w-4 h-4" /> Compartilhar
+                        </button>
+
+                        <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
+                            <ArrowRight className="w-4 h-4" /> Próximo Desafio
                         </button>
                     </div>
                 )}

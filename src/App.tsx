@@ -24,6 +24,13 @@ const shuffleText = (text: string) => {
 
 export default function App() {
   const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map' | 'daily-country' | 'daily-mix'>('home');
+
+  const handleNextDailyChallenge = () => {
+    const dailyOrder: Array<typeof screen> = ['daily', 'daily-anagram', 'daily-wordle', 'daily-map', 'daily-country', 'daily-mix'];
+    const currentIndex = dailyOrder.indexOf(screen);
+    const nextIndex = (currentIndex + 1) % dailyOrder.length;
+    setScreen(dailyOrder[nextIndex]);
+  };
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
   const [highContrast, setHighContrast] = useState(false);
 
@@ -130,32 +137,32 @@ export default function App() {
 
           {/* DESAFIO DIÁRIO - BANDEIRA */}
           {screen === 'daily' && (
-            <DailyChallenge onBack={() => setScreen('home')} />
+            <DailyChallenge onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* DESAFIO DIÁRIO - ANAGRAMA */}
           {screen === 'daily-anagram' && (
-            <DailyAnagram onBack={() => setScreen('home')} />
+            <DailyAnagram onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* DESAFIO DIÁRIO - TERMO */}
           {screen === 'daily-wordle' && (
-            <DailyWordle onBack={() => setScreen('home')} />
+            <DailyWordle onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* DESAFIO DIÁRIO - MAPA */}
           {screen === 'daily-map' && (
-            <DailyMap onBack={() => setScreen('home')} />
+            <DailyMap onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* DESAFIO DIÁRIO - PAÍS */}
           {screen === 'daily-country' && (
-            <DailyCountry onBack={() => setScreen('home')} />
+            <DailyCountry onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* DESAFIO DIÁRIO - MIX */}
           {screen === 'daily-mix' && (
-            <DailyMix onBack={() => setScreen('home')} />
+            <DailyMix onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* CONTINENTES */}

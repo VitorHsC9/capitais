@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, XCircle, Share2, Trophy } from 'lucide-react';
+import { ArrowLeft, Clock, XCircle, Share2, Trophy, ArrowRight } from 'lucide-react';
 import { useDailyMix } from '../hooks/useDailyMix';
 import { OptionButton } from './OptionButton';
 import { ProgressBar } from './ProgressBar';
@@ -7,9 +7,10 @@ import { CountryAutocomplete } from './CountryAutocomplete';
 
 interface DailyMixProps {
     onBack: () => void;
+    onNextChallenge: () => void;
 }
 
-export function DailyMix({ onBack }: DailyMixProps) {
+export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
     const { gameState, submitAnswer, nextDailyTime } = useDailyMix();
     const [timeLeftStr, setTimeLeftStr] = useState('');
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -101,6 +102,10 @@ export function DailyMix({ onBack }: DailyMixProps) {
 
                         <button className="w-full py-4 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] uppercase tracking-wide">
                             <Share2 className="w-5 h-5" /> Compartilhar Resultado
+                        </button>
+
+                        <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
+                            <ArrowRight className="w-4 h-4" /> Próximo Desafio
                         </button>
                     </div>
                 </div>

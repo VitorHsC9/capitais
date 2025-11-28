@@ -712,7 +712,7 @@ export const COUNTRIES_DB: Country[] = [
     mapName: 'Equatorial Guinea', // Fallback to name if mapName missing
     capital: 'Malabo',
     continent: 'África',
-    code: 'jq',
+    code: 'gq',
     population: 1300000,
     mainLanguage: 'French',
     neighboringCountries: ['Camarões', 'Gabão'],
