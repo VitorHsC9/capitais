@@ -10,6 +10,7 @@ interface HomeProps {
     onSelectDailyCountry: () => void;
     onSelectDailyMix: () => void;
     onSelectPractice: () => void;
+    onSelectSupreme: () => void;
 }
 
 interface GameCardProps {
@@ -68,7 +69,7 @@ function GameCard({ title, description, imageSrc, onClick, colorClass, isComplet
     );
 }
 
-export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectPractice }: HomeProps) {
+export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectPractice, onSelectSupreme }: HomeProps) {
     const dailyStatus = useDailyStatus();
 
     return (
@@ -143,7 +144,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                 </div>
 
                 {/* Practice Mode Link */}
-                <div className="pt-4 border-t-2 border-[var(--border-color)]">
+                <div className="pt-4 border-t-2 border-[var(--border-color)] flex flex-col gap-4">
                     <button
                         onClick={onSelectPractice}
                         className="game-card w-full p-4 flex items-center justify-between group"
@@ -155,6 +156,24 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                             <div className="text-left">
                                 <div className="font-extrabold text-lg text-[var(--text-primary)] uppercase">Modos de Prática</div>
                                 <div className="text-xs font-bold text-[var(--text-secondary)]">Treine sem limites</div>
+                            </div>
+                        </div>
+                        <div className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform">
+                            <Play className="w-6 h-6 fill-current" />
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={onSelectSupreme}
+                        className="game-card w-full p-4 flex items-center justify-between group border-yellow-500/50 hover:border-yellow-500"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                                <Trophy className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <div className="font-extrabold text-lg text-[var(--text-primary)] uppercase">Desafios Supremos</div>
+                                <div className="text-xs font-bold text-[var(--text-secondary)]">Complete o mapa mundi</div>
                             </div>
                         </div>
                         <div className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform">

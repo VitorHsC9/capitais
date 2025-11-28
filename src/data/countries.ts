@@ -567,16 +567,7 @@ export const COUNTRIES_DB: Country[] = [
     mainLanguage: 'Estonian',
     neighboringCountries: ['Letônia', 'Rússia'],
   },
-  {
-    name: 'Eswatini',
-    mapName: 'Eswatini', // Fallback to name if mapName missing
-    capital: 'Mbabane',
-    continent: 'África',
-    code: 'sz',
-    population: 1200000,
-    mainLanguage: 'English',
-    neighboringCountries: ['Moçambique', 'África do Sul'],
-  },
+
   {
     name: 'Etiópia',
     mapName: 'Ethiopia', // Fallback to name if mapName missing
@@ -1897,16 +1888,7 @@ export const COUNTRIES_DB: Country[] = [
     mainLanguage: 'Portuguese',
     neighboringCountries: [],
   },
-  {
-    name: 'Singapura',
-    mapName: 'Singapore',
-    capital: 'Singapura',
-    continent: 'Ásia',
-    code: 'sg',
-    population: 5917600,
-    mainLanguage: 'English',
-    neighboringCountries: ['Malásia'],
-  },
+
   {
     name: 'Tanzânia',
     mapName: 'Tanzania',
