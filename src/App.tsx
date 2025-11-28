@@ -15,6 +15,9 @@ import { DailyWordle } from './components/DailyWordle';
 import { DailyMap } from './components/DailyMap';
 import { DailyCountry } from './components/DailyCountry';
 import { DailyMix } from './components/DailyMix';
+import { DailyPopulation } from './components/DailyPopulation';
+import { DailyCountryAnagram } from './components/DailyCountryAnagram';
+import { DailyCountryWordle } from './components/DailyCountryWordle';
 import { Home } from './components/Home';
 import { PracticeModes } from './components/PracticeModes';
 import { SupremeMenu } from './components/SupremeMenu';
@@ -28,10 +31,10 @@ const shuffleText = (text: string) => {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map' | 'daily-country' | 'daily-mix' | 'supreme-menu' | 'supreme-capitals' | 'supreme-countries' | 'supreme-final'>('home');
+  const [screen, setScreen] = useState<'home' | 'practice' | 'modes' | 'continents' | 'playing' | 'daily' | 'daily-anagram' | 'daily-wordle' | 'daily-map' | 'daily-country' | 'daily-mix' | 'daily-population' | 'daily-country-anagram' | 'daily-country-wordle' | 'supreme-menu' | 'supreme-capitals' | 'supreme-countries' | 'supreme-final'>('home');
 
   const handleNextDailyChallenge = () => {
-    const dailyOrder: Array<typeof screen> = ['daily', 'daily-anagram', 'daily-wordle', 'daily-map', 'daily-country', 'daily-mix'];
+    const dailyOrder: Array<typeof screen> = ['daily', 'daily-anagram', 'daily-wordle', 'daily-map', 'daily-country', 'daily-population', 'daily-country-anagram', 'daily-country-wordle', 'daily-mix'];
     const currentIndex = dailyOrder.indexOf(screen);
     const nextIndex = (currentIndex + 1) % dailyOrder.length;
     setScreen(dailyOrder[nextIndex]);
@@ -124,6 +127,9 @@ export default function App() {
               onSelectDailyWordle={() => setScreen('daily-wordle')}
               onSelectDailyMap={() => setScreen('daily-map')}
               onSelectDailyCountry={() => setScreen('daily-country')}
+              onSelectDailyPopulation={() => setScreen('daily-population')}
+              onSelectDailyCountryAnagram={() => setScreen('daily-country-anagram')}
+              onSelectDailyCountryWordle={() => setScreen('daily-country-wordle')}
               onSelectDailyMix={() => setScreen('daily-mix')}
               onSelectPractice={() => setScreen('practice')}
               onSelectSupreme={() => setScreen('supreme-menu')}
@@ -190,6 +196,21 @@ export default function App() {
           {/* DESAFIO DIÁRIO - PAÍS */}
           {screen === 'daily-country' && (
             <DailyCountry onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
+          )}
+
+          {/* DESAFIO DIÁRIO - POPULAÇÃO */}
+          {screen === 'daily-population' && (
+            <DailyPopulation onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
+          )}
+
+          {/* DESAFIO DIÁRIO - ANAGRAMA PAÍS */}
+          {screen === 'daily-country-anagram' && (
+            <DailyCountryAnagram onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
+          )}
+
+          {/* DESAFIO DIÁRIO - TERMO PAÍS */}
+          {screen === 'daily-country-wordle' && (
+            <DailyCountryWordle onBack={() => setScreen('home')} onNextChallenge={handleNextDailyChallenge} />
           )}
 
           {/* DESAFIO DIÁRIO - MIX */}

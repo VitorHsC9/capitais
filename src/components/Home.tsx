@@ -9,6 +9,9 @@ interface HomeProps {
     onSelectDailyMap: () => void;
     onSelectDailyCountry: () => void;
     onSelectDailyMix: () => void;
+    onSelectDailyPopulation: () => void;
+    onSelectDailyCountryAnagram: () => void;
+    onSelectDailyCountryWordle: () => void;
     onSelectPractice: () => void;
     onSelectSupreme: () => void;
 }
@@ -69,7 +72,7 @@ function GameCard({ title, description, imageSrc, onClick, colorClass, isComplet
     );
 }
 
-export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectPractice, onSelectSupreme }: HomeProps) {
+export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectDailyPopulation, onSelectDailyCountryAnagram, onSelectDailyCountryWordle, onSelectPractice, onSelectSupreme }: HomeProps) {
     const dailyStatus = useDailyStatus();
 
     return (
@@ -140,6 +143,38 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         colorClass="group-hover:bg-orange-500"
                         isCompleted={dailyStatus.country.isCompleted}
                         timeLeft={dailyStatus.country.timeLeft}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    <GameCard
+                        title="População"
+                        description="Ordene os países por população."
+                        imageSrc="/assets/populacao_opt.jpg"
+                        onClick={onSelectDailyPopulation}
+                        colorClass="group-hover:bg-blue-500"
+                        isCompleted={dailyStatus.population?.isCompleted}
+                        timeLeft={dailyStatus.population?.timeLeft}
+                    />
+
+                    <GameCard
+                        title="Desafio do País"
+                        description="Desembaralhe o nome do país."
+                        imageSrc="/assets/desafio_do_pais_opt.jpg"
+                        onClick={onSelectDailyCountryAnagram}
+                        colorClass="group-hover:bg-indigo-500"
+                        isCompleted={dailyStatus.countryAnagram?.isCompleted}
+                        timeLeft={dailyStatus.countryAnagram?.timeLeft}
+                    />
+
+                    <GameCard
+                        title="Termo do País"
+                        description="Descubra o país em 5 tentativas."
+                        imageSrc="/assets/termopais_opt.jpg"
+                        onClick={onSelectDailyCountryWordle}
+                        colorClass="group-hover:bg-teal-500"
+                        isCompleted={dailyStatus.countryWordle?.isCompleted}
+                        timeLeft={dailyStatus.countryWordle?.timeLeft}
                     />
                 </div>
 

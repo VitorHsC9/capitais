@@ -13,6 +13,9 @@ interface AllDailyStatuses {
     wordle: DailyStatus;
     map: DailyStatus;
     country: DailyStatus;
+    population: DailyStatus;
+    countryAnagram: DailyStatus;
+    countryWordle: DailyStatus;
 }
 
 const STORAGE_KEYS = {
@@ -22,6 +25,9 @@ const STORAGE_KEYS = {
     wordle: 'quiz_capitais_daily_wordle_v1',
     map: 'quiz_capitais_daily_map_v1',
     country: 'quiz_capitais_daily_country_v1',
+    population: 'quiz_capitais_daily_population_v1',
+    countryAnagram: 'quiz_capitais_daily_country_anagram_v1',
+    countryWordle: 'quiz_capitais_daily_country_wordle_v1',
 };
 
 export const useDailyStatus = () => {
@@ -32,6 +38,9 @@ export const useDailyStatus = () => {
         wordle: { isCompleted: false, timeLeft: '' },
         map: { isCompleted: false, timeLeft: '' },
         country: { isCompleted: false, timeLeft: '' },
+        population: { isCompleted: false, timeLeft: '' },
+        countryAnagram: { isCompleted: false, timeLeft: '' },
+        countryWordle: { isCompleted: false, timeLeft: '' },
     });
 
     useEffect(() => {
