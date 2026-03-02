@@ -25,14 +25,21 @@ interface SrsSettings {
     maxNewCardsPerDay: number;
 }
 
+// Tracking diário de cards novos introduzidos
+interface DailyNewCardsTracker {
+    date: string;  // 'YYYY-MM-DD'
+    count: number;
+}
+
 interface SrsStore {
     items: Record<string, SrsItem>;
     settings: SrsSettings;
+    dailyNewCards: DailyNewCardsTracker;
 
     // Ações
     processReview: (countryName: string, category: SrsCategory, direction: SrsDirection, isCorrect: boolean) => void;
     getDueItems: (category: SrsCategory, continent: Continent | 'Todos', maxItems: number) => SrsItemWithCountry[];
-    getStats: () => { totalLearning: number; totalMastered: number; dueToday: number };
+    getStats: () => { totalLearning: number; totalMastered: number; dueToday: number; newCardsToday: number; newCardsLimit: number };
     updateSettings: (newSettings: Partial<SrsSettings>) => void;
 }
 
@@ -42,11 +49,17 @@ export interface SrsItemWithCountry extends SrsItem {
 
 const MIN_EFACTOR = 1.3;
 
+function getTodayString(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
 export const useSrsStore = create<SrsStore>()(
     persist(
         (set, get) => ({
             items: {},
             settings: { maxNewCardsPerDay: 20 },
+            dailyNewCards: { date: getTodayString(), count: 0 },
 
             updateSettings: (newSettings: Partial<SrsSettings>) => set((state) => ({
                 settings: { ...state.settings, ...newSettings }
@@ -55,7 +68,10 @@ export const useSrsStore = create<SrsStore>()(
             processReview: (countryName, category, direction, isCorrect) => {
                 set((state) => {
                     const id = getSrsItemId(countryName, category, direction);
-                    const item = state.items[id] || {
+                    const existing = state.items[id];
+                    const isFirstTimeSeen = !existing;
+
+                    const item = existing || {
                         countryName,
                         category,
                         direction,
@@ -70,7 +86,6 @@ export const useSrsStore = create<SrsStore>()(
                     let newEfactor = item.efactor;
 
                     if (isCorrect) {
-                        // "Bom" / Acerto
                         if (item.repetition === 0) {
                             newInterval = 1;
                         } else if (item.repetition === 1) {
@@ -79,22 +94,30 @@ export const useSrsStore = create<SrsStore>()(
                             newInterval = Math.round(item.interval * item.efactor);
                         }
                         newRepetition = item.repetition + 1;
-                        // Slightly increase efactor to reward correct answers
                         newEfactor = Math.min(3.0, item.efactor + 0.1);
                     } else {
-                        // "Errei"
                         newRepetition = 0;
-                        newInterval = 0; // Revisa no mesmo dia / imediatamente
-                        newEfactor = Math.max(MIN_EFACTOR, item.efactor - 0.2); // Fica mais dificil
+                        newInterval = 0;
+                        newEfactor = Math.max(MIN_EFACTOR, item.efactor - 0.2);
                     }
 
-                    // Calcula a proxima data
-                    // Se for 0 dias, bota pra daqui a 5 minutos na sessao atual (ou apenas Data atual)
                     const nextDate = newInterval === 0
                         ? Date.now() + 5 * 60 * 1000
                         : Date.now() + newInterval * 24 * 60 * 60 * 1000;
 
+                    // Atualiza o contador diário se é carta nova (primeira vez vista)
+                    const today = getTodayString();
+                    let dailyNewCards = state.dailyNewCards;
+                    if (isFirstTimeSeen) {
+                        if (dailyNewCards.date !== today) {
+                            dailyNewCards = { date: today, count: 1 };
+                        } else {
+                            dailyNewCards = { ...dailyNewCards, count: dailyNewCards.count + 1 };
+                        }
+                    }
+
                     return {
+                        dailyNewCards,
                         items: {
                             ...state.items,
                             [id]: {
@@ -112,18 +135,24 @@ export const useSrsStore = create<SrsStore>()(
             getDueItems: (category, continent, maxItems) => {
                 const state = get();
                 const now = Date.now();
+                const today = getTodayString();
 
-                // Filtra os países do banco original para garantir que as cartas novas apareçam
+                // Reseta o contador se mudou o dia
+                let newCardsUsedToday = state.dailyNewCards.date === today
+                    ? state.dailyNewCards.count
+                    : 0;
+
+                // Se o dia mudou, atualiza o estado
+                if (state.dailyNewCards.date !== today) {
+                    set({ dailyNewCards: { date: today, count: 0 } });
+                }
+
                 const pool = continent === 'Todos'
                     ? COUNTRIES_DB
                     : COUNTRIES_DB.filter(c => c.continent === continent);
 
-                // Bandeiras só usam reverse (Bandeira -> País). Resto usa as duas direções.
                 const directions: SrsDirection[] = category === 'flags' ? ['reverse'] : ['forward', 'reverse'];
 
-                // Se a categoria for "map", o reverse não faz muito sentido (Mapa -> Pais ate faz). Vamos por ambas.
-
-                // Criar uma lista combinada (vistos que estao vencidos + nao vistos)
                 const deck: SrsItemWithCountry[] = [];
 
                 for (const country of pool) {
@@ -132,12 +161,10 @@ export const useSrsStore = create<SrsStore>()(
                         const item = state.items[id];
 
                         if (item) {
-                            // Ja foi visto. Ta vencido?
                             if (item.nextReviewDate <= now) {
                                 deck.push({ ...item, country });
                             }
                         } else {
-                            // Nunca foi visto, eh cartao "novo"
                             deck.push({
                                 countryName: country.name,
                                 category,
@@ -145,15 +172,13 @@ export const useSrsStore = create<SrsStore>()(
                                 interval: 0,
                                 repetition: 0,
                                 efactor: 2.5,
-                                nextReviewDate: now - 1000, // Vencido pra aparecer no topo
+                                nextReviewDate: now - 1000,
                                 country
                             });
                         }
                     }
                 }
 
-                // Ordena: primeiro todas as cartas 'forward', depois 'reverse'. 
-                // Dentro do mesmo tipo, ordena pelas que "venceram" primeiro (mais antigas).
                 deck.sort((a, b) => {
                     if (a.direction !== b.direction) {
                         return a.direction === 'forward' ? -1 : 1;
@@ -164,26 +189,23 @@ export const useSrsStore = create<SrsStore>()(
                     return Math.random() - 0.5;
                 });
 
-                // Aqui nós cortamos a array pra retornar apenas o máximo selecionado
-                // Entretando, um detalhe cru do Anki: o maxItems geralmente capta TODAS as repetições
-                // E SÓ TOSA O LIMITE NAS "Cartas Novas".
+                // Limite diário real: considera cards novos já introduzidos HOJE
                 const newCardsLimit = state.settings.maxNewCardsPerDay;
+                const remainingNewCards = Math.max(0, newCardsLimit - newCardsUsedToday);
                 let addedNewCards = 0;
 
                 const finalDeck: SrsItemWithCountry[] = [];
                 for (const card of deck) {
                     if (finalDeck.length >= maxItems) break;
 
-                    const isNewCard = card.interval === 0 && card.repetition === 0 && card.nextReviewDate >= now - (24 * 60 * 60 * 1000); // heurística simples
-
-                    // Se a carta é nova, vê se estouramos banco
-                    if (card.interval === 0 && card.repetition === 0) {
-                        if (addedNewCards < newCardsLimit) {
+                    if (card.interval === 0 && card.repetition === 0 && !state.items[getSrsItemId(card.countryName, card.category, card.direction)]) {
+                        // Card novo (nunca visto)
+                        if (addedNewCards < remainingNewCards) {
                             finalDeck.push(card);
                             addedNewCards++;
                         }
                     } else {
-                        // É revisão devida (Erros ou Learning), entra livremente até o teto geral
+                        // Revisão devida — entra livremente
                         finalDeck.push(card);
                     }
                 }
@@ -192,13 +214,17 @@ export const useSrsStore = create<SrsStore>()(
             },
 
             getStats: () => {
-                const items = Object.values(get().items);
+                const state = get();
+                const items = Object.values(state.items);
                 const now = Date.now();
+                const today = getTodayString();
                 const dueToday = items.filter(i => i.nextReviewDate <= now).length;
                 const totalMastered = items.filter(i => i.interval >= 21).length;
                 const totalLearning = items.length - totalMastered;
+                const newCardsToday = state.dailyNewCards.date === today ? state.dailyNewCards.count : 0;
+                const newCardsLimit = state.settings.maxNewCardsPerDay;
 
-                return { totalLearning, totalMastered, dueToday };
+                return { totalLearning, totalMastered, dueToday, newCardsToday, newCardsLimit };
             }
         }),
         {

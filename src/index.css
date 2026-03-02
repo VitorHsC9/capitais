@@ -54,24 +54,7 @@
   --key-bg: var(--surface-color);
 }
 
-/* --- TEMA: ALTO CONTRASTE (Acessibilidade) --- */
-.high-contrast {
-  --bg-color: #000000;
-  --surface-color: #000000;
-  --border-color: #FFFF00; /* Amarelo Vibrante para separadores */
-  
-  --text-primary: #FFFFFF;
-  --text-secondary: #CCCCCC;
 
-  --color-primary: #000000;
-  --color-primary-dark: #FFFF00;
-  
-  --color-secondary: #000000;
-  --color-secondary-dark: #00FFFF;
-  
-  --color-neutral: #000000;
-  --color-neutral-dark: #FFFFFF;
-}
 
 body {
   margin: 0;
@@ -164,23 +147,7 @@ body {
     /* Bouncy animation */
   }
 
-  .switch {
-    @apply relative inline-flex h-7 w-12 items-center rounded-full transition-colors border-2 border-transparent;
-    background-color: var(--border-color);
-  }
 
-  .switch.checked {
-    background-color: var(--color-primary);
-  }
-
-  .switch-thumb {
-    @apply inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm;
-    translate: 2px;
-  }
-
-  .switch.checked .switch-thumb {
-    translate: 22px;
-  }
 }
 
 /* ANIMAÇÕES */

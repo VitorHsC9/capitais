@@ -1,30 +1,11 @@
 import { create } from 'zustand';
 import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
-
+import { shuffleArray, getRandomItems } from '../utils/array';
 import { checkCountryName, checkCountryCapital } from '../utils/validation';
 
 export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writing' | 'survival' | 'anagram';
 export type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
-
-const shuffleArray = <T,>(array: T[]): T[] => [...array].sort(() => Math.random() - 0.5);
-
-const getRandomItems = <T,>(arr: T[], count: number, excludeItem?: T): T[] => {
-    const result: T[] = [];
-    const takenIndices = new Set<number>();
-
-    const excludeIndex = excludeItem ? arr.indexOf(excludeItem) : -1;
-    if (excludeIndex !== -1) takenIndices.add(excludeIndex);
-
-    while (result.length < count && takenIndices.size < arr.length) {
-        const idx = Math.floor(Math.random() * arr.length);
-        if (!takenIndices.has(idx)) {
-            takenIndices.add(idx);
-            result.push(arr[idx]);
-        }
-    }
-    return result;
-};
 
 const generateRoundOptions = (correct: Country): Country[] => {
     const needed = CONFIG.OPTIONS_COUNT - 1;

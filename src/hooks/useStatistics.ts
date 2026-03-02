@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { ACHIEVEMENTS_DB } from '../data/achievements';
 import type { GameStats, Achievement, GameSession } from '../data/achievements';
 
@@ -11,57 +12,57 @@ const INITIAL_STATS: GameStats = {
   unlockedAchievements: [],
 };
 
-export const useStatistics = () => {
-  const [stats, setStats] = useState<GameStats>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('quiz-stats');
-      return saved ? JSON.parse(saved) : INITIAL_STATS;
-    }
-    return INITIAL_STATS;
-  });
+interface StatisticsStore {
+  stats: GameStats;
+  newAchievements: Achievement[];
+  updateStats: (session: GameSession, totalQuestionsInGame: number) => void;
+  clearNotifications: () => void;
+}
 
-  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+export const useStatistics = create<StatisticsStore>()(
+  persist(
+    (set, get) => ({
+      stats: INITIAL_STATS,
+      newAchievements: [],
 
-  useEffect(() => {
-    localStorage.setItem('quiz-stats', JSON.stringify(stats));
-  }, [stats]);
+      updateStats: (session, totalQuestionsInGame) => {
+        set((state) => {
+          const newStats = { ...state.stats };
 
-  const updateStats = (session: GameSession, totalQuestionsInGame: number) => {
-    setStats(prev => {
-      const newStats = { ...prev };
-      
-      // Atualiza contadores
-      newStats.totalGames += 1;
-      newStats.totalCorrect += session.correctCount;
-      newStats.totalQuestions += totalQuestionsInGame;
-      newStats.totalScore += session.score;
-      
-      if (session.streak > newStats.bestStreak) {
-        newStats.bestStreak = session.streak;
-      }
+          // Atualiza contadores
+          newStats.totalGames += 1;
+          newStats.totalCorrect += session.correctCount;
+          newStats.totalQuestions += totalQuestionsInGame;
+          newStats.totalScore += session.score;
 
-      // Verifica conquistas
-      const unlockedNow: Achievement[] = [];
-      
-      ACHIEVEMENTS_DB.forEach(achievement => {
-        if (!newStats.unlockedAchievements.includes(achievement.id)) {
-          // Passa stats e session para a verificação
-          if (achievement.condition(newStats, session)) {
-            newStats.unlockedAchievements.push(achievement.id);
-            unlockedNow.push(achievement);
+          if (session.streak > newStats.bestStreak) {
+            newStats.bestStreak = session.streak;
           }
-        }
-      });
 
-      if (unlockedNow.length > 0) {
-        setNewAchievements(unlockedNow);
-      }
+          // Verifica conquistas
+          const unlockedNow: Achievement[] = [];
 
-      return newStats;
-    });
-  };
+          ACHIEVEMENTS_DB.forEach(achievement => {
+            if (!newStats.unlockedAchievements.includes(achievement.id)) {
+              if (achievement.condition(newStats, session)) {
+                newStats.unlockedAchievements.push(achievement.id);
+                unlockedNow.push(achievement);
+              }
+            }
+          });
 
-  const clearNotifications = () => setNewAchievements([]);
+          return {
+            stats: newStats,
+            newAchievements: unlockedNow.length > 0 ? unlockedNow : state.newAchievements
+          };
+        });
+      },
 
-  return { stats, updateStats, newAchievements, clearNotifications };
-};
+      clearNotifications: () => set({ newAchievements: [] }),
+    }),
+    {
+      name: 'quiz-stats', // match the old localstorage key to migrate user data seamlessly
+      partialize: (state) => ({ stats: state.stats }), // only persist the stats, not the active notifications
+    }
+  )
+);

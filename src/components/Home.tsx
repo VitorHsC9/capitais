@@ -1,21 +1,7 @@
 import { useState } from 'react';
-import { Play, Trophy, Loader2, CheckCircle, Clock, Crown, GraduationCap, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Play, Trophy, Loader2, CheckCircle, Clock, Crown, GraduationCap, Wifi } from 'lucide-react';
 import { useDailyStatus } from '../hooks/useDailyStatus';
-
-interface HomeProps {
-    onSelectDaily: () => void;
-    onSelectDailyAnagram: () => void;
-    onSelectDailyWordle: () => void;
-    onSelectDailyMap: () => void;
-    onSelectDailyCountry: () => void;
-    onSelectDailyMix: () => void;
-    onSelectDailyPopulation: () => void;
-    onSelectDailyCountryAnagram: () => void;
-    onSelectDailyCountryWordle: () => void;
-    onSelectPractice: () => void;
-    onSelectSupreme: () => void;
-    onSelectSrs: () => void;
-}
 
 interface GameCardProps {
     title: string;
@@ -73,7 +59,8 @@ function GameCard({ title, description, imageSrc, onClick, colorClass, isComplet
     );
 }
 
-export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectDailyPopulation, onSelectDailyCountryAnagram, onSelectDailyCountryWordle, onSelectPractice, onSelectSupreme, onSelectSrs }: HomeProps) {
+export function Home() {
+    const navigate = useNavigate();
     const dailyStatus = useDailyStatus();
 
     return (
@@ -88,7 +75,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                 {/* SRS Banner */}
                 <div className="mb-6">
                     <button
-                        onClick={onSelectSrs}
+                        onClick={() => navigate('/srs')}
                         className="w-full bg-[var(--color-primary)]/10 border-2 border-[var(--color-primary)] text-[var(--color-primary)] p-4 rounded-2xl shadow-sm text-left active:scale-[0.98] transition-transform flex items-center gap-4"
                     >
                         <div className="bg-[var(--color-primary)] text-white p-3 rounded-xl hidden sm:block">
@@ -97,6 +84,39 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         <div className="flex-1">
                             <h2 className="font-black text-xl">Revisão Espaçada</h2>
                             <p className="text-sm font-medium opacity-90 mt-0.5">Retenha países na memória com Flashcards Diários.</p>
+                        </div>
+                    </button>
+                </div>
+
+                {/* Online Banner */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => navigate('/online')}
+                        className="w-full relative overflow-hidden rounded-2xl border-2 border-cyan-500/50 bg-[var(--surface-color)] p-4 text-left transition-all hover:border-cyan-500 hover:shadow-[0_0_20px_-5px_rgba(6,182,212,0.3)] group"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-50" />
+                        <div className="relative z-10 flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                    <Wifi className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                        <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                                            Multiplayer
+                                        </span>
+                                    </div>
+                                    <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-tight">
+                                        Jogar <span className="text-cyan-400">Online</span>
+                                    </h3>
+                                    <p className="text-sm font-bold text-[var(--text-secondary)] mt-0.5">
+                                        Desafie seus amigos em tempo real!
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-[var(--bg-color)] border-2 border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] group-hover:border-cyan-500 group-hover:text-cyan-400 transition-all group-hover:scale-110">
+                                <Play className="w-5 h-5 fill-current ml-0.5" />
+                            </div>
                         </div>
                     </button>
                 </div>
@@ -110,7 +130,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Desafio Mix"
                         description="10 perguntas variadas. Errou, perdeu!"
                         imageSrc="/assets/home_mix.png"
-                        onClick={onSelectDailyMix}
+                        onClick={() => navigate('/daily-mix')}
                         colorClass="group-hover:bg-pink-500"
                         isCompleted={dailyStatus.mix.isCompleted}
                         timeLeft={dailyStatus.mix.timeLeft}
@@ -120,7 +140,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Bandeiras"
                         description="Adivinhe o país pela bandeira pixelada."
                         imageSrc="/assets/BandeiraDoBrasil.png"
-                        onClick={onSelectDaily}
+                        onClick={() => navigate('/daily')}
                         colorClass="group-hover:bg-[var(--color-primary)]"
                         isCompleted={dailyStatus.flag.isCompleted}
                         timeLeft={dailyStatus.flag.timeLeft}
@@ -130,7 +150,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Capital"
                         description="Desembaralhe as letras da capital."
                         imageSrc="/assets/Tajmahal.jpg"
-                        onClick={onSelectDailyAnagram}
+                        onClick={() => navigate('/daily-anagram')}
                         colorClass="group-hover:bg-[var(--color-secondary)]"
                         isCompleted={dailyStatus.anagram.isCompleted}
                         timeLeft={dailyStatus.anagram.timeLeft}
@@ -140,7 +160,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Termo"
                         description="Descubra a capital em 5 tentativas."
                         imageSrc="/assets/wordle.jpg"
-                        onClick={onSelectDailyWordle}
+                        onClick={() => navigate('/daily-wordle')}
                         colorClass="group-hover:bg-purple-500"
                         isCompleted={dailyStatus.wordle.isCompleted}
                         timeLeft={dailyStatus.wordle.timeLeft}
@@ -150,7 +170,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Mapa"
                         description="Identifique o país no mapa."
                         imageSrc="/assets/mapapais.jpg"
-                        onClick={onSelectDailyMap}
+                        onClick={() => navigate('/daily-map')}
                         colorClass="group-hover:bg-emerald-500"
                         isCompleted={dailyStatus.map.isCompleted}
                         timeLeft={dailyStatus.map.timeLeft}
@@ -160,7 +180,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="País"
                         description="Descubra o país com dicas."
                         imageSrc="/assets/globalmap.jpg"
-                        onClick={onSelectDailyCountry}
+                        onClick={() => navigate('/daily-country')}
                         colorClass="group-hover:bg-orange-500"
                         isCompleted={dailyStatus.country.isCompleted}
                         timeLeft={dailyStatus.country.timeLeft}
@@ -172,7 +192,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="População"
                         description="Ordene os países por população."
                         imageSrc="/assets/populacao_opt.jpg"
-                        onClick={onSelectDailyPopulation}
+                        onClick={() => navigate('/daily-population')}
                         colorClass="group-hover:bg-blue-500"
                         isCompleted={dailyStatus.population?.isCompleted}
                         timeLeft={dailyStatus.population?.timeLeft}
@@ -182,7 +202,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Desafio do País"
                         description="Desembaralhe o nome do país."
                         imageSrc="/assets/desafio_do_pais_opt.jpg"
-                        onClick={onSelectDailyCountryAnagram}
+                        onClick={() => navigate('/daily-country-anagram')}
                         colorClass="group-hover:bg-indigo-500"
                         isCompleted={dailyStatus.countryAnagram?.isCompleted}
                         timeLeft={dailyStatus.countryAnagram?.timeLeft}
@@ -192,7 +212,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                         title="Termo do País"
                         description="Descubra o país em 5 tentativas."
                         imageSrc="/assets/termopais_opt.jpg"
-                        onClick={onSelectDailyCountryWordle}
+                        onClick={() => navigate('/daily-country-wordle')}
                         colorClass="group-hover:bg-teal-500"
                         isCompleted={dailyStatus.countryWordle?.isCompleted}
                         timeLeft={dailyStatus.countryWordle?.timeLeft}
@@ -202,7 +222,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                 {/* Supreme Mode Section */}
                 <div className="mb-8">
                     <button
-                        onClick={onSelectSupreme}
+                        onClick={() => navigate('/supreme-menu')}
                         className="w-full relative overflow-hidden rounded-2xl border-2 border-yellow-500/50 bg-[var(--surface-color)] p-6 text-left transition-all hover:border-yellow-500 hover:shadow-[0_0_20px_-5px_rgba(234,179,8,0.3)] group"
                     >
                         {/* Background Pattern */}
@@ -238,7 +258,7 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
                 {/* Practice Mode Link */}
                 <div className="pt-4 border-t-2 border-[var(--border-color)]">
                     <button
-                        onClick={onSelectPractice}
+                        onClick={() => navigate('/practice')}
                         className="game-card w-full p-4 flex items-center justify-between group"
                     >
                         <div className="flex items-center gap-4">

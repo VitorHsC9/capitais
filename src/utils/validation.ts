@@ -1,4 +1,4 @@
-import { Country } from '../data/countries';
+import type { Country } from '../data/countries';
 
 export const normalizeText = (text: string) => {
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
