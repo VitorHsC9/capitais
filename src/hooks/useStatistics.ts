@@ -21,7 +21,7 @@ interface StatisticsStore {
 
 export const useStatistics = create<StatisticsStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       stats: INITIAL_STATS,
       newAchievements: [],
 
