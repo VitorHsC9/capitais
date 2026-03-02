@@ -30,9 +30,25 @@ export function OnlineResults({ game, onBack }: OnlineResultsProps) {
     const myScore = myPlayer?.score || 0;
     const opponentScore = opponent?.score || 0;
 
-    const isWinner = myScore > opponentScore;
-    const isDraw = myScore === opponentScore;
-    const isLoser = myScore < opponentScore;
+    let isWinner = myScore > opponentScore;
+    let isDraw = myScore === opponentScore;
+    let isLoser = myScore < opponentScore;
+
+    // Em modos de sobrevivência/infinito, quem está vivo vence, independentemente dos pontos.
+    if (roomData.mode === 'survival' || roomData.mode === 'infinite') {
+        const iAmAlive = myPlayer?.isAlive ?? false;
+        const opponentIsAlive = opponent?.isAlive ?? false;
+
+        if (iAmAlive && !opponentIsAlive) {
+            isWinner = true;
+            isDraw = false;
+            isLoser = false;
+        } else if (!iAmAlive && opponentIsAlive) {
+            isWinner = false;
+            isDraw = false;
+            isLoser = true;
+        }
+    }
 
     const getResultEmoji = () => {
         if (isWinner) return '🏆';

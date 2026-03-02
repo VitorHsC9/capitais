@@ -231,10 +231,10 @@ export function useOnlineGame(): UseOnlineGameReturn {
         };
     }, [phase, roomData?.currentRound]);
 
-    // ─── Auto-submit on timeout (speed mode) ────────────────────────
+    // ─── Auto-submit on timeout (all modes) ────────────────────────
     // Uses refs to avoid re-running on every state change; only timeLeft triggers this.
     useEffect(() => {
-        if (timeLeft === 0 && phaseRef.current === 'playing' && !myAnswerRef.current && roomDataRef.current?.mode === 'speed') {
+        if (timeLeft === 0 && phaseRef.current === 'playing' && !myAnswerRef.current) {
             handleAnswerRef.current('TIME_UP');
         }
     }, [timeLeft]);
