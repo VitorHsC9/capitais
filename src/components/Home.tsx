@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, Trophy, Loader2, CheckCircle, Clock, Crown } from 'lucide-react';
+import { Play, Trophy, Loader2, CheckCircle, Clock, Crown, GraduationCap, Globe } from 'lucide-react';
 import { useDailyStatus } from '../hooks/useDailyStatus';
 
 interface HomeProps {
@@ -14,6 +14,7 @@ interface HomeProps {
     onSelectDailyCountryWordle: () => void;
     onSelectPractice: () => void;
     onSelectSupreme: () => void;
+    onSelectSrs: () => void;
 }
 
 interface GameCardProps {
@@ -72,7 +73,7 @@ function GameCard({ title, description, imageSrc, onClick, colorClass, isComplet
     );
 }
 
-export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectDailyPopulation, onSelectDailyCountryAnagram, onSelectDailyCountryWordle, onSelectPractice, onSelectSupreme }: HomeProps) {
+export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle, onSelectDailyMap, onSelectDailyCountry, onSelectDailyMix, onSelectDailyPopulation, onSelectDailyCountryAnagram, onSelectDailyCountryWordle, onSelectPractice, onSelectSupreme, onSelectSrs }: HomeProps) {
     const dailyStatus = useDailyStatus();
 
     return (
@@ -83,6 +84,26 @@ export function Home({ onSelectDaily, onSelectDailyAnagram, onSelectDailyWordle,
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 pb-20">
+
+                {/* SRS Banner */}
+                <div className="mb-6">
+                    <button
+                        onClick={onSelectSrs}
+                        className="w-full bg-[var(--color-primary)]/10 border-2 border-[var(--color-primary)] text-[var(--color-primary)] p-4 rounded-2xl shadow-sm text-left active:scale-[0.98] transition-transform flex items-center gap-4"
+                    >
+                        <div className="bg-[var(--color-primary)] text-white p-3 rounded-xl hidden sm:block">
+                            <GraduationCap className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1">
+                            <h2 className="font-black text-xl">Revisão Espaçada</h2>
+                            <p className="text-sm font-medium opacity-90 mt-0.5">Retenha países na memória com Flashcards Diários.</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div className="mb-4">
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-[var(--tone-2)]">Desafios de Hoje</h2>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                     <GameCard

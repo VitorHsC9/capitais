@@ -49,5 +49,26 @@ export const ACHIEVEMENTS_DB: Achievement[] = [
     description: 'Atingiu uma sequência de 20 acertos!',
     icon: 'Flame',
     condition: (_, session) => (session?.streak ?? 0) >= 20,
+  },
+  {
+    id: 'legend',
+    title: 'Lenda Viva',
+    description: 'Atingiu uma sequência incrível de 50 acertos!',
+    icon: 'Crown',
+    condition: (_, session) => (session?.streak ?? 0) >= 50,
+  },
+  {
+    id: 'master',
+    title: 'Mestre Global',
+    description: 'Acumule 500 respostas corretas no total.',
+    icon: 'Star',
+    condition: (stats) => stats.totalCorrect >= 500,
+  },
+  {
+    id: 'perfectionist',
+    title: 'Perfeccionista',
+    description: 'Jogue ao menos 5 partidas e mantenha 100% de precisão.',
+    icon: 'Medal',
+    condition: (stats) => stats.totalGames >= 5 && stats.totalCorrect === stats.totalQuestions && stats.totalQuestions > 0,
   }
 ];

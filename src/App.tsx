@@ -10,6 +10,7 @@ import { Header } from './components/Header';
 import { OptionButton } from './components/OptionButton';
 import { InputAnswer } from './components/InputAnswer';
 import { ProgressBar } from './components/ProgressBar';
+import { triggerConfetti, triggerAchievementConfetti } from './utils/confetti';
 
 // Lazy loaded components (Code Splitting)
 const Home = lazy(() => import('./components/Home').then(module => ({ default: module.Home })));
@@ -27,6 +28,10 @@ const SupremeMenu = lazy(() => import('./components/SupremeMenu').then(module =>
 const SupremeCapitals = lazy(() => import('./components/SupremeCapitals').then(module => ({ default: module.SupremeCapitals })));
 const SupremeCountries = lazy(() => import('./components/SupremeCountries').then(module => ({ default: module.SupremeCountries })));
 const SupremeFinal = lazy(() => import('./components/SupremeFinal').then(module => ({ default: module.SupremeFinal })));
+
+const SrsMenu = lazy(() => import('./components/srs/SrsMenu').then(module => ({ default: module.SrsMenu })));
+const SrsFlashcard = lazy(() => import('./components/srs/SrsFlashcard').then(module => ({ default: module.SrsFlashcard })));
+const SrsBrowser = lazy(() => import('./components/srs/SrsBrowser').then(module => ({ default: module.SrsBrowser })));
 import type { Continent } from './data/countries';
 
 const shuffleText = (text: string) => {
@@ -48,7 +53,19 @@ export default function App() {
     }
   };
   const [modal, setModal] = useState<'none' | 'stats' | 'help' | 'settings'>('none');
-  const [highContrast, setHighContrast] = useState(false);
+  const [highContrast, setHighContrast] = useState(() => {
+    return localStorage.getItem('capitais-high-contrast') === 'true';
+  });
+
+  // Aplica classe no body e salva no localstorage
+  useEffect(() => {
+    localStorage.setItem('capitais-high-contrast', highContrast.toString());
+    if (highContrast) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+  }, [highContrast]);
 
   const game = useGameStore();
   const { clearNotifications, updateStats, stats, newAchievements } = useStatistics();
@@ -125,9 +142,20 @@ export default function App() {
         streak: game.maxStreak
       }, game.gameState === 'game_over' ? game.correctCount + 1 : game.questions.length);
 
+      if (game.gameState === 'finished') {
+        triggerConfetti();
+      }
+
       setTimeout(() => setModal('stats'), 800);
     }
   }, [game.gameState]);
+
+  // Confete de Achievement
+  useEffect(() => {
+    if (newAchievements.length > 0) {
+      triggerAchievementConfetti();
+    }
+  }, [newAchievements]);
 
   const continents: Continent[] = ['América do Sul', 'Europa', 'Ásia', 'América do Norte', 'América Central', 'África', 'Oceania', 'Todos'];
 
@@ -178,6 +206,7 @@ export default function App() {
                   onSelectDailyMix={() => navigate('/daily-mix')}
                   onSelectPractice={() => navigate('/practice')}
                   onSelectSupreme={() => navigate('/supreme-menu')}
+                  onSelectSrs={() => navigate('/srs')}
                 />
               } />
 
@@ -214,6 +243,11 @@ export default function App() {
               <Route path="/daily-country-anagram" element={<DailyCountryAnagram onBack={() => navigate('/')} onNextChallenge={handleNextDailyChallenge} />} />
               <Route path="/daily-country-wordle" element={<DailyCountryWordle onBack={() => navigate('/')} onNextChallenge={handleNextDailyChallenge} />} />
               <Route path="/daily-mix" element={<DailyMix onBack={() => navigate('/')} onNextChallenge={handleNextDailyChallenge} />} />
+
+              {/* SRS Routes */}
+              <Route path="/srs" element={<SrsMenu />} />
+              <Route path="/srs/study" element={<SrsFlashcard />} />
+              <Route path="/srs/browser" element={<SrsBrowser />} />
 
               <Route path="/continents" element={
                 <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-300">
