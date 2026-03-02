@@ -1,0 +1,34 @@
+﻿node : C:\Users\Vitor\D
+ocuments\GitHub\capitai
+s\enrich.cjs:17
+No linha:1 caractere:1
++ node enrich.cjs 2>&1 
+| Out-File -Encoding 
+utf8 error8.txt
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (C:\Users\Vito   
+ r\...s\enrich.cjs:    
+17:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+    for (const c of 
+restData) {
+                    ^
+
+TypeError: restData is 
+not iterable
+    at main (C:\Users\V
+itor\Documents\GitHub\c
+apitais\enrich.cjs:17:2
+1)
+    at process.processT
+icksAndRejections (node
+:internal/process/task_
+queues:95:5)
+
+Node.js v20.19.2

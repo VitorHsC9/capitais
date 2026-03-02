@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { COUNTRIES_DB, type Country } from '../data/countries';
+import { checkCountryName, checkCountryCapital } from '../utils/validation';
 
 export function useSupremeFinal() {
     const [input, setInput] = useState('');
@@ -43,32 +44,30 @@ export function useSupremeFinal() {
         const normalizedInput = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         if (!normalizedInput) return;
 
-        // Check against all countries/capitals
         const match = COUNTRIES_DB.find(c => {
-            const normalizedName = c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const normalizedCapital = c.capital.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let found = false;
 
             // Check if it matches name and hasn't been guessed yet
-            if (normalizedName === normalizedInput && !guessedCountries.has(c.code)) {
+            if (!guessedCountries.has(c.code) && checkCountryName(c, text)) {
                 setGuessedCountries(prev => {
                     const newSet = new Set(prev).add(c.code);
                     checkWin(newSet, guessedCapitals);
                     return newSet;
                 });
-                return true;
+                found = true;
             }
 
             // Check if it matches capital and hasn't been guessed yet
-            if (normalizedCapital === normalizedInput && !guessedCapitals.has(c.code)) {
+            if (!guessedCapitals.has(c.code) && checkCountryCapital(c, text)) {
                 setGuessedCapitals(prev => {
                     const newSet = new Set(prev).add(c.code);
                     checkWin(guessedCountries, newSet);
                     return newSet;
                 });
-                return true;
+                found = true;
             }
 
-            return false;
+            return found;
         });
 
         if (match) {

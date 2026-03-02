@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { COUNTRIES_DB, type Country } from '../data/countries';
+import { checkCountryName } from '../utils/validation';
 
 export function useSupremeCountries() {
     const [input, setInput] = useState('');
@@ -45,10 +46,7 @@ export function useSupremeCountries() {
         // Check against all countries that haven't been guessed yet
         const match = COUNTRIES_DB.find(c => {
             if (guessedCodes.has(c.code)) return false;
-            const normalizedName = c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            // Also check mapName (English) just in case, or stick to Portuguese as requested?
-            // User said "digita o país", usually implies the main name. Let's stick to 'name' (Portuguese).
-            return normalizedName === normalizedInput;
+            return checkCountryName(c, text);
         });
 
         if (match) {

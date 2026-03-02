@@ -2,13 +2,7 @@ import { create } from 'zustand';
 import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
 
-const normalizeText = (text: string) => {
-    return text
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim();
-};
+import { checkCountryName, checkCountryCapital } from '../utils/validation';
 
 export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writing' | 'survival' | 'anagram';
 export type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
@@ -148,9 +142,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         const currentQ = state.questions[state.currentIndex];
         const isCapitalMode = ['classic', 'suddenDeath', 'writing', 'survival', 'anagram'].includes(state.gameMode);
-        const correctAnswer = isCapitalMode ? currentQ.capital : currentQ.name;
-
-        const isCorrect = normalizeText(answer) === normalizeText(correctAnswer);
+        const isCorrect = isCapitalMode
+            ? checkCountryCapital(currentQ, answer)
+            : checkCountryName(currentQ, answer);
 
         let newScore = state.score;
         let newCorrectCount = state.correctCount;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDailyMap } from '../hooks/useDailyMap';
+import { checkCountryName } from '../utils/validation';
 import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, ArrowRight } from 'lucide-react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -89,10 +90,8 @@ export function DailyMap({ onBack, onNextChallenge }: DailyMapProps) {
 
     const handleGuess = (guess: string) => {
         if (!targetCountry) return;
-        const normalizedGuess = guess.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const normalizedTarget = targetCountry.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-        if (normalizedGuess === normalizedTarget) {
+        if (checkCountryName(targetCountry, guess)) {
             setGameStatus('won');
             setLastIncorrectGuess(null);
         } else {

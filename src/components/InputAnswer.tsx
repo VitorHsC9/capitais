@@ -5,12 +5,13 @@ interface InputAnswerProps {
   onSubmit: (answer: string) => void;
   isAnswered: boolean;
   correctAnswer: string;
+  acceptedAnswers?: string[];
   nextQuestion: () => void;
   isDark: boolean;
   placeholder?: string;
 }
 
-export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, nextQuestion, placeholder }: InputAnswerProps) => {
+export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, acceptedAnswers, nextQuestion, placeholder }: InputAnswerProps) => {
   const [value, setValue] = useState('');
 
   useEffect(() => {
@@ -30,7 +31,10 @@ export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, nextQuestion,
   };
 
   const normalize = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-  const isCorrect = isAnswered && normalize(value) === normalize(correctAnswer);
+  const isCorrect = isAnswered && (
+    normalize(value) === normalize(correctAnswer) ||
+    (acceptedAnswers && acceptedAnswers.some(a => normalize(value) === normalize(a)))
+  );
 
   return (
     <div className="w-full space-y-3">

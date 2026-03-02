@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { COUNTRIES_DB } from '../data/countries';
 import { Check, Search } from 'lucide-react';
+import { normalizeText } from '../utils/validation';
 
 interface CountryAutocompleteProps {
     onSelect: (countryName: string) => void;
@@ -18,9 +19,11 @@ export function CountryAutocomplete({ onSelect, placeholder, disabled }: Country
     const filteredCountries = query.trim() === ''
         ? []
         : COUNTRIES_DB.filter(c => {
-            const normalizedName = c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return normalizedName.includes(normalizedQuery);
+            const normalizedQuery = normalizeText(query);
+            if (normalizeText(c.name).includes(normalizedQuery)) return true;
+            if (c.mapName && normalizeText(c.mapName).includes(normalizedQuery)) return true;
+            if (c.acceptedNames && c.acceptedNames.some(n => normalizeText(n).includes(normalizedQuery))) return true;
+            return false;
         }).slice(0, 5);
 
     useEffect(() => {

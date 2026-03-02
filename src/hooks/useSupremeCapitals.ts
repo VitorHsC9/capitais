@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { COUNTRIES_DB, type Country } from '../data/countries';
+import { checkCountryCapital } from '../utils/validation';
 
 export function useSupremeCapitals() {
     const [input, setInput] = useState('');
@@ -45,8 +46,7 @@ export function useSupremeCapitals() {
         // Check against all capitals that haven't been guessed yet
         const match = COUNTRIES_DB.find(c => {
             if (guessedCodes.has(c.code)) return false;
-            const normalizedCapital = c.capital.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return normalizedCapital === normalizedInput;
+            return checkCountryCapital(c, text);
         });
 
         if (match) {
