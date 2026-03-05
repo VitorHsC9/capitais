@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, BrainCircuit, X, Check, Eye } from 'lucide-react';
 import { useSrsStore, type SrsCategory, type SrsItemWithCountry } from '../../hooks/useSrsStore';
 import type { Continent } from '../../data/countries';
-import { triggerConfetti } from '../../utils/confetti';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Country } from '../../data/countries';
+
+const normalizeString = (str: string) =>
+    str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
 function MapZoomer({ targetCountry, geoJsonData, isActive }: { targetCountry: any, geoJsonData: any, isActive: boolean }) {
     const map = useMap();
@@ -16,8 +18,8 @@ function MapZoomer({ targetCountry, geoJsonData, isActive }: { targetCountry: an
         const feature = geoJsonData.features.find((f: any) => {
             const props = f.properties || {};
             const name = props.name || '';
-            const iso = props.iso_a2 || props.ISO_A2 || '';
-            return name.toLowerCase() === (targetCountry.mapName || targetCountry.name).toLowerCase() || (iso && iso.toLowerCase() === targetCountry.code.toLowerCase());
+            const targetName = targetCountry.mapName || targetCountry.name;
+            return normalizeString(name) === normalizeString(targetName);
         });
         if (feature) {
             const layer = L.geoJSON(feature);
@@ -30,23 +32,63 @@ function MapZoomer({ targetCountry, geoJsonData, isActive }: { targetCountry: an
     return null;
 }
 
-function SrsMapViewer({ targetCountry, geoJsonData, showHighlight }: { targetCountry: Country, geoJsonData: any, showHighlight: boolean }) {
+function MapCleanup({ targetCountry }: { targetCountry: Country }) {
+    const map = useMap();
+    useEffect(() => {
+        if (map) {
+            map.closePopup();
+        }
+    }, [targetCountry, map]);
+    return null;
+}
+
+function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, onCorrectGuess, onWrongGuess, mapKey }: { targetCountry: Country, geoJsonData: any, showHighlight: boolean, allowGuess?: boolean, onCorrectGuess?: () => void, onWrongGuess?: () => void, mapKey?: string }) {
+    const hasGuessedRef = useRef(false);
+    const geoJsonLayerRef = useRef<any>(null);
+
+    // Reseta o bloqueio de clique quando troca de carta
+    useEffect(() => {
+        hasGuessedRef.current = false;
+    }, [mapKey]);
+
+    // Função para encontrar e destacar + zoom no país correto
+    const highlightAndZoomCorrect = (map: any, targetNameEn: string, targetNamePt: string) => {
+        if (!geoJsonLayerRef.current) return;
+        geoJsonLayerRef.current.eachLayer((l: any) => {
+            if (l.feature) {
+                const lName = l.feature.properties?.name || '';
+                const lIsTarget =
+                    (lName && targetNameEn && normalizeString(lName) === normalizeString(targetNameEn)) ||
+                    (lName && targetNamePt && normalizeString(lName) === normalizeString(targetNamePt));
+                if (lIsTarget) {
+                    l.setStyle({ fillColor: '#22c55e', color: '#22c55e', fillOpacity: 0.6 });
+                    // Zoom no país correto
+                    const bounds = l.getBounds();
+                    if (bounds && bounds.isValid()) {
+                        map.flyToBounds(bounds, { padding: [20, 20], maxZoom: 5, duration: 1.5 });
+                    }
+                }
+            }
+        });
+    };
+
     return (
         <div className="w-full h-full min-h-[300px] rounded-xl overflow-hidden relative">
-            <MapContainer center={[20, 0]} zoom={1} style={{ height: '300px', width: '100%', background: 'var(--bg-color)', zIndex: 10 }} zoomControl={true} attributionControl={false} maxBounds={[[-90, -180], [90, 180]]} minZoom={1}>
+            <MapContainer center={[20, 0]} zoom={1} style={{ height: '300px', width: '100%', background: 'var(--bg-color)', zIndex: 10 }} zoomControl={true} scrollWheelZoom={true} attributionControl={false} maxBounds={[[-90, -180], [90, 180]]} minZoom={1}>
                 {/* TileLayer opcional para dar mais contexto */}
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png" />
                 {geoJsonData && (
                     <GeoJSON
+                        ref={geoJsonLayerRef}
+                        key={mapKey || targetCountry.code}
                         data={geoJsonData}
                         style={(feature: any) => {
                             let isTarget = false;
                             if (showHighlight && targetCountry) {
                                 const props = feature.properties || {};
                                 const name = props.name || '';
-                                const iso = props.iso_a2 || props.ISO_A2 || '';
                                 const targetName = targetCountry.mapName || targetCountry.name;
-                                isTarget = name.toLowerCase() === targetName.toLowerCase() || (iso && iso.toLowerCase() === targetCountry.code.toLowerCase());
+                                isTarget = normalizeString(name) === normalizeString(targetName);
                             }
                             return {
                                 fillColor: isTarget ? 'var(--color-primary)' : 'transparent',
@@ -56,9 +98,46 @@ function SrsMapViewer({ targetCountry, geoJsonData, showHighlight }: { targetCou
                                 fillOpacity: isTarget ? 0.6 : 0.2,
                             };
                         }}
+                        onEachFeature={(feature, layer: any) => {
+                            const props = feature.properties || {};
+                            const name = props.name || '';
+                            const targetNameEn = targetCountry.mapName || '';
+                            const targetNamePt = targetCountry.name || '';
+
+                            const isTarget =
+                                (name && targetNameEn && normalizeString(name) === normalizeString(targetNameEn)) ||
+                                (name && targetNamePt && normalizeString(name) === normalizeString(targetNamePt));
+
+                            layer.on('click', () => {
+                                if (hasGuessedRef.current) return;
+                                if (allowGuess && !showHighlight && name) {
+                                    hasGuessedRef.current = true;
+                                    const map = layer._map;
+                                    if (isTarget) {
+                                        layer.setStyle({ fillColor: '#22c55e', color: '#22c55e', fillOpacity: 0.6 });
+                                        layer.bindPopup(`<div style="text-align: center;"><strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong><br/><span style="color: #22c55e; font-weight: bold; font-size: 12px;">✅ É aqui!</span></div>`).openPopup();
+                                        // Zoom no país correto
+                                        const bounds = layer.getBounds();
+                                        if (bounds && bounds.isValid()) {
+                                            map.flyToBounds(bounds, { padding: [20, 20], maxZoom: 5, duration: 1.5 });
+                                        }
+                                        if (onCorrectGuess) onCorrectGuess();
+                                    } else {
+                                        layer.setStyle({ fillColor: '#ef4444', color: '#ef4444', fillOpacity: 0.6 });
+                                        layer.bindPopup(`<div style="text-align: center;"><strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong><br/><span style="color: #ef4444; font-weight: bold; font-size: 12px;">❌ Errou</span></div>`).openPopup();
+                                        // Destacar e dar zoom no país correto
+                                        highlightAndZoomCorrect(map, targetNameEn, targetNamePt);
+                                        if (onWrongGuess) onWrongGuess();
+                                    }
+                                } else if (name) {
+                                    layer.bindPopup(`<strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong>`).openPopup();
+                                }
+                            });
+                        }}
                     />
                 )}
                 {showHighlight && <MapZoomer targetCountry={targetCountry} geoJsonData={geoJsonData} isActive={showHighlight} />}
+                <MapCleanup targetCountry={targetCountry} />
             </MapContainer>
             {!showHighlight && (
                 <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md z-[1000] pointer-events-none">
@@ -81,6 +160,7 @@ export const SrsFlashcard = () => {
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
+    const timeoutRef = useRef<any>(null);
 
     useEffect(() => {
         if (category === 'map') {
@@ -103,12 +183,27 @@ export const SrsFlashcard = () => {
 
     const currentCard = deck[currentIndex];
 
+    const handleCorrectGuess = () => {
+        if (isFlipped) return;
+        setIsFlipped(true);
+    };
+
+    const handleWrongGuess = () => {
+        if (isFlipped) return;
+        setIsFlipped(true);
+    };
+
     const handleReveal = () => {
         setIsFlipped(true);
     };
 
     const handleRating = (isCorrect: boolean) => {
         if (!currentCard) return;
+
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
 
         const cardStep = (currentCard as any).sessionStep || 0;
         let shouldKeepInDeck = false;
@@ -150,7 +245,6 @@ export const SrsFlashcard = () => {
             setCurrentIndex(prev => prev + 1);
         } else {
             setIsFinished(true);
-            triggerConfetti();
         }
     };
 
@@ -196,9 +290,9 @@ export const SrsFlashcard = () => {
                     </div>
                 );
             case 'interactive_map_front':
-                return <SrsMapViewer targetCountry={country} geoJsonData={geoJsonData} showHighlight={false} />;
+                return <SrsMapViewer targetCountry={country} geoJsonData={geoJsonData} showHighlight={false} allowGuess={true} onCorrectGuess={handleCorrectGuess} onWrongGuess={handleWrongGuess} mapKey={`front-${currentIndex}-${country.code}`} />;
             case 'interactive_map_back':
-                return <SrsMapViewer targetCountry={country} geoJsonData={geoJsonData} showHighlight={true} />;
+                return <SrsMapViewer targetCountry={country} geoJsonData={geoJsonData} showHighlight={true} allowGuess={false} mapKey={`back-${currentIndex}-${country.code}`} />;
             case 'capital':
                 return <div className="text-3xl font-black text-[var(--color-secondary)]">{country.capital}</div>;
             case 'name':
@@ -241,7 +335,7 @@ export const SrsFlashcard = () => {
     const progress = ((currentIndex) / deck.length) * 100;
 
     return (
-        <div className="flex flex-col h-full animate-in fade-in duration-300">
+        <div className="flex flex-col h-full overflow-y-auto pb-4 hide-scrollbar animate-in fade-in duration-300">
             <div className="flex items-center gap-4 mb-6">
                 <button onClick={() => navigate('/srs')} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                     <ChevronLeft className="w-6 h-6" />
@@ -260,7 +354,7 @@ export const SrsFlashcard = () => {
                 </div>
 
                 {/* Card Front */}
-                <div className={`w-full bg-[var(--surface-color)] border-2 border-[var(--border-color)] rounded-2xl p-8 shadow-sm flex items-center justify-center min-h-[250px] transition-all duration-300 ${isFlipped ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+                <div className={`w-full bg-[var(--surface-color)] border-2 border-[var(--border-color)] rounded-2xl p-4 sm:p-8 shadow-sm flex items-center justify-center min-h-[250px] transition-all duration-300 ${isFlipped && category === 'map' ? 'border-[var(--color-primary)]' : (isFlipped ? 'opacity-50 scale-95' : 'opacity-100 scale-100')}`}>
                     {getCardContent('front')}
                 </div>
 
@@ -273,9 +367,9 @@ export const SrsFlashcard = () => {
                     </div>
                 )}
 
-                {/* Card Back */}
-                {isFlipped && (
-                    <div className="w-full bg-[var(--surface-color)] border-2 border-[var(--color-primary)] rounded-2xl p-8 shadow-lg flex items-center justify-center min-h-[200px] animate-in slide-in-from-top-4 fade-in duration-300 mt-2">
+                {/* Card Back - para mapa, não mostra verso separado pois o mapa da frente já mostra o resultado */}
+                {isFlipped && category !== 'map' && (
+                    <div className="w-full bg-[var(--surface-color)] border-2 border-[var(--color-primary)] rounded-2xl p-4 sm:p-8 shadow-lg flex items-center justify-center min-h-[200px] animate-in slide-in-from-top-4 fade-in duration-300 mt-2">
                         {getCardContent('back')}
                     </div>
                 )}
