@@ -247,7 +247,7 @@ export function useOnlineGame(): UseOnlineGameReturn {
 
         const players = rd.players ? Object.keys(rd.players) : [];
         const alivePlayers = rd.players
-            ? Object.entries(rd.players).filter(([_, p]) => p.isAlive).map(([id]) => id)
+            ? Object.entries(rd.players).filter(([, p]) => p.isAlive).map(([id]) => id)
             : [];
 
         const playersToCheck = rd.mode === 'survival' ? alivePlayers : players;

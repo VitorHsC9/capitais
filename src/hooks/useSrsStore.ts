@@ -138,7 +138,7 @@ export const useSrsStore = create<SrsStore>()(
                 const today = getTodayString();
 
                 // Reseta o contador se mudou o dia
-                let newCardsUsedToday = state.dailyNewCards.date === today
+                const newCardsUsedToday = state.dailyNewCards.date === today
                     ? state.dailyNewCards.count
                     : 0;
 
