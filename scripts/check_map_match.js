@@ -34,7 +34,7 @@ const getDailyCountryIndex = (totalCountries, salt = 0) => {
     let seed = 0;
     for (let i = 0; i < seedString.length; i++) {
         seed = ((seed << 5) - seed) + seedString.charCodeAt(i);
-        seed |= 0;
+        seed = Math.trunc(seed);
     }
     seed += salt;
 
