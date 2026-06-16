@@ -4,9 +4,9 @@ import { Check, Search } from 'lucide-react';
 import { normalizeText } from '../utils/validation';
 
 interface CountryAutocompleteProps {
-    onSelect: (countryName: string) => void;
-    placeholder?: string;
-    disabled?: boolean;
+    readonly onSelect: (countryName: string) => void;
+    readonly placeholder?: string;
+    readonly disabled?: boolean;
 }
 
 export function CountryAutocomplete({ onSelect, placeholder, disabled }: CountryAutocompleteProps) {
@@ -76,11 +76,16 @@ export function CountryAutocomplete({ onSelect, placeholder, disabled }: Country
                     {filteredCountries.map((country, index) => (
                         <li
                             key={country.code}
-                            onClick={() => handleSelect(country.name)}
-                            className={`px-4 py-3 cursor-pointer flex items-center justify-between ${index === selectedIndex ? 'bg-[var(--tone-4)]' : 'hover:bg-[var(--tone-5)]'}`}
+                            className={index === selectedIndex ? 'bg-[var(--tone-4)]' : 'hover:bg-[var(--tone-5)]'}
                         >
-                            <span className="font-bold text-[var(--tone-1)]">{country.name}</span>
-                            {index === selectedIndex && <Check className="w-4 h-4 text-[var(--tone-2)]" />}
+                            <button
+                                type="button"
+                                onClick={() => handleSelect(country.name)}
+                                className="w-full px-4 py-3 cursor-pointer flex items-center justify-between text-left"
+                            >
+                                <span className="font-bold text-[var(--tone-1)]">{country.name}</span>
+                                {index === selectedIndex && <Check className="w-4 h-4 text-[var(--tone-2)]" />}
+                            </button>
                         </li>
                     ))}
                 </ul>

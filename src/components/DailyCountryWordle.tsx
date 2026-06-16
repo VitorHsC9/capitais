@@ -4,8 +4,8 @@ import { COUNTRIES_DB, type Country } from '../data/countries';
 import { getDailyCountry, getDailySeed } from '../utils/daily';
 
 interface DailyCountryWordleProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
 type DailyGameState = 'playing' | 'won' | 'lost';
@@ -251,7 +251,8 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                     {!isFinished && guesses.length < 5 && (
                         <div className="flex gap-1 justify-center min-w-min mx-auto">
                             {[...Array(wordLength)].map((_, i) => (
-                                <div
+                                <button
+                                    type="button"
                                     key={i}
                                     onClick={() => setCursorIndex(i)}
                                     className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
@@ -260,7 +261,7 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                                     `}
                                 >
                                     {currentGuess[i] || ''}
-                                </div>
+                                </button>
                             ))}
                         </div>
                     )}

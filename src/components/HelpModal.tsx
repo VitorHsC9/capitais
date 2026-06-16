@@ -1,16 +1,22 @@
 import { X } from 'lucide-react';
 
 interface HelpModalProps {
-    onClose: () => void;
+    readonly onClose: () => void;
 }
 
 export function HelpModal({ onClose }: HelpModalProps) {
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content p-6" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay">
+            <button
+                type="button"
+                aria-label="Fechar modal"
+                className="absolute inset-0 cursor-default"
+                onClick={onClose}
+            />
+            <div className="modal-content p-6 z-10">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">Como Jogar</h2>
-                    <button onClick={onClose}><X className="w-5 h-5 text-[var(--text-secondary)]" /></button>
+                    <button type="button" onClick={onClose}><X className="w-5 h-5 text-[var(--text-secondary)]" /></button>
                 </div>
 
                 <div className="space-y-4 text-sm text-[var(--text-secondary)]">

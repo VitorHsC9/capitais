@@ -3,8 +3,8 @@ import { useDailyWordle } from '../hooks/useDailyWordle';
 import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, Delete, ArrowRight } from 'lucide-react';
 
 interface DailyWordleProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
 export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
@@ -93,7 +93,8 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
                     {!isFinished && guesses.length < 5 && (
                         <div className="flex gap-1 justify-center min-w-min mx-auto">
                             {[...Array(wordLength)].map((_, i) => (
-                                <div
+                                <button
+                                    type="button"
                                     key={i}
                                     onClick={() => setCursorIndex(i)}
                                     className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
@@ -102,7 +103,7 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
                                     `}
                                 >
                                     {currentGuess[i] || ''}
-                                </div>
+                                </button>
                             ))}
                         </div>
                     )}

@@ -2,22 +2,24 @@ import { X } from 'lucide-react';
 import type { GameState } from '../hooks/useGameStore';
 
 interface StatsModalProps {
-    onClose: () => void;
-    onRestart: () => void;
-    gameState: GameState;
-    score: number;
-    correctCount: number;
-    totalQuestions: number;
-    stats: {
-        totalGames: number;
-        totalCorrect: number;
-        totalQuestions: number;
-        bestStreak: number;
-        totalScore: number;
+    readonly onClose: () => void;
+    readonly onRestart: () => void;
+    readonly gameState: GameState;
+    readonly score: number;
+    readonly correctCount: number;
+    readonly totalQuestions: number;
+    readonly stats: {
+        readonly totalGames: number;
+        readonly totalCorrect: number;
+        readonly totalQuestions: number;
+        readonly bestStreak: number;
+        readonly totalScore: number;
     };
 }
 
 export function StatsModal({ onClose, onRestart, gameState, score, correctCount, totalQuestions, stats }: StatsModalProps) {
+    const canCloseByOverlay = gameState === 'playing';
+
     const handleClose = () => {
         onClose();
         if (gameState === 'finished' || gameState === 'game_over') {
@@ -25,11 +27,23 @@ export function StatsModal({ onClose, onRestart, gameState, score, correctCount,
         }
     };
 
+    const handleOverlayClick = () => {
+        if (canCloseByOverlay) {
+            onClose();
+        }
+    };
+
     return (
-        <div className="modal-overlay" onClick={() => gameState === 'playing' ? onClose() : null}>
-            <div className="modal-content p-6" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay">
+            <button
+                type="button"
+                aria-label="Fechar estatísticas"
+                className="absolute inset-0 cursor-default"
+                onClick={handleOverlayClick}
+            />
+            <div className="modal-content p-6 z-10">
                 <div className="flex justify-end mb-2">
-                    <button onClick={handleClose}>
+                    <button type="button" onClick={handleClose}>
                         <X className="w-5 h-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]" />
                     </button>
                 </div>
@@ -43,8 +57,8 @@ export function StatsModal({ onClose, onRestart, gameState, score, correctCount,
                             { label: 'Vitórias', val: `${Math.round((stats.totalCorrect / (stats.totalQuestions || 1)) * 100) || 0}%` },
                             { label: 'Sequência', val: stats.bestStreak },
                             { label: 'Pontos', val: stats.totalScore || score },
-                        ].map((stat, i) => (
-                            <div key={i} className="flex flex-col items-center">
+                        ].map((stat) => (
+                            <div key={stat.label} className="flex flex-col items-center">
                                 <div className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">{stat.val}</div>
                                 <div className="text-[9px] uppercase font-bold text-[var(--text-secondary)] mt-1">{stat.label}</div>
                             </div>
@@ -62,6 +76,7 @@ export function StatsModal({ onClose, onRestart, gameState, score, correctCount,
                                 </p>
                             </div>
                             <button
+                                type="button"
                                 onClick={() => { onRestart(); onClose(); }}
                                 className="w-full py-4 bg-[var(--color-correct)] text-white font-bold uppercase text-sm rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all"
                             >

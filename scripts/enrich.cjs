@@ -8,7 +8,7 @@ async function fetchCountries() {
 (async function main() {
     const restData = await fetchCountries();
     if (!Array.isArray(restData)) {
-        console.error("API error, not an array", restData);
+        console.error("API error: expected a countries array");
         return;
     }
     const restMap = {};
