@@ -3,7 +3,7 @@ import { useSupremeCountries } from '../hooks/useSupremeCountries';
 import { MultiCountryMap } from './MultiCountryMap';
 
 interface SupremeCountriesProps {
-    onBack: () => void;
+    readonly onBack: () => void;
 }
 
 export function SupremeCountries({ onBack }: SupremeCountriesProps) {

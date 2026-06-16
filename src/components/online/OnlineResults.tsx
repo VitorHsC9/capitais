@@ -2,8 +2,8 @@ import { RotateCcw, Home } from 'lucide-react';
 import type { useOnlineGame } from '../../hooks/useOnlineGame';
 
 interface OnlineResultsProps {
-    game: ReturnType<typeof useOnlineGame>;
-    onBack: () => void;
+    readonly game: ReturnType<typeof useOnlineGame>;
+    readonly onBack: () => void;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -18,6 +18,12 @@ const MODE_LABELS: Record<string, string> = {
     speed: '⚡ Velocidade',
     survival: '💀 Sobrevivência',
     infinite: '♾️ Infinito',
+};
+
+const getScoreCardClass = (isTopResult: boolean, isDraw: boolean) => {
+    if (isTopResult) return 'border-[var(--color-accent)] bg-[var(--color-accent)]/10';
+    if (isDraw) return 'border-[var(--border-color)] bg-[var(--surface-color)]';
+    return 'border-[var(--color-error)]/30 bg-[var(--surface-color)]';
 };
 
 export function OnlineResults({ game, onBack }: OnlineResultsProps) {
@@ -91,12 +97,7 @@ export function OnlineResults({ game, onBack }: OnlineResultsProps) {
             {/* Score Cards */}
             <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
                 {/* My Card */}
-                <div className={`p-5 rounded-2xl border-2 text-center ${isWinner
-                    ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/10'
-                    : isDraw
-                        ? 'border-[var(--border-color)] bg-[var(--surface-color)]'
-                        : 'border-[var(--color-error)]/30 bg-[var(--surface-color)]'
-                    }`}>
+                <div className={`p-5 rounded-2xl border-2 text-center ${getScoreCardClass(isWinner, isDraw)}`}>
                     <div className="w-12 h-12 mx-auto rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary)] flex items-center justify-center font-black text-lg border-2 border-[var(--color-primary)]/30 mb-2">
                         {myPlayer?.name.charAt(0).toUpperCase() || '?'}
                     </div>
@@ -106,12 +107,7 @@ export function OnlineResults({ game, onBack }: OnlineResultsProps) {
                 </div>
 
                 {/* Opponent Card */}
-                <div className={`p-5 rounded-2xl border-2 text-center ${isLoser
-                    ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/10'
-                    : isDraw
-                        ? 'border-[var(--border-color)] bg-[var(--surface-color)]'
-                        : 'border-[var(--color-error)]/30 bg-[var(--surface-color)]'
-                    }`}>
+                <div className={`p-5 rounded-2xl border-2 text-center ${getScoreCardClass(isLoser, isDraw)}`}>
                     <div className="w-12 h-12 mx-auto rounded-full bg-[var(--color-secondary)]/20 text-[var(--color-secondary)] flex items-center justify-center font-black text-lg border-2 border-[var(--color-secondary)]/30 mb-2">
                         {opponent?.name.charAt(0).toUpperCase() || '?'}
                     </div>

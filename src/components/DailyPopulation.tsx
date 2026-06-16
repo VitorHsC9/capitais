@@ -3,16 +3,57 @@ import { ArrowLeft, CheckCircle, ArrowRight, Share2, Clock } from 'lucide-react'
 import { COUNTRIES_DB, type Country } from '../data/countries';
 import { getDailySeed } from '../utils/daily';
 
+type PopulationGameStatus = 'playing' | 'won' | 'lost';
+
 interface DailyPopulationProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
 const STORAGE_KEY = 'quiz_capitais_daily_population_v1';
 
+const hashSeed = (seedString: string) => {
+    let seedNum = 0;
+    for (const char of seedString) {
+        seedNum = ((seedNum << 5) - seedNum) + (char.codePointAt(0) || 0);
+        seedNum = Math.trunc(seedNum);
+    }
+    return seedNum;
+};
+
+const getCardFeedbackClass = (showFeedback: boolean, isCorrect: boolean) => {
+    if (!showFeedback) return 'bg-[var(--surface-color)] border-[var(--border-color)]';
+    return isCorrect
+        ? 'bg-[var(--color-correct)]/10 border-[var(--color-correct)]'
+        : 'bg-[var(--color-error)]/10 border-[var(--color-error)]';
+};
+
+const getRankClass = (showFeedback: boolean, isCorrect: boolean) => {
+    if (!showFeedback) return 'bg-[var(--bg-color)] text-[var(--text-secondary)]';
+    return isCorrect
+        ? 'bg-[var(--color-correct)] text-white'
+        : 'bg-[var(--color-error)] text-white';
+};
+
+const getCorrectState = (status: PopulationGameStatus, feedback: boolean[], index: number) => {
+    if (status === 'won') return true;
+    if (status === 'lost') return feedback[index];
+    return false;
+};
+
+const getResultPanelClass = (status: PopulationGameStatus) => {
+    if (status === 'won') return 'bg-[var(--surface-color)] border-[var(--border-color)]';
+    return 'bg-[var(--color-error)]/10 border-[var(--color-error)]';
+};
+
+const getResultTitleClass = (status: PopulationGameStatus) => {
+    if (status === 'won') return 'text-[var(--color-correct)]';
+    return 'text-[var(--color-error)]';
+};
+
 export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProps) {
     const [items, setItems] = useState<Country[]>([]);
-    const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
+    const [status, setStatus] = useState<PopulationGameStatus>('playing');
     const [feedback, setFeedback] = useState<boolean[]>([]);
     const [timeLeftStr, setTimeLeftStr] = useState('');
     const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
@@ -20,14 +61,8 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
     // Initialize game
     useEffect(() => {
         const seedString = getDailySeed();
-        const saved = localStorage.getItem(STORAGE_KEY);
-
-        // Hash the seed string to a number
-        let seedNum = 0;
-        for (let i = 0; i < seedString.length; i++) {
-            seedNum = ((seedNum << 5) - seedNum) + seedString.charCodeAt(i);
-            seedNum |= 0;
-        }
+        const saved = globalThis.localStorage.getItem(STORAGE_KEY);
+        const seedNum = hashSeed(seedString);
 
         // Simple PRNG based on seed
         const prng = (s: number) => {
@@ -68,11 +103,11 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
                         return;
                     }
                 } else {
-                    localStorage.removeItem(STORAGE_KEY);
+                    globalThis.localStorage.removeItem(STORAGE_KEY);
                 }
             } catch (e) {
                 console.error("Error parsing saved state", e);
-                localStorage.removeItem(STORAGE_KEY);
+                globalThis.localStorage.removeItem(STORAGE_KEY);
             }
         }
 
@@ -89,7 +124,7 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
             tomorrow.setHours(0, 0, 0, 0);
-            const distance = tomorrow.getTime() - now.getTime();
+            const distance = tomorrow.getTime() - Date.now();
 
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -131,6 +166,24 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
         setDraggedItemIndex(null);
     };
 
+    const moveItem = (fromIndex: number, toIndex: number) => {
+        if (status !== 'playing' || toIndex < 0 || toIndex >= items.length) return;
+        const newItems = [...items];
+        const [movedItem] = newItems.splice(fromIndex, 1);
+        newItems.splice(toIndex, 0, movedItem);
+        setItems(newItems);
+    };
+
+    const handleItemKeyDown = (event: React.KeyboardEvent, index: number) => {
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            moveItem(index, index - 1);
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            moveItem(index, index + 1);
+        }
+    };
+
     const handleConfirm = () => {
         // Check order - Descending (Largest to Smallest)
         const sorted = [...items].sort((a, b) => (b.population || 0) - (a.population || 0));
@@ -138,12 +191,12 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
 
         setFeedback(newFeedback);
 
-        const allCorrect = newFeedback.every(f => f);
+        const allCorrect = newFeedback.every(Boolean);
         const seed = getDailySeed();
 
         if (allCorrect) {
             setStatus('won');
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 date: seed,
                 status: 'won',
                 items: items // Save the winning order
@@ -151,7 +204,7 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
         } else {
             setStatus('lost');
             // Keep user's order to show feedback
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 date: seed,
                 status: 'lost',
                 items: items // Save the user's wrong order
@@ -194,35 +247,32 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
 
                 <div className="flex flex-col gap-3 mb-8">
                     {items.map((country, index) => {
-                        const isCorrect = status === 'won' ? true : (status === 'lost' ? feedback[index] : false);
+                        const isCorrect = getCorrectState(status, feedback, index);
                         const showFeedback = status === 'won' || status === 'lost';
+                        const cardFeedbackClass = getCardFeedbackClass(showFeedback, isCorrect);
+                        const rankClass = getRankClass(showFeedback, isCorrect);
 
                         return (
-                            <div
+                            <button
+                                type="button"
                                 key={country.name}
+                                tabIndex={status === 'playing' ? 0 : -1}
                                 draggable={status === 'playing'}
                                 onDragStart={(e) => handleDragStart(e, index)}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDragEnd={handleDragEnd}
+                                onKeyDown={(e) => handleItemKeyDown(e, index)}
                                 className={`
-                                    relative p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group
+                                    relative p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group w-full text-left
                                     ${status === 'playing' ? 'cursor-grab active:cursor-grabbing hover:border-[var(--text-primary)]' : ''}
-                                    ${showFeedback
-                                        ? (isCorrect
-                                            ? 'bg-[var(--color-correct)]/10 border-[var(--color-correct)]'
-                                            : 'bg-[var(--color-error)]/10 border-[var(--color-error)]')
-                                        : 'bg-[var(--surface-color)] border-[var(--border-color)]'
-                                    }
+                                    ${cardFeedbackClass}
                                     ${draggedItemIndex === index ? 'opacity-50 scale-95' : ''}
                                 `}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`
                                         w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm
-                                        ${showFeedback
-                                            ? (isCorrect ? 'bg-[var(--color-correct)] text-white' : 'bg-[var(--color-error)] text-white')
-                                            : 'bg-[var(--bg-color)] text-[var(--text-secondary)]'
-                                        }
+                                        ${rankClass}
                                     `}>
                                         {index + 1}
                                     </div>
@@ -247,7 +297,7 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
                                 {status === 'won' && (
                                     <CheckCircle className="w-6 h-6 text-[var(--color-correct)]" />
                                 )}
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
@@ -261,8 +311,8 @@ export function DailyPopulation({ onBack, onNextChallenge }: DailyPopulationProp
                     </button>
                 ) : (
                     <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 space-y-4">
-                        <div className={`p-6 rounded-2xl border-2 text-center ${status === 'won' ? 'bg-[var(--surface-color)] border-[var(--border-color)]' : 'bg-[var(--color-error)]/10 border-[var(--color-error)]'}`}>
-                            <h2 className={`text-2xl font-black uppercase mb-2 ${status === 'won' ? 'text-[var(--color-correct)]' : 'text-[var(--color-error)]'}`}>
+                        <div className={`p-6 rounded-2xl border-2 text-center ${getResultPanelClass(status)}`}>
+                            <h2 className={`text-2xl font-black uppercase mb-2 ${getResultTitleClass(status)}`}>
                                 {status === 'won' ? 'Parabéns!' : 'Não foi dessa vez!'}
                             </h2>
                             <p className="text-[var(--text-secondary)] font-medium mb-6">

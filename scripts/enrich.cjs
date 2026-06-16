@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 async function fetchCountries() {
     const res = await fetch('https://restcountries.com/v3.1/all?fields=name,capital,cca2,cca3,translations');
@@ -29,28 +29,35 @@ async function fetchCountries() {
     // Regex matches each country object
     const regex = /{\s*name:\s*'([^']+)'[\s\S]*?code:\s*'([^']+)'[\s\S]*?},/g;
 
+    const collectAcceptedNames = (restCountry, match) => {
+        const names = new Set([
+            restCountry.name?.common,
+            restCountry.name?.official,
+            restCountry.translations?.por?.common,
+            restCountry.translations?.por?.official,
+        ].filter(Boolean));
+
+        const mapNameMatch = /mapName:\s*'([^']+)'/.exec(match);
+        if (mapNameMatch) names.add(mapNameMatch[1]);
+        return names;
+    };
+
+    const collectAcceptedCapitals = (restCountry) => {
+        const capitals = new Set();
+        if (restCountry.capital?.length > 0) {
+            capitals.add(restCountry.capital[0]);
+        }
+        return capitals;
+    };
+
     code = code.replace(regex, (match, name, codeStr) => {
         const cCode = codeStr.toLowerCase();
         const restCountry = restMap[cCode];
         if (restCountry && !match.includes('acceptedNames:')) {
-            const names = new Set();
-            const capitals = new Set();
+            const names = collectAcceptedNames(restCountry, match);
+            const capitals = collectAcceptedCapitals(restCountry);
 
-            if (restCountry.name && restCountry.name.common) names.add(restCountry.name.common);
-            if (restCountry.name && restCountry.name.official) names.add(restCountry.name.official);
-            if (restCountry.translations && restCountry.translations.por) {
-                names.add(restCountry.translations.por.common);
-                names.add(restCountry.translations.por.official);
-            }
-
-            const mapNameMatch = match.match(/mapName:\s*'([^']+)'/);
-            if (mapNameMatch) names.add(mapNameMatch[1]);
-
-            if (restCountry.capital && restCountry.capital.length > 0) {
-                capitals.add(restCountry.capital[0]);
-            }
-
-            const capMatch = match.match(/capital:\s*'([^']+)'/);
+            const capMatch = /capital:\s*'([^']+)'/.exec(match);
             const origCap = capMatch ? capMatch[1] : '';
 
             const finalNames = [...names].filter(n => n && n.toLowerCase() !== name.toLowerCase());
@@ -59,7 +66,7 @@ async function fetchCountries() {
             const addNames = finalNames.length > 0 ? `\n    acceptedNames: ${JSON.stringify(finalNames)},` : '';
             const addCaps = finalCaps.length > 0 ? `\n    acceptedCapitals: ${JSON.stringify(finalCaps)},` : '';
 
-            return match.replace(new RegExp(`code:\\s*'${codeStr}',`), `code: '${codeStr}',${addNames}${addCaps}`);
+            return match.replace(new RegExp(String.raw`code:\s*'${codeStr}',`), `code: '${codeStr}',${addNames}${addCaps}`);
         }
         return match;
     });

@@ -3,8 +3,20 @@ import { useSupremeFinal } from '../hooks/useSupremeFinal';
 import { MultiCountryMap } from './MultiCountryMap';
 
 interface SupremeFinalProps {
-    onBack: () => void;
+    readonly onBack: () => void;
 }
+
+const getCountryRowClass = (isFull: boolean, isPartial: boolean) => {
+    if (isFull) return 'bg-green-500/10 border-green-500';
+    if (isPartial) return 'bg-yellow-500/10 border-yellow-500';
+    return 'bg-[var(--surface-color)] border-[var(--border-color)]';
+};
+
+const getSeparatorClass = (isFull: boolean, isPartial: boolean) => {
+    if (isFull) return 'bg-green-500/20';
+    if (isPartial) return 'bg-yellow-500/20';
+    return 'bg-[var(--border-color)]';
+};
 
 export function SupremeFinal({ onBack }: SupremeFinalProps) {
     const { input, handleInput, guessedCountries, guessedCapitals, countriesByContinent, highlights, progress, totalPoints, timeLeft, gameStatus, resetGame } = useSupremeFinal();
@@ -109,12 +121,7 @@ export function SupremeFinal({ onBack }: SupremeFinalProps) {
                                     <div
                                         key={country.code}
                                         className={`p-2 rounded-xl border-2 transition-all duration-300 flex items-center gap-2 relative overflow-hidden group
-                                            ${isFull
-                                                ? 'bg-green-500/10 border-green-500'
-                                                : isPartial
-                                                    ? 'bg-yellow-500/10 border-yellow-500'
-                                                    : 'bg-[var(--surface-color)] border-[var(--border-color)]'
-                                            }`}
+                                            ${getCountryRowClass(isFull, isPartial)}`}
                                     >
                                         {/* Country Slot */}
                                         <div className={`flex-1 p-3 rounded-lg text-center text-sm font-bold transition-all relative z-10
@@ -123,7 +130,7 @@ export function SupremeFinal({ onBack }: SupremeFinalProps) {
                                         </div>
 
                                         {/* Separator */}
-                                        <div className={`w-px h-8 ${isFull ? 'bg-green-500/20' : isPartial ? 'bg-yellow-500/20' : 'bg-[var(--border-color)]'}`} />
+                                        <div className={`w-px h-8 ${getSeparatorClass(isFull, isPartial)}`} />
 
                                         {/* Capital Slot */}
                                         <div className={`flex-1 p-3 rounded-lg text-center text-sm font-bold transition-all relative z-10

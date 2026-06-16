@@ -4,13 +4,13 @@ import { Play, Trophy, Loader2, CheckCircle, Clock, Crown, GraduationCap, Wifi }
 import { useDailyStatus } from '../hooks/useDailyStatus';
 
 interface GameCardProps {
-    title: string;
-    description: string;
-    imageSrc: string;
-    onClick: () => void;
-    colorClass: string; // e.g., "group-hover:bg-pink-500"
-    isCompleted?: boolean;
-    timeLeft?: string;
+    readonly title: string;
+    readonly description: string;
+    readonly imageSrc: string;
+    readonly onClick: () => void;
+    readonly colorClass: string; // e.g., "group-hover:bg-pink-500"
+    readonly isCompleted?: boolean;
+    readonly timeLeft?: string;
 }
 
 function GameCard({ title, description, imageSrc, onClick, colorClass, isCompleted, timeLeft }: GameCardProps) {

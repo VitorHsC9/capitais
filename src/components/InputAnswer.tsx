@@ -2,13 +2,12 @@ import { useState, useEffect, type KeyboardEvent } from 'react';
 import { Check, CornerDownLeft } from 'lucide-react';
 
 interface InputAnswerProps {
-  onSubmit: (answer: string) => void;
-  isAnswered: boolean;
-  correctAnswer: string;
-  acceptedAnswers?: string[];
-  nextQuestion: () => void;
-  isDark: boolean;
-  placeholder?: string;
+  readonly onSubmit: (answer: string) => void;
+  readonly isAnswered: boolean;
+  readonly correctAnswer: string;
+  readonly acceptedAnswers?: string[];
+  readonly nextQuestion: () => void;
+  readonly placeholder?: string;
 }
 
 export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, acceptedAnswers, nextQuestion, placeholder }: InputAnswerProps) => {
@@ -33,16 +32,21 @@ export const InputAnswer = ({ onSubmit, isAnswered, correctAnswer, acceptedAnswe
   const normalize = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
   const isCorrect = isAnswered && (
     normalize(value) === normalize(correctAnswer) ||
-    (acceptedAnswers && acceptedAnswers.some(a => normalize(value) === normalize(a)))
+    acceptedAnswers?.some(a => normalize(value) === normalize(a))
   );
+
+  const answerClass = isCorrect
+    ? 'border-[var(--color-correct)] bg-[var(--color-correct)] text-white'
+    : 'border-[var(--color-error)] text-[var(--color-error)]';
+  const inputClass = isAnswered
+    ? answerClass
+    : 'border-[var(--tone-4)] bg-transparent focus-within:border-[var(--tone-2)] text-[var(--tone-1)]';
 
   return (
     <div className="w-full space-y-3">
       <div className={`
         flex items-center justify-between border-2 rounded px-4 py-3 transition-colors
-        ${isAnswered
-          ? (isCorrect ? 'border-[var(--color-correct)] bg-[var(--color-correct)] text-white' : 'border-[var(--color-error)] text-[var(--color-error)]')
-          : 'border-[var(--tone-4)] bg-transparent focus-within:border-[var(--tone-2)] text-[var(--tone-1)]'}
+        ${inputClass}
       `}>
         <input
           type="text"

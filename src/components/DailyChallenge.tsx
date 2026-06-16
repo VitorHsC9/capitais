@@ -5,9 +5,11 @@ import { useDailyGame } from '../hooks/useDailyGame';
 import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface DailyChallengeProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
+
+const ATTEMPT_KEYS = ['attempt-1', 'attempt-2', 'attempt-3', 'attempt-4', 'attempt-5'];
 
 export function DailyChallenge({ onBack, onNextChallenge }: DailyChallengeProps) {
     const { targetCountry, guesses, gameStatus, submitGuess, attemptsLeft, nextDailyTime } = useDailyGame();
@@ -16,7 +18,7 @@ export function DailyChallenge({ onBack, onNextChallenge }: DailyChallengeProps)
     // Countdown timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -116,9 +118,9 @@ export function DailyChallenge({ onBack, onNextChallenge }: DailyChallengeProps)
                         <div className="space-y-4">
                             <h2 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight">Que país é esse?</h2>
                             <div className="flex justify-center gap-2">
-                                {[...Array(5)].map((_, i) => (
+                                {ATTEMPT_KEYS.map((key, i) => (
                                     <div
-                                        key={i}
+                                        key={key}
                                         className={`w-4 h-4 rounded-full border-2 border-[var(--border-color)] transition-colors ${i < guesses.length ? 'bg-[var(--color-error)]' : 'bg-[var(--surface-color)]'
                                             }`}
                                     />
@@ -142,8 +144,8 @@ export function DailyChallenge({ onBack, onNextChallenge }: DailyChallengeProps)
                         {/* Previous Guesses List */}
                         {guesses.length > 0 && (
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
-                                {guesses.map((g, i) => (
-                                    <span key={i} className="text-[10px] px-2 py-1 bg-[var(--surface-color)] text-[var(--text-secondary)] rounded-lg border-2 border-[var(--border-color)] line-through opacity-70 font-bold">
+                                {guesses.map((g) => (
+                                    <span key={g} className="text-[10px] px-2 py-1 bg-[var(--surface-color)] text-[var(--text-secondary)] rounded-lg border-2 border-[var(--border-color)] line-through opacity-70 font-bold">
                                         {g}
                                     </span>
                                 ))}

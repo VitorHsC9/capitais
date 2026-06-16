@@ -1,6 +1,6 @@
 
-import fs from 'fs';
-import https from 'https';
+import fs from 'node:fs';
+import https from 'node:https';
 
 // Mock the countries data since we can't easily import TS directly in JS without build
 // I will copy the structure of one country to test, or better, I will read the file and extract names
@@ -13,7 +13,7 @@ const seededRandom = (seed) => {
     const m = 0x80000000;
     const a = 1103515245;
     const c = 12345;
-    let state = seed ? seed : Math.floor(Math.random() * (m - 1));
+    let state = seed || Math.floor(Math.random() * (m - 1));
 
     return () => {
         state = (a * state + c) % m;
@@ -21,19 +21,13 @@ const seededRandom = (seed) => {
     };
 };
 
-const getDailySeed = () => {
-    const now = new Date();
-    const baseSeed = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    return baseSeed;
-}
-
 const getDailyCountryIndex = (totalCountries, salt = 0) => {
     const now = new Date();
-    let seedString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const seedString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
 
     let seed = 0;
-    for (let i = 0; i < seedString.length; i++) {
-        seed = ((seed << 5) - seed) + seedString.charCodeAt(i);
+    for (const char of seedString) {
+        seed = ((seed << 5) - seed) + (char.codePointAt(0) || 0);
         seed = Math.trunc(seed);
     }
     seed += salt;

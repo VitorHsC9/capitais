@@ -32,8 +32,8 @@ export const useDailyMix = () => {
     const generateDailyQuestions = useCallback((dateStr: string) => {
         // Create a seed from the date string (e.g., "2023-10-27")
         let seed = 0;
-        for (let i = 0; i < dateStr.length; i++) {
-            seed = ((seed << 5) - seed) + dateStr.charCodeAt(i);
+        for (const char of dateStr) {
+            seed = ((seed << 5) - seed) + (char.codePointAt(0) || 0);
             seed = Math.trunc(seed);
         }
         const random = mulberry32(seed);
@@ -58,7 +58,7 @@ export const useDailyMix = () => {
             while (options.length < 4) {
                 const randomOptionIndex = Math.floor(random() * pool.length);
                 const option = pool[randomOptionIndex];
-                if (!options.find(o => o.name === option.name)) {
+                if (!options.some(o => o.name === option.name)) {
                     options.push(option);
                 }
             }
@@ -86,7 +86,7 @@ export const useDailyMix = () => {
             tomorrow.setHours(0, 0, 0, 0);
             setNextDailyTime(tomorrow.getTime());
 
-            const saved = localStorage.getItem(STORAGE_KEY);
+            const saved = globalThis.localStorage.getItem(STORAGE_KEY);
             let parsed: DailyMixState | null = null;
 
             if (saved) {
@@ -97,7 +97,7 @@ export const useDailyMix = () => {
                 }
             }
 
-            if (parsed && parsed.date === dateStr) {
+            if (parsed?.date === dateStr) {
                 setGameState(parsed);
             } else {
                 // New day, new game
@@ -110,7 +110,7 @@ export const useDailyMix = () => {
                     answers: []
                 };
                 setGameState(newState);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+                globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
             }
         };
 
@@ -120,7 +120,7 @@ export const useDailyMix = () => {
     }, [generateDailyQuestions]);
 
     const submitAnswer = (answer: string) => {
-        if (!gameState || gameState.status !== 'playing') return;
+        if (gameState?.status !== 'playing') return;
 
         const currentQ = gameState.questions[gameState.currentIndex];
         let isCorrect = false;
@@ -148,7 +148,7 @@ export const useDailyMix = () => {
         };
 
         setGameState(newState);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+        globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
     };
 
     return {

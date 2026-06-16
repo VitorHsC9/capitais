@@ -4,8 +4,8 @@ import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, Users, Globe, Langu
 import { CountryAutocomplete } from './CountryAutocomplete';
 
 interface DailyCountryProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
 function formatPopulation(pop: number): string {
@@ -18,6 +18,23 @@ function formatPopulation(pop: number): string {
     return `Entre ${lower} e ${upper} milhões`;
 }
 
+const normalizeGuess = (guess: string) => guess.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const getHintClass = (isVisible: boolean) => {
+    if (isVisible) return 'bg-[var(--bg-color)] border-[var(--border-color)] opacity-100';
+    return 'bg-[var(--surface-color)] border-transparent opacity-50 blur-[2px]';
+};
+
+const getPopulationHint = (population?: number) => {
+    if (!population) return 'N/A';
+    return formatPopulation(population);
+};
+
+const getNeighborsHint = (neighboringCountries?: string[]) => {
+    if (!neighboringCountries?.length) return 'Nenhum / Ilha';
+    return neighboringCountries.join(', ');
+};
+
 export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
     const { targetCountry, gameStatus, guesses, submitGuess, nextDailyTime, maxAttempts } = useDailyCountry();
     const [timeLeftStr, setTimeLeftStr] = useState('');
@@ -26,7 +43,7 @@ export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
     // Countdown timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -44,8 +61,8 @@ export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
 
     const handleGuess = (guess: string) => {
         if (!targetCountry) return;
-        const normalizedGuess = guess.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const normalizedTarget = targetCountry.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const normalizedGuess = normalizeGuess(guess);
+        const normalizedTarget = normalizeGuess(targetCountry.name);
 
         if (normalizedGuess !== normalizedTarget) {
             setLastIncorrectGuess(guess);
@@ -58,6 +75,10 @@ export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
 
     const isFinished = gameStatus !== 'playing';
     const misses = guesses.length;
+    const showContinentHint = misses >= 1 || isFinished;
+    const showPopulationHint = misses >= 2 || isFinished;
+    const showNeighborsHint = misses >= 3 || isFinished;
+    const showLanguageHint = misses >= 4 || isFinished;
 
     return (
         <div className="flex flex-col h-full animate-in fade-in duration-300 relative">
@@ -82,43 +103,43 @@ export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
                     </div>
 
                     {/* Hint 1: Continent (Always visible after 1 miss or if game over) */}
-                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${misses >= 1 || isFinished ? 'bg-[var(--bg-color)] border-[var(--border-color)] opacity-100' : 'bg-[var(--surface-color)] border-transparent opacity-50 blur-[2px]'}`}>
+                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${getHintClass(showContinentHint)}`}>
                         <Globe className="w-5 h-5 text-[var(--text-secondary)]" />
                         <div className="flex-1">
                             <div className="text-[10px] font-black uppercase text-[var(--text-secondary)] tracking-wider">Continente</div>
-                            <div className="font-bold text-[var(--text-primary)]">{(misses >= 1 || isFinished) ? targetCountry.continent : '???'}</div>
+                            <div className="font-bold text-[var(--text-primary)]">{showContinentHint ? targetCountry.continent : '???'}</div>
                         </div>
                     </div>
 
                     {/* Hint 2: Population */}
-                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${misses >= 2 || isFinished ? 'bg-[var(--bg-color)] border-[var(--border-color)] opacity-100' : 'bg-[var(--surface-color)] border-transparent opacity-50 blur-[2px]'}`}>
+                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${getHintClass(showPopulationHint)}`}>
                         <Users className="w-5 h-5 text-[var(--text-secondary)]" />
                         <div className="flex-1">
                             <div className="text-[10px] font-black uppercase text-[var(--text-secondary)] tracking-wider">População</div>
                             <div className="font-bold text-[var(--text-primary)]">
-                                {(misses >= 2 || isFinished) ? (targetCountry.population ? formatPopulation(targetCountry.population) : 'N/A') : '???'}
+                                {showPopulationHint ? getPopulationHint(targetCountry.population) : '???'}
                             </div>
                         </div>
                     </div>
 
                     {/* Hint 3: Neighbors */}
-                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${misses >= 3 || isFinished ? 'bg-[var(--bg-color)] border-[var(--border-color)] opacity-100' : 'bg-[var(--surface-color)] border-transparent opacity-50 blur-[2px]'}`}>
+                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${getHintClass(showNeighborsHint)}`}>
                         <Map className="w-5 h-5 text-[var(--text-secondary)]" />
                         <div className="flex-1">
                             <div className="text-[10px] font-black uppercase text-[var(--text-secondary)] tracking-wider">Vizinhos</div>
                             <div className="font-bold text-[var(--text-primary)]">
-                                {(misses >= 3 || isFinished) ? (targetCountry.neighboringCountries?.length ? targetCountry.neighboringCountries.join(', ') : 'Nenhum / Ilha') : '???'}
+                                {showNeighborsHint ? getNeighborsHint(targetCountry.neighboringCountries) : '???'}
                             </div>
                         </div>
                     </div>
 
                     {/* Hint 4: Language */}
-                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${misses >= 4 || isFinished ? 'bg-[var(--bg-color)] border-[var(--border-color)] opacity-100' : 'bg-[var(--surface-color)] border-transparent opacity-50 blur-[2px]'}`}>
+                    <div className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${getHintClass(showLanguageHint)}`}>
                         <Languages className="w-5 h-5 text-[var(--text-secondary)]" />
                         <div className="flex-1">
                             <div className="text-[10px] font-black uppercase text-[var(--text-secondary)] tracking-wider">Idioma</div>
                             <div className="font-bold text-[var(--text-primary)]">
-                                {(misses >= 4 || isFinished) ? (targetCountry.mainLanguage || 'N/A') : '???'}
+                                {showLanguageHint ? (targetCountry.mainLanguage || 'N/A') : '???'}
                             </div>
                         </div>
                     </div>
@@ -126,8 +147,8 @@ export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
 
                 {/* Guesses History */}
                 <div className="flex flex-col gap-2">
-                    {guesses.map((g, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm p-3 rounded-xl bg-[var(--surface-color)] border-2 border-[var(--border-color)] text-[var(--text-secondary)] font-bold">
+                    {guesses.map((g) => (
+                        <div key={g} className="flex items-center gap-2 text-sm p-3 rounded-xl bg-[var(--surface-color)] border-2 border-[var(--border-color)] text-[var(--text-secondary)] font-bold">
                             <div className="w-6 h-6 flex items-center justify-center bg-[var(--color-error)] text-white rounded-lg text-xs font-black border-2 border-black/10">X</div>
                             <span>{g}</span>
                         </div>

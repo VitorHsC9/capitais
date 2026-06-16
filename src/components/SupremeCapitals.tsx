@@ -3,7 +3,7 @@ import { useSupremeCapitals } from '../hooks/useSupremeCapitals';
 import { MultiCountryMap } from './MultiCountryMap';
 
 interface SupremeCapitalsProps {
-    onBack: () => void;
+    readonly onBack: () => void;
 }
 
 export function SupremeCapitals({ onBack }: SupremeCapitalsProps) {

@@ -15,7 +15,7 @@ import {
     AlertCircle,
     Globe,
     Map,
-    Infinity,
+    Infinity as InfinityIcon,
     Keyboard,
     ListChecks,
 } from 'lucide-react';
@@ -25,7 +25,7 @@ import { OnlineResults } from './OnlineResults';
 import type { OnlineCategory, OnlineGameMode } from '../../services/roomService';
 
 interface OnlineLobbyProps {
-    onBack: () => void;
+    readonly onBack: () => void;
 }
 
 const CATEGORY_CONFIG: {
@@ -53,7 +53,7 @@ const MODE_CONFIG: {
         { id: 'classic', icon: Swords, title: 'CLÁSSICO', desc: '10 rodadas • 10s por pergunta', color: 'text-[var(--color-primary)]', emoji: '⚔️' },
         { id: 'speed', icon: Zap, title: 'VELOCIDADE', desc: '10 rodadas • Timer de 5s • Bônus por rapidez', color: 'text-yellow-400', emoji: '⚡' },
         { id: 'survival', icon: Skull, title: 'SOBREVIVÊNCIA', desc: 'Errou = Eliminado', color: 'text-red-400', emoji: '💀' },
-        { id: 'infinite', icon: Infinity, title: 'INFINITO', desc: '3 vidas • Joga até morrer', color: 'text-cyan-400', emoji: '♾️' },
+        { id: 'infinite', icon: InfinityIcon, title: 'INFINITO', desc: '3 vidas • Joga até morrer', color: 'text-cyan-400', emoji: '♾️' },
     ];
 
 export function OnlineLobby({ onBack }: OnlineLobbyProps) {
@@ -78,7 +78,7 @@ export function OnlineLobby({ onBack }: OnlineLobbyProps) {
     }
 
     const players = game.roomData?.players ? Object.entries(game.roomData.players) : [];
-    const allReady = players.length >= 2 && players.every(([_, p]) => p.isReady);
+    const allReady = players.length >= 2 && players.every(([, p]) => p.isReady);
     const myPlayerData = game.roomData?.players?.[game.playerId];
 
     const getHeaderTitle = () => {
@@ -126,10 +126,11 @@ export function OnlineLobby({ onBack }: OnlineLobbyProps) {
                 {game.phase === 'menu' && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2">
+                            <label htmlFor="online-player-name" className="block text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2">
                                 Seu Nome
                             </label>
                             <input
+                                id="online-player-name"
                                 type="text"
                                 value={game.playerName}
                                 onChange={(e) => game.setPlayerName(e.target.value)}
@@ -158,10 +159,11 @@ export function OnlineLobby({ onBack }: OnlineLobbyProps) {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+                            <label htmlFor="online-room-code" className="block text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                                 Entrar numa Sala
                             </label>
                             <input
+                                id="online-room-code"
                                 type="text"
                                 value={joinCode}
                                 onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
@@ -246,9 +248,9 @@ export function OnlineLobby({ onBack }: OnlineLobbyProps) {
                         {/* Input Format Toggle */}
                         {game.selectedMode && (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2">
+                                <p className="block text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2">
                                     Formato de Resposta
-                                </label>
+                                </p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <button
                                         onClick={() => game.setSelectedInputFormat('multiple_choice')}

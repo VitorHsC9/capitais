@@ -16,16 +16,16 @@ export const getDailyCountry = (countries: Country[], salt: number = 0): Country
     let seedString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
 
     // Check for debug salt
-    const debugSalt = localStorage.getItem('debug_seed_salt');
+    const debugSalt = globalThis.localStorage.getItem('debug_seed_salt');
     if (debugSalt) {
         seedString += debugSalt;
     }
 
     // Simple hash of the string to get a number
     let seed = 0;
-    for (let i = 0; i < seedString.length; i++) {
-        seed = ((seed << 5) - seed) + seedString.charCodeAt(i);
-        seed = Math.trunc(seed)
+    for (const char of seedString) {
+        seed = ((seed << 5) - seed) + (char.codePointAt(0) || 0);
+        seed = Math.trunc(seed);
     }
 
     seed += salt;
@@ -41,6 +41,6 @@ export const getDailyCountry = (countries: Country[], salt: number = 0): Country
 export const getDailySeed = (): string => {
     const now = new Date();
     const baseSeed = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const debugSalt = localStorage.getItem('debug_seed_salt');
+    const debugSalt = globalThis.localStorage.getItem('debug_seed_salt');
     return debugSalt ? `${baseSeed}-${debugSalt}` : baseSeed;
-}
+};

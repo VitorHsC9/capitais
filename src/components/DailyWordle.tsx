@@ -7,6 +7,38 @@ interface DailyWordleProps {
     readonly onNextChallenge: () => void;
 }
 
+const KEYBOARD_ROWS = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+];
+
+const getSlotKeys = (length: number, prefix: string) =>
+    Array.from({ length }, (_, index) => `${prefix}-${index + 1}`);
+
+const getGuessCells = (guess: string) => {
+    const counts = new Map<string, number>();
+    return guess.split('').map((char) => {
+        const count = (counts.get(char) || 0) + 1;
+        counts.set(char, count);
+        return { char, key: `${char}-${count}` };
+    });
+};
+
+const getStatusClass = (status: string) => {
+    if (status === 'correct') return 'bg-[var(--color-correct)] border-[var(--color-correct)] text-white';
+    if (status === 'present') return 'bg-yellow-500 border-yellow-500 text-white';
+    return 'bg-[var(--surface-color)] border-[var(--border-color)] text-[var(--text-secondary)]';
+};
+
+const getCurrentCellClass = (index: number, cursorIndex: number, value?: string) => {
+    const cursorClass = index === cursorIndex
+        ? 'border-[var(--text-primary)] bg-[var(--surface-color)] shadow-[0_0_0_2px_var(--text-primary)]'
+        : 'border-[var(--border-color)] bg-[var(--bg-color)]';
+    const textClass = value ? 'text-[var(--text-primary)]' : '';
+    return `${cursorClass} ${textClass}`;
+};
+
 export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
     const { targetCountry, guesses, currentGuess, gameStatus, handleKey, checkGuess, nextDailyTime, cursorIndex, setCursorIndex, wordLength } = useDailyWordle();
     const [timeLeftStr, setTimeLeftStr] = useState('');
@@ -14,7 +46,7 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
     // Countdown timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -35,20 +67,17 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
         const listener = (e: KeyboardEvent) => {
             handleKey(e.key);
         };
-        window.addEventListener('keydown', listener);
-        return () => window.removeEventListener('keydown', listener);
+        globalThis.addEventListener('keydown', listener);
+        return () => globalThis.removeEventListener('keydown', listener);
     }, [handleKey]);
 
     if (!targetCountry) return <div className="p-10 text-center">Carregando desafio...</div>;
 
     const isFinished = gameStatus !== 'playing';
 
-    // Virtual Keyboard Rows
-    const keyboardRows = [
-        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-        ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-    ];
+    const currentSlotKeys = getSlotKeys(wordLength, 'current');
+    const emptyRows = getSlotKeys(Math.max(0, 5 - guesses.length - (isFinished ? 0 : 1)), 'empty-row');
+    const emptySlotKeys = getSlotKeys(wordLength, 'empty-cell');
 
     return (
         <div className="flex flex-col h-full animate-in fade-in duration-300">
@@ -69,18 +98,14 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
                 {/* Grid */}
                 <div className="flex flex-col gap-2 mb-4 w-full max-w-2xl px-4 overflow-x-auto">
                     {/* Previous Guesses */}
-                    {guesses.map((guess, i) => {
+                    {guesses.map((guess) => {
                         const status = checkGuess(guess);
                         return (
-                            <div key={i} className="flex gap-1 justify-center min-w-min mx-auto">
-                                {guess.split('').map((char, j) => (
+                            <div key={guess} className="flex gap-1 justify-center min-w-min mx-auto">
+                                {getGuessCells(guess).map(({ char, key }, j) => (
                                     <div
-                                        key={j}
-                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)]
-                                            ${status[j] === 'correct' ? 'bg-[var(--color-correct)] border-[var(--color-correct)] text-white' :
-                                                status[j] === 'present' ? 'bg-yellow-500 border-yellow-500 text-white' :
-                                                    'bg-[var(--surface-color)] border-[var(--border-color)] text-[var(--text-secondary)]'
-                                            }`}
+                                        key={key}
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)] ${getStatusClass(status[j])}`}
                                     >
                                         {char}
                                     </div>
@@ -92,15 +117,12 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
                     {/* Current Guess */}
                     {!isFinished && guesses.length < 5 && (
                         <div className="flex gap-1 justify-center min-w-min mx-auto">
-                            {[...Array(wordLength)].map((_, i) => (
+                            {currentSlotKeys.map((key, i) => (
                                 <button
                                     type="button"
-                                    key={i}
+                                    key={key}
                                     onClick={() => setCursorIndex(i)}
-                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
-                                        ${i === cursorIndex ? 'border-[var(--text-primary)] bg-[var(--surface-color)] shadow-[0_0_0_2px_var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-color)]'}
-                                        ${currentGuess[i] ? 'text-[var(--text-primary)]' : ''}
-                                    `}
+                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all ${getCurrentCellClass(i, cursorIndex, currentGuess[i])}`}
                                 >
                                     {currentGuess[i] || ''}
                                 </button>
@@ -109,11 +131,11 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
                     )}
 
                     {/* Empty Rows */}
-                    {[...Array(Math.max(0, 5 - guesses.length - (isFinished ? 0 : 1)))].map((_, i) => (
-                        <div key={`empty-${i}`} className="flex gap-1 justify-center min-w-min mx-auto">
-                            {[...Array(wordLength)].map((_, j) => (
+                    {emptyRows.map((rowKey) => (
+                        <div key={rowKey} className="flex gap-1 justify-center min-w-min mx-auto">
+                            {emptySlotKeys.map((key) => (
                                 <div
-                                    key={j}
+                                    key={`${rowKey}-${key}`}
                                     className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-color)] opacity-50"
                                 />
                             ))}
@@ -162,8 +184,8 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
                 {/* Virtual Keyboard */}
                 {!isFinished && (
                     <div className="w-full max-w-md px-1 pb-4">
-                        {keyboardRows.map((row, i) => (
-                            <div key={i} className="flex justify-center gap-1 mb-1">
+                        {KEYBOARD_ROWS.map((row) => (
+                            <div key={row.join('')} className="flex justify-center gap-1 mb-1">
                                 {row.map((key) => (
                                     <button
                                         key={key}

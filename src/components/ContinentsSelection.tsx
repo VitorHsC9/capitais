@@ -13,8 +13,8 @@ const continentsList: Continent[] = [
 ];
 
 interface ContinentsSelectionProps {
-    onBack: () => void;
-    onSelect: (continent: Continent) => void;
+    readonly onBack: () => void;
+    readonly onSelect: (continent: Continent) => void;
 }
 
 export function ContinentsSelection({ onBack, onSelect }: ContinentsSelectionProps) {

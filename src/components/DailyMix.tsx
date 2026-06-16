@@ -6,8 +6,8 @@ import { ProgressBar } from './ProgressBar';
 import { CountryAutocomplete } from './CountryAutocomplete';
 
 interface DailyMixProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
 export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
@@ -18,7 +18,7 @@ export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
     // Countdown timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -95,7 +95,7 @@ export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
                             <div className="text-center">
                                 <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">ACERTOS</div>
                                 <div className="text-xl font-bold text-[var(--text-primary)]">
-                                    {gameState.answers.filter(a => a).length}/10
+                                    {gameState.answers.filter(Boolean).length}/10
                                 </div>
                             </div>
                         </div>
@@ -125,7 +125,7 @@ export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
                 </div>
             </div>
 
-            <ProgressBar current={gameState.currentIndex} total={10} isDark={true} />
+            <ProgressBar current={gameState.currentIndex} total={10} />
 
             <div className="flex-1 flex flex-col items-center justify-center gap-6 relative py-4">
 
@@ -165,7 +165,6 @@ export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
                                 isCorrect={isCorrect}
                                 onSelect={() => handleOptionSelect(opt.capital)}
                                 mode="classic"
-                                isDark={true}
                             />
                         );
                     })

@@ -48,7 +48,7 @@ export function PlayingScreen() {
                 </div>
             </div>
 
-            <ProgressBar current={game.currentIndex} total={game.questions.length} isDark={true} />
+            <ProgressBar current={game.currentIndex} total={game.questions.length} />
 
             {/* ÁREA DA PERGUNTA */}
             <div className="flex-1 flex flex-col items-center justify-center gap-6 relative">
@@ -93,7 +93,6 @@ export function PlayingScreen() {
                         isAnswered={game.isAnswered}
                         correctAnswer={game.questions[game.currentIndex].capital}
                         nextQuestion={game.nextQuestion}
-                        isDark={true}
                     />
                 ) : (
                     <div className="flex flex-col gap-2.5">
@@ -111,7 +110,6 @@ export function PlayingScreen() {
                                 }
                                 onSelect={() => game.handleAnswer(['classic', 'suddenDeath', 'survival'].includes(game.gameMode) ? opt.capital : opt.name)}
                                 mode={game.gameMode}
-                                isDark={true}
                             />
                         ))}
 

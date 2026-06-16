@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,17 +49,21 @@ const allCountries = [
 // 'Congo' might be 'República do Congo'.
 // 'Vaticano' might be 'Santa Sé'.
 
+const aliases = new Map([
+    ['RepÃºblica Checa', 'ChÃ©quia'],
+    ['Congo', 'RepÃºblica do Congo'],
+    ['Vaticano', 'Santa SÃ©'],
+    ['EssuatÃ­ni', 'SuazilÃ¢ndia'],
+    ['MacedÃ´nia do Norte', 'MacedÃ´nia'],
+]);
+
 const missing = [];
 allCountries.forEach(c => {
     if (!currentNames.has(c)) {
-        // Check for common aliases
-        if (c === 'República Checa' && currentNames.has('Chéquia')) return;
-        if (c === 'Congo' && currentNames.has('República do Congo')) return;
-        if (c === 'Vaticano' && currentNames.has('Santa Sé')) return;
-        if (c === 'Essuatíni' && currentNames.has('Suazilândia')) return;
-        if (c === 'Macedônia do Norte' && currentNames.has('Macedônia')) return;
-
-        missing.push(c);
+        const alias = aliases.get(c);
+        if (!alias || !currentNames.has(alias)) {
+            missing.push(c);
+        }
     }
 });
 

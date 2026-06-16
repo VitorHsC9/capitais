@@ -2,22 +2,115 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, BrainCircuit, X, Check, Eye } from 'lucide-react';
 import { useSrsStore, type SrsCategory, type SrsItemWithCountry } from '../../hooks/useSrsStore';
-import type { Continent } from '../../data/countries';
+import type { Continent, Country } from '../../data/countries';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { Country } from '../../data/countries';
 
 const normalizeString = (str: string) =>
     str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
-function MapZoomer({ targetCountry, geoJsonData, isActive }: { targetCountry: any, geoJsonData: any, isActive: boolean }) {
+const getFlashcardClass = (isFlipped: boolean, category: SrsCategory) => {
+    if (isFlipped && category === 'map') return 'border-[var(--color-primary)]';
+    if (isFlipped) return 'opacity-50 scale-95';
+    return 'opacity-100 scale-100';
+};
+
+type SrsMapViewerProps = {
+    readonly targetCountry: Country;
+    readonly geoJsonData: any;
+    readonly showHighlight: boolean;
+    readonly allowGuess?: boolean;
+    readonly onCorrectGuess?: () => void;
+    readonly onWrongGuess?: () => void;
+    readonly mapKey?: string;
+};
+
+type SrsContentKey = 'name' | 'capital' | 'flag' | 'map' | 'interactive_map_front' | 'interactive_map_back';
+
+const getCardContentKeys = (category: SrsCategory, direction: SrsItemWithCountry['direction']) => {
+    if (category === 'capitals') {
+        return {
+            questionKey: direction === 'forward' ? 'name' : 'capital',
+            answerKey: direction === 'forward' ? 'capital' : 'name',
+        } satisfies { questionKey: SrsContentKey; answerKey: SrsContentKey };
+    }
+
+    if (category === 'flags') {
+        return {
+            questionKey: direction === 'forward' ? 'name' : 'flag',
+            answerKey: direction === 'forward' ? 'flag' : 'name',
+        } satisfies { questionKey: SrsContentKey; answerKey: SrsContentKey };
+    }
+
+    if (direction === 'forward') {
+        return {
+            questionKey: 'interactive_map_front',
+            answerKey: 'interactive_map_back',
+        } satisfies { questionKey: SrsContentKey; answerKey: SrsContentKey };
+    }
+
+    return {
+        questionKey: 'map',
+        answerKey: 'name',
+    } satisfies { questionKey: SrsContentKey; answerKey: SrsContentKey };
+};
+
+type MapFeatureClickOptions = {
+    readonly allowGuess?: boolean;
+    readonly showHighlight: boolean;
+    readonly name: string;
+    readonly isTarget: boolean;
+    readonly layer: any;
+    readonly hasGuessedRef: { current: boolean };
+    readonly targetNameEn: string;
+    readonly targetNamePt: string;
+    readonly highlightAndZoomCorrect: (map: any, targetNameEn: string, targetNamePt: string) => void;
+    readonly onCorrectGuess?: () => void;
+    readonly onWrongGuess?: () => void;
+};
+
+const showCorrectMapGuess = (layer: any, name: string) => {
+    layer.setStyle({ fillColor: '#22c55e', color: '#22c55e', fillOpacity: 0.6 });
+    layer.bindPopup(`<div style="text-align: center;"><strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong><br/><span style="color: #22c55e; font-weight: bold; font-size: 12px;">âœ… Ã‰ aqui!</span></div>`).openPopup();
+    const bounds = layer.getBounds();
+    if (bounds?.isValid()) {
+        layer._map.flyToBounds(bounds, { padding: [20, 20], maxZoom: 5, duration: 1.5 });
+    }
+};
+
+const showWrongMapGuess = (options: MapFeatureClickOptions) => {
+    const { layer, name, targetNameEn, targetNamePt, highlightAndZoomCorrect } = options;
+    layer.setStyle({ fillColor: '#ef4444', color: '#ef4444', fillOpacity: 0.6 });
+    layer.bindPopup(`<div style="text-align: center;"><strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong><br/><span style="color: #ef4444; font-weight: bold; font-size: 12px;">âŒ Errou</span></div>`).openPopup();
+    highlightAndZoomCorrect(layer._map, targetNameEn, targetNamePt);
+};
+
+const createMapFeatureClickHandler = (options: MapFeatureClickOptions) => () => {
+    const { allowGuess, showHighlight, name, isTarget, layer, hasGuessedRef, onCorrectGuess, onWrongGuess } = options;
+
+    if (hasGuessedRef.current) return;
+
+    if (allowGuess && !showHighlight && name) {
+        hasGuessedRef.current = true;
+        if (isTarget) {
+            showCorrectMapGuess(layer, name);
+            onCorrectGuess?.();
+        } else {
+            showWrongMapGuess(options);
+            onWrongGuess?.();
+        }
+    } else if (name) {
+        layer.bindPopup(`<strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong>`).openPopup();
+    }
+};
+
+function MapZoomer({ targetCountry, geoJsonData, isActive }: { readonly targetCountry: any, readonly geoJsonData: any, readonly isActive: boolean }) {
     const map = useMap();
     useEffect(() => {
         if (!isActive || !targetCountry || !geoJsonData || !map) return;
         const feature = geoJsonData.features.find((f: any) => {
-            const props = f.properties || {};
-            const name = props.name || '';
+            const name = f.properties?.name || '';
             const targetName = targetCountry.mapName || targetCountry.name;
             return normalizeString(name) === normalizeString(targetName);
         });
@@ -32,7 +125,7 @@ function MapZoomer({ targetCountry, geoJsonData, isActive }: { targetCountry: an
     return null;
 }
 
-function MapCleanup({ targetCountry }: { targetCountry: Country }) {
+function MapCleanup({ targetCountry }: { readonly targetCountry: Country }) {
     const map = useMap();
     useEffect(() => {
         if (map) {
@@ -42,7 +135,7 @@ function MapCleanup({ targetCountry }: { targetCountry: Country }) {
     return null;
 }
 
-function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, onCorrectGuess, onWrongGuess, mapKey }: { targetCountry: Country, geoJsonData: any, showHighlight: boolean, allowGuess?: boolean, onCorrectGuess?: () => void, onWrongGuess?: () => void, mapKey?: string }) {
+function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, onCorrectGuess, onWrongGuess, mapKey }: SrsMapViewerProps) {
     const hasGuessedRef = useRef(false);
     const geoJsonLayerRef = useRef<any>(null);
 
@@ -55,16 +148,16 @@ function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, o
     const highlightAndZoomCorrect = (map: any, targetNameEn: string, targetNamePt: string) => {
         if (!geoJsonLayerRef.current) return;
         geoJsonLayerRef.current.eachLayer((l: any) => {
-            if (l.feature) {
-                const lName = l.feature.properties?.name || '';
+            const lName = l.feature?.properties?.name || '';
+            if (lName) {
                 const lIsTarget =
-                    (lName && targetNameEn && normalizeString(lName) === normalizeString(targetNameEn)) ||
-                    (lName && targetNamePt && normalizeString(lName) === normalizeString(targetNamePt));
+                    (targetNameEn && normalizeString(lName) === normalizeString(targetNameEn)) ||
+                    (targetNamePt && normalizeString(lName) === normalizeString(targetNamePt));
                 if (lIsTarget) {
                     l.setStyle({ fillColor: '#22c55e', color: '#22c55e', fillOpacity: 0.6 });
                     // Zoom no país correto
                     const bounds = l.getBounds();
-                    if (bounds && bounds.isValid()) {
+                    if (bounds?.isValid()) {
                         map.flyToBounds(bounds, { padding: [20, 20], maxZoom: 5, duration: 1.5 });
                     }
                 }
@@ -85,8 +178,7 @@ function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, o
                         style={(feature: any) => {
                             let isTarget = false;
                             if (showHighlight && targetCountry) {
-                                const props = feature.properties || {};
-                                const name = props.name || '';
+                                const name = feature.properties?.name || '';
                                 const targetName = targetCountry.mapName || targetCountry.name;
                                 isTarget = normalizeString(name) === normalizeString(targetName);
                             }
@@ -99,8 +191,7 @@ function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, o
                             };
                         }}
                         onEachFeature={(feature, layer: any) => {
-                            const props = feature.properties || {};
-                            const name = props.name || '';
+                            const name = feature.properties?.name || '';
                             const targetNameEn = targetCountry.mapName || '';
                             const targetNamePt = targetCountry.name || '';
 
@@ -108,31 +199,19 @@ function SrsMapViewer({ targetCountry, geoJsonData, showHighlight, allowGuess, o
                                 (name && targetNameEn && normalizeString(name) === normalizeString(targetNameEn)) ||
                                 (name && targetNamePt && normalizeString(name) === normalizeString(targetNamePt));
 
-                            layer.on('click', () => {
-                                if (hasGuessedRef.current) return;
-                                if (allowGuess && !showHighlight && name) {
-                                    hasGuessedRef.current = true;
-                                    const map = layer._map;
-                                    if (isTarget) {
-                                        layer.setStyle({ fillColor: '#22c55e', color: '#22c55e', fillOpacity: 0.6 });
-                                        layer.bindPopup(`<div style="text-align: center;"><strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong><br/><span style="color: #22c55e; font-weight: bold; font-size: 12px;">✅ É aqui!</span></div>`).openPopup();
-                                        // Zoom no país correto
-                                        const bounds = layer.getBounds();
-                                        if (bounds && bounds.isValid()) {
-                                            map.flyToBounds(bounds, { padding: [20, 20], maxZoom: 5, duration: 1.5 });
-                                        }
-                                        if (onCorrectGuess) onCorrectGuess();
-                                    } else {
-                                        layer.setStyle({ fillColor: '#ef4444', color: '#ef4444', fillOpacity: 0.6 });
-                                        layer.bindPopup(`<div style="text-align: center;"><strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong><br/><span style="color: #ef4444; font-weight: bold; font-size: 12px;">❌ Errou</span></div>`).openPopup();
-                                        // Destacar e dar zoom no país correto
-                                        highlightAndZoomCorrect(map, targetNameEn, targetNamePt);
-                                        if (onWrongGuess) onWrongGuess();
-                                    }
-                                } else if (name) {
-                                    layer.bindPopup(`<strong style="font-family: inherit; font-size: 14px; text-transform: uppercase;">${name}</strong>`).openPopup();
-                                }
-                            });
+                            layer.on('click', createMapFeatureClickHandler({
+                                allowGuess,
+                                showHighlight,
+                                name,
+                                isTarget,
+                                layer,
+                                hasGuessedRef,
+                                targetNameEn,
+                                targetNamePt,
+                                highlightAndZoomCorrect,
+                                onCorrectGuess,
+                                onWrongGuess,
+                            }));
                         }}
                     />
                 )}
@@ -206,35 +285,25 @@ export const SrsFlashcard = () => {
         }
 
         const cardStep = (currentCard as any).sessionStep || 0;
-        let shouldKeepInDeck = false;
+        let shouldKeepInDeck = true;
         let nextStep = cardStep;
 
-        if (!isCorrect) {
-            // Errei: Reseta o progresso desta carta nesta sessão, informa a store
-            nextStep = 0;
-            shouldKeepInDeck = true;
-            processReview(currentCard.countryName, currentCard.category, currentCard.direction, false);
-            // Garante que a carta será tratada como nova/reaprendizado nos próximos giros da sessão
-            currentCard.interval = 0;
-        } else {
-            // Bom
+        if (isCorrect) {
             if (currentCard.interval === 0 && cardStep === 0) {
-                // Carta nova ou erro recente: só avança 1 estágio (precisa de mais um "Bom" pra sair da sessão)
                 nextStep = 1;
-                shouldKeepInDeck = true;
-                // Não marcamos como concluído na store ainda.
             } else {
-                // Já estava no step 1 (ou já era uma carta velha/graduada)
                 shouldKeepInDeck = false;
-                // Gradua da sessão diária e comemora na store
                 processReview(currentCard.countryName, currentCard.category, currentCard.direction, true);
             }
+        } else {
+            nextStep = 0;
+            processReview(currentCard.countryName, currentCard.category, currentCard.direction, false);
         }
 
         const newDeck = [...deck];
 
         if (shouldKeepInDeck) {
-            const updatedCard = { ...currentCard, sessionStep: nextStep };
+            const updatedCard = { ...currentCard, interval: isCorrect ? currentCard.interval : 0, sessionStep: nextStep };
             newDeck.push(updatedCard);
         }
 
@@ -247,33 +316,12 @@ export const SrsFlashcard = () => {
             setIsFinished(true);
         }
     };
-
     // Renderizadores de conteúdo dinâmico baseado na categoria e direção
     const getCardContent = (side: 'front' | 'back') => {
         if (!currentCard) return null;
         const { country, direction } = currentCard;
 
-        // A logica do flashcard é saber o q tem q mostrar na Frente (Pergunta) e no Verso (Resposta)
-        let questionKey: 'name' | 'capital' | 'flag' | 'map' | 'interactive_map_front' | 'interactive_map_back' = 'name';
-        let answerKey: 'name' | 'capital' | 'flag' | 'map' | 'interactive_map_front' | 'interactive_map_back' = 'capital';
-
-        if (category === 'capitals') {
-            questionKey = direction === 'forward' ? 'name' : 'capital';
-            answerKey = direction === 'forward' ? 'capital' : 'name';
-        } else if (category === 'flags') {
-            questionKey = direction === 'forward' ? 'name' : 'flag';
-            answerKey = direction === 'forward' ? 'flag' : 'name';
-        } else if (category === 'map') {
-            if (direction === 'forward') {
-                // Pais -> Mapa Interativo
-                questionKey = 'interactive_map_front';
-                answerKey = 'interactive_map_back';
-            } else {
-                // Formato/Mapa -> Pais 
-                questionKey = 'map';
-                answerKey = 'name';
-            }
-        }
+        const { questionKey, answerKey } = getCardContentKeys(category, direction);
 
         const valueToRender = side === 'front' ? questionKey : answerKey;
 
@@ -354,7 +402,7 @@ export const SrsFlashcard = () => {
                 </div>
 
                 {/* Card Front */}
-                <div className={`w-full bg-[var(--surface-color)] border-2 border-[var(--border-color)] rounded-2xl p-4 sm:p-8 shadow-sm flex items-center justify-center min-h-[250px] transition-all duration-300 ${isFlipped && category === 'map' ? 'border-[var(--color-primary)]' : (isFlipped ? 'opacity-50 scale-95' : 'opacity-100 scale-100')}`}>
+                <div className={`w-full bg-[var(--surface-color)] border-2 border-[var(--border-color)] rounded-2xl p-4 sm:p-8 shadow-sm flex items-center justify-center min-h-[250px] transition-all duration-300 ${getFlashcardClass(isFlipped, category)}`}>
                     {getCardContent('front')}
                 </div>
 
@@ -376,14 +424,7 @@ export const SrsFlashcard = () => {
             </div>
 
             <div className="mt-auto pt-6 pb-2">
-                {!isFlipped ? (
-                    <button
-                        onClick={handleReveal}
-                        className="w-full py-5 bg-[var(--color-secondary)] text-white font-black uppercase tracking-widest text-sm rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2"
-                    >
-                        <Eye className="w-5 h-5" /> Revelar Resposta
-                    </button>
-                ) : (
+                {isFlipped ? (
                     <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <button
                             onClick={() => handleRating(false)}
@@ -398,6 +439,13 @@ export const SrsFlashcard = () => {
                             <Check className="w-5 h-5" /> Bom
                         </button>
                     </div>
+                ) : (
+                    <button
+                        onClick={handleReveal}
+                        className="w-full py-5 bg-[var(--color-secondary)] text-white font-black uppercase tracking-widest text-sm rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2"
+                    >
+                        <Eye className="w-5 h-5" /> Revelar Resposta
+                    </button>
                 )}
             </div>
         </div>

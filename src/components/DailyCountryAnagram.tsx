@@ -5,8 +5,8 @@ import { COUNTRIES_DB, type Country } from '../data/countries';
 import { getDailyCountry, getDailySeed } from '../utils/daily';
 
 interface DailyCountryAnagramProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
 type DailyGameState = 'playing' | 'won' | 'lost';
@@ -18,6 +18,7 @@ interface DailyCountryAnagramState {
 }
 
 const STORAGE_KEY = 'quiz_capitais_daily_country_anagram_v1';
+const ATTEMPT_KEYS = ['attempt-1', 'attempt-2', 'attempt-3', 'attempt-4', 'attempt-5'];
 
 export function DailyCountryAnagram({ onBack, onNextChallenge }: DailyCountryAnagramProps) {
     const [targetCountry, setTargetCountry] = useState<Country | null>(null);
@@ -49,7 +50,7 @@ export function DailyCountryAnagram({ onBack, onNextChallenge }: DailyCountryAna
         setNextDailyTime(tomorrow.getTime());
 
         // Load from storage
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = globalThis.localStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
                 const parsed: DailyCountryAnagramState = JSON.parse(saved);
@@ -77,13 +78,13 @@ export function DailyCountryAnagram({ onBack, onNextChallenge }: DailyCountryAna
             guesses,
             status: gameStatus
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [guesses, gameStatus, targetCountry]);
 
     // Timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -208,9 +209,9 @@ export function DailyCountryAnagram({ onBack, onNextChallenge }: DailyCountryAna
                     ) : (
                         <div className="space-y-4">
                             <div className="flex justify-center gap-2">
-                                {[...Array(5)].map((_, i) => (
+                                {ATTEMPT_KEYS.map((key, i) => (
                                     <div
-                                        key={i}
+                                        key={key}
                                         className={`w-4 h-4 rounded-full border-2 border-[var(--border-color)] transition-colors ${i < guesses.length ? 'bg-[var(--color-error)]' : 'bg-[var(--surface-color)]'
                                             }`}
                                     />
@@ -231,13 +232,12 @@ export function DailyCountryAnagram({ onBack, onNextChallenge }: DailyCountryAna
                             isAnswered={false}
                             correctAnswer={targetCountry.name}
                             nextQuestion={() => { }}
-                            isDark={true}
                             placeholder="Digite o país..."
                         />
                         {guesses.length > 0 && (
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
-                                {guesses.map((g, i) => (
-                                    <span key={i} className="text-[10px] px-2 py-1 bg-[var(--surface-color)] text-[var(--text-secondary)] rounded-lg border-2 border-[var(--border-color)] line-through opacity-70 font-bold">
+                                {guesses.map((g) => (
+                                    <span key={g} className="text-[10px] px-2 py-1 bg-[var(--surface-color)] text-[var(--text-secondary)] rounded-lg border-2 border-[var(--border-color)] line-through opacity-70 font-bold">
                                         {g}
                                     </span>
                                 ))}

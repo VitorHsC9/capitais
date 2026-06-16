@@ -12,11 +12,11 @@ import type { Country } from '../data/countries';
 // In a real production app, this should be a local asset.
 
 interface DailyMapProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
 
-function MapZoomer({ targetCountry, geoJsonData }: { targetCountry: Country | null, geoJsonData: any }) {
+function MapZoomer({ targetCountry, geoJsonData }: { readonly targetCountry: Country | null, readonly geoJsonData: any }) {
     const map = useMap();
 
     useEffect(() => {
@@ -24,14 +24,13 @@ function MapZoomer({ targetCountry, geoJsonData }: { targetCountry: Country | nu
 
         // Find the feature
         const feature = geoJsonData.features.find((f: any) => {
-            const props = f.properties || {};
-            const name = props.name || '';
-            const iso = props.iso_a2 || props.ISO_A2 || '';
+            const name = f.properties?.name || '';
+            const iso = f.properties?.iso_a2 || f.properties?.ISO_A2 || '';
 
             const targetName = targetCountry.mapName || targetCountry.name;
 
             const matchName = name.toLowerCase() === targetName.toLowerCase();
-            const matchIso = iso && iso.toLowerCase() === targetCountry.code.toLowerCase();
+            const matchIso = iso?.toLowerCase() === targetCountry.code.toLowerCase();
 
             return matchName || matchIso;
         });
@@ -58,7 +57,7 @@ export function DailyMap({ onBack, onNextChallenge }: DailyMapProps) {
     // Countdown timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -129,16 +128,15 @@ export function DailyMap({ onBack, onNextChallenge }: DailyMapProps) {
                         <GeoJSON
                             data={geoJsonData}
                             style={(feature) => {
-                                const props = feature?.properties || {};
-                                const name = props.name || '';
-                                const iso = props.iso_a2 || props.ISO_A2 || ''; // Try to find ISO code in GeoJSON
+                                const name = feature?.properties?.name || '';
+                                const iso = feature?.properties?.iso_a2 || feature?.properties?.ISO_A2 || ''; // Try to find ISO code in GeoJSON
 
                                 // Check mapName first (English name), then name (Portuguese)
                                 const targetName = targetCountry.mapName || targetCountry.name;
 
                                 // Strict matching logic
                                 const matchName = name.toLowerCase() === targetName.toLowerCase();
-                                const matchIso = iso && iso.toLowerCase() === targetCountry.code.toLowerCase();
+                                const matchIso = iso?.toLowerCase() === targetCountry.code.toLowerCase();
 
                                 if (matchName || matchIso) {
                                     return { fillColor: '#ef4444', weight: 2, color: 'white', fillOpacity: 0.8 };

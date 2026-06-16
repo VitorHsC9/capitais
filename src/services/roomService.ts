@@ -84,6 +84,13 @@ function getCategoryRoundTypes(category: OnlineCategory): RoundType[] {
     }
 }
 
+const toQuestion = (c: Country): RoundQuestion => ({
+    name: c.name,
+    capital: c.capital,
+    code: c.code,
+    continent: c.continent,
+});
+
 function generateRoundQuestion(category: OnlineCategory, roundIndex: number, inputFormat: InputFormat): RoundData {
     const correctCountry = COUNTRIES_DB[Math.floor(Math.random() * COUNTRIES_DB.length)];
 
@@ -107,22 +114,8 @@ function generateRoundQuestion(category: OnlineCategory, roundIndex: number, inp
             distractors = [...distractors, ...extraDistractors];
         }
 
-        const toQuestion = (c: Country): RoundQuestion => ({
-            name: c.name,
-            capital: c.capital,
-            code: c.code,
-            continent: c.continent,
-        });
-
         options = shuffleArray([...distractors.map(toQuestion), toQuestion(correctCountry)]);
     }
-
-    const toQuestion = (c: Country): RoundQuestion => ({
-        name: c.name,
-        capital: c.capital,
-        code: c.code,
-        continent: c.continent,
-    });
 
     return {
         question: toQuestion(correctCountry),

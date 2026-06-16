@@ -3,16 +3,16 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface Highlight {
-    code: string;
-    mapName?: string;
-    status: 'partial' | 'full';
+    readonly code: string;
+    readonly mapName?: string;
+    readonly status: 'partial' | 'full';
 }
 
 interface MultiCountryMapProps {
-    highlights: Highlight[];
+    readonly highlights: Highlight[];
 }
 
-function MapUpdater({ highlights, geoJsonData }: { highlights: Highlight[], geoJsonData: any }) {
+function MapUpdater({ highlights, geoJsonData }: { readonly highlights: Highlight[], readonly geoJsonData: any }) {
     const map = useMap();
 
     useEffect(() => {

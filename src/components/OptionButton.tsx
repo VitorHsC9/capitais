@@ -2,14 +2,13 @@ import type { Country } from '../data/countries';
 import type { GameMode } from '../hooks/useQuizGame';
 
 interface OptionButtonProps {
-  option: Country;
-  idx: number;
-  isSelected: boolean;
-  isCorrect: boolean;
-  isAnswered: boolean;
-  onSelect: () => void;
-  mode: GameMode;
-  isDark: boolean; // Mantido por compatibilidade
+  readonly option: Country;
+  readonly idx: number;
+  readonly isSelected: boolean;
+  readonly isCorrect: boolean;
+  readonly isAnswered: boolean;
+  readonly onSelect: () => void;
+  readonly mode: GameMode;
 }
 
 export const OptionButton = ({

@@ -1,7 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
-import { ChevronLeft, Trophy } from 'lucide-react';
+import { ChevronLeft, Loader2, Trophy } from 'lucide-react';
 import type { Achievement } from './data/achievements';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
@@ -46,11 +45,11 @@ export default function App() {
   const handleNextDailyChallenge = () => {
     const dailyOrder = ['/daily', '/daily-anagram', '/daily-wordle', '/daily-map', '/daily-country', '/daily-population', '/daily-country-anagram', '/daily-country-wordle', '/daily-mix'];
     const currentIndex = dailyOrder.indexOf(location.pathname);
-    if (currentIndex !== -1) {
+    if (currentIndex === -1) {
+      navigate('/');
+    } else {
       const nextIndex = (currentIndex + 1) % dailyOrder.length;
       navigate(dailyOrder[nextIndex]);
-    } else {
-      navigate('/');
     }
   };
   const [modal, setModal] = useState<'none' | 'stats' | 'help'>('none');
@@ -92,7 +91,7 @@ export default function App() {
 
       const key = e.key;
       if (['1', '2', '3', '4', '5'].includes(key)) {
-        const idx = parseInt(key) - 1;
+        const idx = Number.parseInt(key, 10) - 1;
         if (game.currentOptions[idx]) {
           const opt = game.currentOptions[idx];
           // Lógica para determinar qual campo enviar como resposta
@@ -101,8 +100,8 @@ export default function App() {
         }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, [location.pathname, game.isAnswered, game.currentOptions, game.gameMode]);
 
   const handleModeSelect = (mode: GameMode) => {

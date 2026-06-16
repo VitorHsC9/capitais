@@ -10,6 +10,7 @@ export const SrsMenu = () => {
     const [selectedCategory, setSelectedCategory] = useState<SrsCategory>('capitals');
     const [selectedContinent, setSelectedContinent] = useState<Continent | 'Todos'>('Todos');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [now] = useState(() => Date.now());
 
     // Store
     const items = useSrsStore(s => s.items);
@@ -18,13 +19,12 @@ export const SrsMenu = () => {
 
     const stats = useMemo(() => {
         const itemsList = Object.values(items);
-        const now = Date.now();
         const dueToday = itemsList.filter(i => i.nextReviewDate <= now).length;
         const totalMastered = itemsList.filter(i => i.interval >= 21).length;
         const totalLearning = itemsList.length - totalMastered;
 
         return { totalLearning, totalMastered, dueToday };
-    }, [items]);
+    }, [items, now]);
 
     const categories = [
         { id: 'capitals', icon: Brain, label: 'Capitais', desc: 'País ↔ Capital' },
@@ -77,7 +77,7 @@ export const SrsMenu = () => {
                         {categories.map(({ id, icon: Icon, label, desc }) => (
                             <button
                                 key={id}
-                                onClick={() => setSelectedCategory(id as SrsCategory)}
+                                onClick={() => setSelectedCategory(id)}
                                 className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all active:scale-[0.98]
                   ${selectedCategory === id
                                         ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)]'
@@ -135,9 +135,9 @@ export const SrsMenu = () => {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] block mb-2">
+                                <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] block mb-2">
                                     Novas Cartas por Dia
-                                </label>
+                                </p>
                                 <div className="flex items-center justify-between bg-[var(--surface-color)] p-3 rounded-xl border-2 border-[var(--border-color)]">
                                     <button
                                         onClick={() => updateSettings({ maxNewCardsPerDay: Math.max(5, settings.maxNewCardsPerDay - 5) })}

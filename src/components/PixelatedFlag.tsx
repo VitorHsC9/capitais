@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface PixelatedFlagProps {
-    countryCode: string;
-    attempt: number; // 0 to 5 (0 = most pixelated, 5 = clear)
-    maxAttempts?: number;
+    readonly countryCode: string;
+    readonly attempt: number; // 0 to 5 (0 = most pixelated, 5 = clear)
+    readonly maxAttempts?: number;
 }
+
+const PIXEL_LEVELS = [4, 8, 16, 32, 64, 320];
 
 export function PixelatedFlag({ countryCode, attempt, maxAttempts = 5 }: PixelatedFlagProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,8 +16,6 @@ export function PixelatedFlag({ countryCode, attempt, maxAttempts = 5 }: Pixelat
     // Levels of pixelation (width in pixels)
     // Attempt 0: Very blocky (e.g., 4x3 pixels)
     // Attempt 4: Almost clear
-    const PIXEL_LEVELS = [4, 8, 16, 32, 64, 320];
-
     useEffect(() => {
         const img = new Image();
         img.crossOrigin = "Anonymous";

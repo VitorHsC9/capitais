@@ -62,6 +62,51 @@ interface UseOnlineGameReturn {
     clearError: () => void;
 }
 
+type OnlinePlayer = NonNullable<RoomData['players']>[string];
+
+const isAnswerCorrect = (round: RoundData, inputFormat: InputFormat, answer: string) => {
+    if (answer === 'TIME_UP') return false;
+    const { question, type } = round;
+    const isTyping = inputFormat === 'typing';
+
+    if (type === 'capital') {
+        return isTyping ? checkCountryCapital(question, answer) : answer === question.capital;
+    }
+
+    if (type === 'flag' || type === 'reverse' || type === 'territory') {
+        return isTyping ? checkCountryName(question, answer) : answer === question.name;
+    }
+
+    return false;
+};
+
+const getUpdatedPlayerStats = (player: OnlinePlayer, roomMode: OnlineGameMode, isCorrect: boolean, timeLeft: number) => {
+    if (isCorrect) {
+        const speedBonus = roomMode === 'speed' ? Math.max(0, timeLeft * 10) : 0;
+        return {
+            score: player.score + 100 + (player.streak * 20) + speedBonus,
+            streak: player.streak + 1,
+            isAlive: player.isAlive,
+            lives: player.lives,
+        };
+    }
+
+    const lives = roomMode === 'infinite' ? Math.max(0, player.lives - 1) : player.lives;
+    let isAlive = player.isAlive;
+    if (roomMode === 'survival') {
+        isAlive = false;
+    } else if (roomMode === 'infinite') {
+        isAlive = lives > 0;
+    }
+
+    return {
+        score: player.score,
+        streak: 0,
+        isAlive,
+        lives,
+    };
+};
+
 export function useOnlineGame(): UseOnlineGameReturn {
     // Identity
     const [playerId] = useState(() => {
@@ -174,7 +219,7 @@ export function useOnlineGame(): UseOnlineGameReturn {
 
     // ─── Answer listener ────────────────────────────────────────────
     useEffect(() => {
-        if (!roomCode || !roomData || roomData.status !== 'playing') return;
+        if (!roomCode || roomData?.status !== 'playing') return;
 
         if (answersUnsubRef.current) {
             answersUnsubRef.current();
@@ -188,7 +233,7 @@ export function useOnlineGame(): UseOnlineGameReturn {
                     if (prev) return prev;
                     return answers[playerId] || null;
                 });
-                if (opponentId && answers[opponentId]) {
+                if (opponentId && answers?.[opponentId]) {
                     setOpponentAnswer(answers[opponentId]);
                 }
             }
@@ -245,10 +290,8 @@ export function useOnlineGame(): UseOnlineGameReturn {
         const code = roomCodeRef.current;
         if (!code || !rd || phase !== 'playing') return;
 
-        const players = rd.players ? Object.keys(rd.players) : [];
-        const alivePlayers = rd.players
-            ? Object.entries(rd.players).filter(([, p]) => p.isAlive).map(([id]) => id)
-            : [];
+        const players = Object.keys(rd.players || {});
+        const alivePlayers = Object.entries(rd.players || {}).filter(([, p]) => p.isAlive).map(([id]) => id);
 
         const playersToCheck = rd.mode === 'survival' ? alivePlayers : players;
 
@@ -381,23 +424,7 @@ export function useOnlineGame(): UseOnlineGameReturn {
 
         if (!roomCode || !latestRoomData || !latestRound || myAnswer) return;
 
-        const question = latestRound.question;
-        const roundType = latestRound.type;
-        const isTyping = latestRoomData.inputFormat === 'typing';
-
-        let isCorrect = false;
-        if (answer === 'TIME_UP') {
-            isCorrect = false;
-        } else if (roundType === 'capital') {
-            // Typing mode: normalize for comparison
-            isCorrect = isTyping
-                ? checkCountryCapital(question, answer)
-                : answer === question.capital;
-        } else if (roundType === 'flag' || roundType === 'reverse' || roundType === 'territory') {
-            isCorrect = isTyping
-                ? checkCountryName(question, answer)
-                : answer === question.name;
-        }
+        const isCorrect = isAnswerCorrect(latestRound, latestRoomData.inputFormat, answer);
 
         // Submit answer to Firebase
         submitAnswer(roomCode, latestRoomData.currentRound, playerId, answer, isCorrect);
@@ -405,29 +432,8 @@ export function useOnlineGame(): UseOnlineGameReturn {
         // Update score
         const currentPlayer = latestRoomData.players?.[playerId];
         if (currentPlayer) {
-            let newScore = currentPlayer.score;
-            let newStreak = currentPlayer.streak;
-            let isAlive = currentPlayer.isAlive;
-            let lives = currentPlayer.lives;
-
-            if (isCorrect) {
-                const speedBonus = latestRoomData.mode === 'speed' ? Math.max(0, timeLeft * 10) : 0;
-                newScore += 100 + (newStreak * 20) + speedBonus;
-                newStreak += 1;
-            } else {
-                newStreak = 0;
-                if (latestRoomData.mode === 'survival') {
-                    isAlive = false;
-                }
-                if (latestRoomData.mode === 'infinite') {
-                    lives = Math.max(0, lives - 1);
-                    if (lives <= 0) {
-                        isAlive = false;
-                    }
-                }
-            }
-
-            updatePlayerScore(roomCode, playerId, newScore, newStreak, isAlive, lives);
+            const stats = getUpdatedPlayerStats(currentPlayer, latestRoomData.mode, isCorrect, timeLeft);
+            updatePlayerScore(roomCode, playerId, stats.score, stats.streak, stats.isAlive, stats.lives);
         }
 
         setMyAnswer({

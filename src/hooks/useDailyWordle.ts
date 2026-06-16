@@ -15,6 +15,42 @@ interface DailyWordleState {
 
 const STORAGE_KEY = 'quiz_capitais_daily_wordle_v1';
 const MAX_ATTEMPTS = 5;
+const normalizeWord = (word: string) => word.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+function deleteCharacter(guess: string[], cursorIndex: number, wordLength: number) {
+    const nextGuess = [...guess];
+    const shouldDeletePrevious = cursorIndex > 0 && !nextGuess[cursorIndex];
+    const deleteIndex = shouldDeletePrevious ? cursorIndex - 1 : cursorIndex;
+
+    if (nextGuess[deleteIndex]) {
+        nextGuess[deleteIndex] = '';
+        return {
+            guess: nextGuess,
+            cursorIndex: shouldDeletePrevious ? deleteIndex : cursorIndex,
+        };
+    }
+
+    const endIndex = wordLength - 1;
+    if (cursorIndex === wordLength && nextGuess[endIndex]) {
+        nextGuess[endIndex] = '';
+        return { guess: nextGuess, cursorIndex: endIndex };
+    }
+
+    return { guess, cursorIndex };
+}
+
+function typeCharacter(guess: string[], cursorIndex: number, key: string, wordLength: number) {
+    if (cursorIndex >= wordLength) {
+        return { guess, cursorIndex };
+    }
+
+    const nextGuess = [...guess];
+    while (nextGuess.length <= cursorIndex) {
+        nextGuess.push('');
+    }
+    nextGuess[cursorIndex] = key.toUpperCase();
+    return { guess: nextGuess, cursorIndex: cursorIndex + 1 };
+}
 
 export const useDailyWordle = () => {
     const [targetCountry, setTargetCountry] = useState<Country | null>(null);
@@ -39,7 +75,7 @@ export const useDailyWordle = () => {
         setNextDailyTime(tomorrow.getTime());
 
         // Load from storage
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = globalThis.localStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
                 const parsed: DailyWordleState = JSON.parse(saved);
@@ -69,7 +105,7 @@ export const useDailyWordle = () => {
             guesses,
             status: gameStatus
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [guesses, gameStatus, targetCountry]);
 
     const targetWord = targetCountry ? targetCountry.capital.replace(/\s/g, '').toUpperCase() : '';
@@ -90,8 +126,8 @@ export const useDailyWordle = () => {
             setCurrentGuess([]);
             setCursorIndex(0);
 
-            const normalizedGuess = currentGuess.join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const normalizedTarget = targetWord.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normalizedGuess = normalizeWord(currentGuess.join(''));
+            const normalizedTarget = normalizeWord(targetWord);
 
             if (normalizedGuess === normalizedTarget) {
                 setGameStatus('won');
@@ -99,37 +135,17 @@ export const useDailyWordle = () => {
                 setGameStatus('lost');
             }
         } else if (key === 'Backspace') {
-            const newGuess = [...currentGuess];
-            if (cursorIndex > 0 && !newGuess[cursorIndex]) { // If cursor is at an empty spot, move back and delete
-                setCursorIndex(prev => prev - 1);
-                newGuess[cursorIndex - 1] = '';
-                setCurrentGuess(newGuess);
-            } else if (newGuess[cursorIndex]) { // If there's a char at cursor, delete it
-                newGuess[cursorIndex] = '';
-                setCurrentGuess(newGuess);
-            } else if (cursorIndex === wordLength && newGuess[cursorIndex - 1]) { // If cursor is at the end and previous char exists
-                setCursorIndex(prev => prev - 1);
-                newGuess[cursorIndex - 1] = '';
-                setCurrentGuess(newGuess);
-            }
+            const next = deleteCharacter(currentGuess, cursorIndex, wordLength);
+            setCursorIndex(next.cursorIndex);
+            setCurrentGuess(next.guess);
         } else if (key === 'ArrowLeft') {
             setCursorIndex(prev => Math.max(0, prev - 1));
         } else if (key === 'ArrowRight') {
             setCursorIndex(prev => Math.min(wordLength, prev + 1));
         } else if (/^[a-zA-Z]$/.test(key)) {
-            if (cursorIndex < wordLength) {
-                const newGuess = [...currentGuess];
-                // Ensure the array is long enough
-                while (newGuess.length <= cursorIndex) {
-                    newGuess.push('');
-                }
-                newGuess[cursorIndex] = key.toUpperCase();
-                setCurrentGuess(newGuess);
-                // Move cursor forward if not at end
-                if (cursorIndex < wordLength) {
-                    setCursorIndex(prev => prev + 1);
-                }
-            }
+            const next = typeCharacter(currentGuess, cursorIndex, key, wordLength);
+            setCursorIndex(next.cursorIndex);
+            setCurrentGuess(next.guess);
         }
     }, [gameStatus, targetCountry, currentGuess, guesses, cursorIndex, targetWord, wordLength]);
 

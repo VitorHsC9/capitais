@@ -4,8 +4,148 @@ import { TerritoryMap } from './TerritoryMap';
 import type { useOnlineGame } from '../../hooks/useOnlineGame';
 
 interface OnlineGameProps {
-    game: ReturnType<typeof useOnlineGame>;
+    readonly game: ReturnType<typeof useOnlineGame>;
 }
+
+const getTimerColor = (timeLeft: number) => {
+    if (timeLeft <= 2) return 'text-[var(--color-error)] animate-pulse';
+    if (timeLeft <= 5) return 'text-[var(--color-accent)]';
+    return 'text-[var(--text-primary)]';
+};
+
+const getPlayerAnswerClass = (isShowingResult: boolean, isCorrect: boolean, waitingClass: string) => {
+    if (!isShowingResult) return waitingClass;
+    return isCorrect ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-error)]';
+};
+
+const getOptionStateClasses = (isShowingResult: boolean, hasAnswer: boolean, isCorrectOption: boolean, isSelected: boolean, myIsCorrect: boolean) => {
+    if (!isShowingResult && !hasAnswer) {
+        return {
+            bgColor: 'bg-[var(--surface-color)] border-[var(--border-color)] hover:border-[var(--text-primary)]',
+            textColor: 'text-[var(--text-primary)]',
+        };
+    }
+
+    if (isCorrectOption) {
+        return {
+            bgColor: 'bg-[var(--color-primary)]/20 border-[var(--color-primary)]',
+            textColor: 'text-[var(--color-primary)]',
+        };
+    }
+
+    if (isSelected && !myIsCorrect) {
+        return {
+            bgColor: 'bg-[var(--color-error)]/20 border-[var(--color-error)]',
+            textColor: 'text-[var(--color-error)]',
+        };
+    }
+
+    return {
+        bgColor: 'bg-[var(--surface-color)] border-[var(--border-color)] opacity-50',
+        textColor: 'text-[var(--text-primary)]',
+    };
+};
+
+type PlayerLifeState = {
+    readonly lives?: number;
+    readonly isAlive?: boolean;
+} | null | undefined;
+
+const renderLives = (lives: number, maxLives: number = 3) => (
+    Array.from({ length: maxLives }, (_, i) => (
+        i < lives
+            ? <Heart key={i} className="w-4 h-4 text-red-400 fill-red-400" />
+            : <HeartOff key={i} className="w-4 h-4 text-[var(--text-secondary)] opacity-40" />
+    ))
+);
+
+const renderPlayerLifeStatus = (isInfiniteMode: boolean, player: PlayerLifeState) => {
+    if (isInfiniteMode) {
+        return <div className="flex gap-0.5">{renderLives(player?.lives ?? 3)}</div>;
+    }
+
+    if (player?.isAlive) {
+        return <Heart className="w-4 h-4 text-red-400 fill-red-400" />;
+    }
+
+    return <HeartOff className="w-4 h-4 text-[var(--text-secondary)]" />;
+};
+
+const getRoundQuestionText = (roundType: string, question: { readonly name: string; readonly capital: string }) => {
+    if (roundType === 'capital') return question.name;
+    if (roundType === 'reverse') return question.capital;
+    if (roundType === 'flag') return 'QUE PAIS E ESSE?';
+    if (roundType === 'territory') return 'QUE PAIS E ESSE?';
+    return question.name;
+};
+
+const getRoundSubtitle = (roundType: string) => {
+    if (roundType === 'capital') return 'QUAL A CAPITAL?';
+    if (roundType === 'reverse') return 'QUAL O PAIS?';
+    if (roundType === 'flag') return 'IDENTIFIQUE A BANDEIRA';
+    if (roundType === 'territory') return 'IDENTIFIQUE O TERRITORIO';
+    return '';
+};
+
+const getOptionLabel = (roundType: string, option: { readonly name: string; readonly capital: string }) => {
+    if (roundType === 'capital') return option.capital;
+    return option.name;
+};
+
+const getCorrectAnswer = (roundType: string, question: { readonly name: string; readonly capital: string }) => {
+    if (roundType === 'capital') return question.capital;
+    return question.name;
+};
+
+const getRoundCounter = (isSurvivalMode: boolean, isInfiniteMode: boolean, currentRoundNum: number, totalRounds: number) => {
+    if (isSurvivalMode || isInfiniteMode) return `${currentRoundNum + 1}`;
+    return `${currentRoundNum + 1}/${totalRounds}`;
+};
+
+const getLifeNameClass = (isAlive?: boolean) => {
+    if (isAlive) return 'text-red-400';
+    return 'text-[var(--text-secondary)] line-through';
+};
+
+const getTypingPlaceholder = (roundType: string) => {
+    if (roundType === 'capital') return 'Digite a capital...';
+    return 'Digite o país...';
+};
+
+const getResultBorderClass = (isCorrect: boolean) => {
+    if (isCorrect) return 'border-[var(--color-primary)] bg-[var(--color-primary)]/10';
+    return 'border-[var(--color-error)] bg-[var(--color-error)]/10';
+};
+
+const getResultTextClass = (isCorrect: boolean) => {
+    if (isCorrect) return 'text-[var(--color-primary)]';
+    return 'text-[var(--color-error)]';
+};
+
+const getResultSymbol = (isCorrect: boolean) => isCorrect ? '✓' : '✗';
+
+const getTypingAnswerBorderClass = (isCorrect: boolean) => {
+    if (isCorrect) return 'bg-[var(--color-primary)]/20 border-[var(--color-primary)]';
+    return 'bg-[var(--color-error)]/20 border-[var(--color-error)]';
+};
+
+const getTypingAnswerMessage = (isCorrect: boolean, answer: string) => {
+    if (isCorrect) return '✓ Correto!';
+    return `✗ Sua resposta: ${answer}`;
+};
+
+const getRoundResultHeadline = (myIsCorrect: boolean, opponentIsCorrect: boolean) => {
+    if (myIsCorrect && !opponentIsCorrect) {
+        return <div className="text-[var(--color-primary)] font-black text-xl uppercase">Ponto seu!</div>;
+    }
+    if (!myIsCorrect && opponentIsCorrect) {
+        return <div className="text-[var(--color-error)] font-black text-xl uppercase">Ponto do oponente</div>;
+    }
+    if (myIsCorrect && opponentIsCorrect) {
+        return <div className="text-[var(--color-accent)] font-black text-xl uppercase">Ambos acertaram!</div>;
+    }
+    return <div className="text-[var(--text-secondary)] font-black text-xl uppercase">Ninguem acertou</div>;
+};
 
 export function OnlineGame({ game }: OnlineGameProps) {
     const { roomData, currentRound, myAnswer, opponentAnswer, opponentId, timeLeft, phase, roundAnswers } = game;
@@ -38,52 +178,16 @@ export function OnlineGame({ game }: OnlineGameProps) {
     const opponentIsCorrect = opponentAnswer?.isCorrect ?? opponentAnswerFromFirebase?.isCorrect ?? false;
 
     // Timer color based on time left
-    const timerColor = timeLeft <= 2
-        ? 'text-[var(--color-error)] animate-pulse'
-        : timeLeft <= 5
-            ? 'text-[var(--color-accent)]'
-            : 'text-[var(--text-primary)]';
+    const timerColor = getTimerColor(timeLeft);
 
-    // Determine what to show as question
-    const getQuestionText = () => {
-        if (roundType === 'capital') return question.name;
-        if (roundType === 'reverse') return question.capital;
-        if (roundType === 'flag') return 'QUE PAÍS É ESSE?';
-        if (roundType === 'territory') return 'QUE PAÍS É ESSE?';
-        return question.name;
-    };
-
-    const getSubtitle = () => {
-        if (roundType === 'capital') return 'QUAL A CAPITAL?';
-        if (roundType === 'reverse') return 'QUAL O PAÍS?';
-        if (roundType === 'flag') return 'IDENTIFIQUE A BANDEIRA';
-        if (roundType === 'territory') return 'IDENTIFIQUE O TERRITÓRIO';
-        return '';
-    };
-
-    const getOptionLabel = (opt: typeof currentRound.options[0]) => {
-        if (roundType === 'capital') return opt.capital;
-        return opt.name;
-    };
-
-    const getCorrectAnswer = () => {
-        if (roundType === 'capital') return question.capital;
-        return question.name;
-    };
+    const questionText = getRoundQuestionText(roundType, question);
+    const subtitle = getRoundSubtitle(roundType);
+    const correctAnswer = getCorrectAnswer(roundType, question);
 
     const handleTypingSubmit = () => {
         if (!typingAnswer.trim() || myAnswer) return;
         game.handleAnswer(typingAnswer.trim());
         setTypingAnswer('');
-    };
-
-    // Lives display for infinite mode
-    const renderLives = (lives: number, maxLives: number = 3) => {
-        return Array.from({ length: maxLives }, (_, i) => (
-            i < lives
-                ? <Heart key={i} className="w-4 h-4 text-red-400 fill-red-400" />
-                : <HeartOff key={i} className="w-4 h-4 text-[var(--text-secondary)] opacity-40" />
-        ));
     };
 
     return (
@@ -100,10 +204,7 @@ export function OnlineGame({ game }: OnlineGameProps) {
                         <div className="text-[10px] font-bold text-[var(--color-primary)] tabular-nums">{myPlayer?.score || 0} pts</div>
                     </div>
                     {myAnswer && (
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isShowingResult
-                            ? myIsCorrect ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-error)]'
-                            : 'bg-[var(--color-primary)]/30'
-                            }`}>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${getPlayerAnswerClass(isShowingResult, myIsCorrect, 'bg-[var(--color-primary)]/30')}`}>
                             <Check className="w-3 h-3 text-white" />
                         </div>
                     )}
@@ -112,7 +213,7 @@ export function OnlineGame({ game }: OnlineGameProps) {
                 {/* VS / Round */}
                 <div className="flex flex-col items-center px-3">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                        {isSurvivalMode || isInfiniteMode ? `${currentRoundNum + 1}` : `${currentRoundNum + 1}/${totalRounds}`}
+                        {getRoundCounter(isSurvivalMode, isInfiniteMode, currentRoundNum, totalRounds)}
                     </span>
                     <span className="text-xs font-black text-[var(--text-secondary)]">VS</span>
                 </div>
@@ -120,10 +221,7 @@ export function OnlineGame({ game }: OnlineGameProps) {
                 {/* Opponent */}
                 <div className="flex items-center gap-2 flex-1 justify-end">
                     {opponentAnswer && (
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isShowingResult
-                            ? opponentIsCorrect ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-error)]'
-                            : 'bg-[var(--color-secondary)]/30'
-                            }`}>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${getPlayerAnswerClass(isShowingResult, opponentIsCorrect, 'bg-[var(--color-secondary)]/30')}`}>
                             <Check className="w-3 h-3 text-white" />
                         </div>
                     )}
@@ -141,26 +239,14 @@ export function OnlineGame({ game }: OnlineGameProps) {
             {(isInfiniteMode || isSurvivalMode) && (
                 <div className="flex items-center justify-center gap-6">
                     <div className="flex items-center gap-1.5">
-                        {isInfiniteMode ? (
-                            <div className="flex gap-0.5">{renderLives(myPlayer?.lives ?? 3)}</div>
-                        ) : (
-                            myPlayer?.isAlive
-                                ? <Heart className="w-4 h-4 text-red-400 fill-red-400" />
-                                : <HeartOff className="w-4 h-4 text-[var(--text-secondary)]" />
-                        )}
-                        <span className={`text-xs font-bold ${myPlayer?.isAlive ? 'text-red-400' : 'text-[var(--text-secondary)] line-through'}`}>
+                        {renderPlayerLifeStatus(isInfiniteMode, myPlayer)}
+                        <span className={`text-xs font-bold ${getLifeNameClass(myPlayer?.isAlive)}`}>
                             {myPlayer?.name}
                         </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        {isInfiniteMode ? (
-                            <div className="flex gap-0.5">{renderLives(opponent?.lives ?? 3)}</div>
-                        ) : (
-                            opponent?.isAlive
-                                ? <Heart className="w-4 h-4 text-red-400 fill-red-400" />
-                                : <HeartOff className="w-4 h-4 text-[var(--text-secondary)]" />
-                        )}
-                        <span className={`text-xs font-bold ${opponent?.isAlive ? 'text-red-400' : 'text-[var(--text-secondary)] line-through'}`}>
+                        {renderPlayerLifeStatus(isInfiniteMode, opponent)}
+                        <span className={`text-xs font-bold ${getLifeNameClass(opponent?.isAlive)}`}>
                             {opponent?.name}
                         </span>
                     </div>
@@ -197,13 +283,13 @@ export function OnlineGame({ game }: OnlineGameProps) {
                 {/* Round type badge */}
                 <div className="px-3 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)]">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                        {getSubtitle()}
+                        {subtitle}
                     </span>
                 </div>
 
                 {/* Question text */}
                 <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight leading-tight text-[var(--text-primary)] text-center px-4 drop-shadow-sm">
-                    {getQuestionText()}
+                    {questionText}
                 </h2>
             </div>
 
@@ -211,29 +297,15 @@ export function OnlineGame({ game }: OnlineGameProps) {
             {!isTypingMode && (
                 <div className="pb-2 space-y-2.5">
                     {currentRound.options.map((opt, idx) => {
-                        const optLabel = getOptionLabel(opt);
-                        const correctAnswer = getCorrectAnswer();
+                        const optLabel = getOptionLabel(roundType, opt);
                         const isSelected = myAnswer?.answer === optLabel;
                         const isCorrectOption = optLabel === correctAnswer;
 
-                        let bgColor = 'bg-[var(--surface-color)] border-[var(--border-color)] hover:border-[var(--text-primary)]';
-                        let textColor = 'text-[var(--text-primary)]';
-
-                        if (isShowingResult || myAnswer) {
-                            if (isCorrectOption) {
-                                bgColor = 'bg-[var(--color-primary)]/20 border-[var(--color-primary)]';
-                                textColor = 'text-[var(--color-primary)]';
-                            } else if (isSelected && !myIsCorrect) {
-                                bgColor = 'bg-[var(--color-error)]/20 border-[var(--color-error)]';
-                                textColor = 'text-[var(--color-error)]';
-                            } else {
-                                bgColor = 'bg-[var(--surface-color)] border-[var(--border-color)] opacity-50';
-                            }
-                        }
+                        const { bgColor, textColor } = getOptionStateClasses(isShowingResult, !!myAnswer, isCorrectOption, isSelected, myIsCorrect);
 
                         return (
                             <button
-                                key={idx}
+                                key={optLabel}
                                 onClick={() => !myAnswer && game.handleAnswer(optLabel)}
                                 disabled={!!myAnswer}
                                 className={`w-full text-left p-4 rounded-xl border-2 flex items-center gap-3 transition-all active:scale-[0.98] ${bgColor} disabled:cursor-default`}
@@ -263,16 +335,13 @@ export function OnlineGame({ game }: OnlineGameProps) {
             {isTypingMode && (
                 <div className="pb-2 space-y-3">
                     {myAnswer ? (
-                        <div className={`p-4 rounded-xl border-2 text-center ${myIsCorrect
-                            ? 'bg-[var(--color-primary)]/20 border-[var(--color-primary)]'
-                            : 'bg-[var(--color-error)]/20 border-[var(--color-error)]'
-                            }`}>
-                            <p className={`text-sm font-bold ${myIsCorrect ? 'text-[var(--color-primary)]' : 'text-[var(--color-error)]'}`}>
-                                {myIsCorrect ? '✓ Correto!' : `✗ Sua resposta: ${myAnswer.answer}`}
+                        <div className={`p-4 rounded-xl border-2 text-center ${getTypingAnswerBorderClass(myIsCorrect)}`}>
+                            <p className={`text-sm font-bold ${getResultTextClass(myIsCorrect)}`}>
+                                {getTypingAnswerMessage(myIsCorrect, myAnswer.answer)}
                             </p>
                             {!myIsCorrect && (
                                 <p className="text-xs text-[var(--color-primary)] font-bold mt-1">
-                                    Resposta: {getCorrectAnswer()}
+                                    Resposta: {correctAnswer}
                                 </p>
                             )}
                         </div>
@@ -283,7 +352,7 @@ export function OnlineGame({ game }: OnlineGameProps) {
                                 value={typingAnswer}
                                 onChange={(e) => setTypingAnswer(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleTypingSubmit()}
-                                placeholder={roundType === 'capital' ? 'Digite a capital...' : 'Digite o país...'}
+                                placeholder={getTypingPlaceholder(roundType)}
                                 autoFocus
                                 className="game-input text-lg flex-1"
                             />
@@ -313,18 +382,7 @@ export function OnlineGame({ game }: OnlineGameProps) {
                     <div className="bg-[var(--surface-color)] border-2 border-[var(--border-color)] rounded-2xl p-6 w-[90%] max-w-sm text-center animate-in zoom-in duration-300">
                         {/* Result headline */}
                         <div className="mb-4">
-                            {myIsCorrect && !opponentIsCorrect && (
-                                <div className="text-[var(--color-primary)] font-black text-xl uppercase">🎉 Ponto seu!</div>
-                            )}
-                            {!myIsCorrect && opponentIsCorrect && (
-                                <div className="text-[var(--color-error)] font-black text-xl uppercase">😓 Ponto do oponente</div>
-                            )}
-                            {myIsCorrect && opponentIsCorrect && (
-                                <div className="text-[var(--color-accent)] font-black text-xl uppercase">⚡ Ambos acertaram!</div>
-                            )}
-                            {!myIsCorrect && !opponentIsCorrect && (
-                                <div className="text-[var(--text-secondary)] font-black text-xl uppercase">😅 Ninguém acertou</div>
-                            )}
+                            {getRoundResultHeadline(myIsCorrect, opponentIsCorrect)}
                         </div>
 
                         {/* Correct answer */}
@@ -332,21 +390,21 @@ export function OnlineGame({ game }: OnlineGameProps) {
                             <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-1">
                                 Resposta Correta
                             </p>
-                            <p className="text-lg font-black text-[var(--color-primary)]">{getCorrectAnswer()}</p>
+                            <p className="text-lg font-black text-[var(--color-primary)]">{correctAnswer}</p>
                         </div>
 
                         {/* Player results side by side */}
                         <div className="grid grid-cols-2 gap-3">
-                            <div className={`p-3 rounded-xl border-2 ${myIsCorrect ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10' : 'border-[var(--color-error)] bg-[var(--color-error)]/10'}`}>
+                            <div className={`p-3 rounded-xl border-2 ${getResultBorderClass(myIsCorrect)}`}>
                                 <p className="text-xs font-bold text-[var(--text-secondary)] truncate">{myPlayer?.name}</p>
-                                <p className={`text-lg font-black ${myIsCorrect ? 'text-[var(--color-primary)]' : 'text-[var(--color-error)]'}`}>
-                                    {myIsCorrect ? '✓' : '✗'}
+                                <p className={`text-lg font-black ${getResultTextClass(myIsCorrect)}`}>
+                                    {getResultSymbol(myIsCorrect)}
                                 </p>
                             </div>
-                            <div className={`p-3 rounded-xl border-2 ${opponentIsCorrect ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10' : 'border-[var(--color-error)] bg-[var(--color-error)]/10'}`}>
+                            <div className={`p-3 rounded-xl border-2 ${getResultBorderClass(opponentIsCorrect)}`}>
                                 <p className="text-xs font-bold text-[var(--text-secondary)] truncate">{opponent?.name}</p>
-                                <p className={`text-lg font-black ${opponentIsCorrect ? 'text-[var(--color-primary)]' : 'text-[var(--color-error)]'}`}>
-                                    {opponentIsCorrect ? '✓' : '✗'}
+                                <p className={`text-lg font-black ${getResultTextClass(opponentIsCorrect)}`}>
+                                    {getResultSymbol(opponentIsCorrect)}
                                 </p>
                             </div>
                         </div>

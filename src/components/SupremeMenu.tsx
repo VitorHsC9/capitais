@@ -1,10 +1,10 @@
 import { ArrowLeft, Map, Globe, Trophy, Play, Star, Crown } from 'lucide-react';
 
 interface SupremeMenuProps {
-    onBack: () => void;
-    onSelectCapitals: () => void;
-    onSelectCountries: () => void;
-    onSelectFinal: () => void;
+    readonly onBack: () => void;
+    readonly onSelectCapitals: () => void;
+    readonly onSelectCountries: () => void;
+    readonly onSelectFinal: () => void;
 }
 
 export function SupremeMenu({ onBack, onSelectCapitals, onSelectCountries, onSelectFinal }: SupremeMenuProps) {

@@ -1,7 +1,6 @@
 interface ProgressBarProps {
-  current: number;
-  total: number;
-  isDark: boolean;
+  readonly current: number;
+  readonly total: number;
 }
 
 export const ProgressBar = ({ current, total }: ProgressBarProps) => (

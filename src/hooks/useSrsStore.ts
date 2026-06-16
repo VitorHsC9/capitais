@@ -54,6 +54,121 @@ function getTodayString(): string {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
+function calculateReviewResult(item: SrsItem, isCorrect: boolean) {
+    if (!isCorrect) {
+        return {
+            interval: 0,
+            repetition: 0,
+            efactor: Math.max(MIN_EFACTOR, item.efactor - 0.2),
+        };
+    }
+
+    let interval = Math.round(item.interval * item.efactor);
+    if (item.repetition === 0) {
+        interval = 1;
+    } else if (item.repetition === 1) {
+        interval = 3;
+    }
+
+    return {
+        interval,
+        repetition: item.repetition + 1,
+        efactor: Math.min(3, item.efactor + 0.1),
+    };
+}
+
+function updateDailyNewCards(dailyNewCards: DailyNewCardsTracker, isFirstTimeSeen: boolean, today: string) {
+    if (!isFirstTimeSeen) return dailyNewCards;
+    if (dailyNewCards.date !== today) return { date: today, count: 1 };
+    return { ...dailyNewCards, count: dailyNewCards.count + 1 };
+}
+
+function isNewCard(card: SrsItemWithCountry, items: Record<string, SrsItem>) {
+    return card.interval === 0
+        && card.repetition === 0
+        && !items[getSrsItemId(card.countryName, card.category, card.direction)];
+}
+
+function getCountryPool(continent: Continent | 'Todos') {
+    if (continent === 'Todos') return COUNTRIES_DB;
+    return COUNTRIES_DB.filter(country => country.continent === continent);
+}
+
+function getSrsDirections(category: SrsCategory): SrsDirection[] {
+    if (category === 'flags') return ['reverse'];
+    return ['forward', 'reverse'];
+}
+
+function createNewSrsCard(country: Country, category: SrsCategory, direction: SrsDirection, now: number): SrsItemWithCountry {
+    return {
+        countryName: country.name,
+        category,
+        direction,
+        interval: 0,
+        repetition: 0,
+        efactor: 2.5,
+        nextReviewDate: now - 1000,
+        country
+    };
+}
+
+function buildDueDeck(
+    pool: Country[],
+    directions: SrsDirection[],
+    category: SrsCategory,
+    items: Record<string, SrsItem>,
+    now: number
+) {
+    const deck: SrsItemWithCountry[] = [];
+
+    for (const country of pool) {
+        for (const direction of directions) {
+            const id = getSrsItemId(country.name, category, direction);
+            const item = items[id];
+
+            if (item?.nextReviewDate <= now) {
+                deck.push({ ...item, country });
+            } else if (!item) {
+                deck.push(createNewSrsCard(country, category, direction, now));
+            }
+        }
+    }
+
+    return deck;
+}
+
+function sortDueDeck(deck: SrsItemWithCountry[]) {
+    return deck.sort((a, b) => {
+        if (a.direction !== b.direction) {
+            return a.direction === 'forward' ? -1 : 1;
+        }
+        if (a.nextReviewDate !== b.nextReviewDate) {
+            return a.nextReviewDate - b.nextReviewDate;
+        }
+        return Math.random() - 0.5;
+    });
+}
+
+function limitDueDeck(deck: SrsItemWithCountry[], items: Record<string, SrsItem>, maxItems: number, remainingNewCards: number) {
+    let addedNewCards = 0;
+    const finalDeck: SrsItemWithCountry[] = [];
+
+    for (const card of deck) {
+        if (finalDeck.length >= maxItems) break;
+
+        if (isNewCard(card, items)) {
+            if (addedNewCards < remainingNewCards) {
+                finalDeck.push(card);
+                addedNewCards++;
+            }
+        } else {
+            finalDeck.push(card);
+        }
+    }
+
+    return finalDeck;
+}
+
 export const useSrsStore = create<SrsStore>()(
     persist(
         (set, get) => ({
@@ -81,40 +196,15 @@ export const useSrsStore = create<SrsStore>()(
                         nextReviewDate: Date.now()
                     };
 
-                    let newInterval: number;
-                    let newRepetition: number;
-                    let newEfactor = item.efactor;
+                    const reviewResult = calculateReviewResult(item, isCorrect);
 
-                    if (isCorrect) {
-                        if (item.repetition === 0) {
-                            newInterval = 1;
-                        } else if (item.repetition === 1) {
-                            newInterval = 3;
-                        } else {
-                            newInterval = Math.round(item.interval * item.efactor);
-                        }
-                        newRepetition = item.repetition + 1;
-                        newEfactor = Math.min(3.0, item.efactor + 0.1);
-                    } else {
-                        newRepetition = 0;
-                        newInterval = 0;
-                        newEfactor = Math.max(MIN_EFACTOR, item.efactor - 0.2);
-                    }
-
-                    const nextDate = newInterval === 0
+                    const nextDate = reviewResult.interval === 0
                         ? Date.now() + 5 * 60 * 1000
-                        : Date.now() + newInterval * 24 * 60 * 60 * 1000;
+                        : Date.now() + reviewResult.interval * 24 * 60 * 60 * 1000;
 
                     // Atualiza o contador diário se é carta nova (primeira vez vista)
                     const today = getTodayString();
-                    let dailyNewCards = state.dailyNewCards;
-                    if (isFirstTimeSeen) {
-                        if (dailyNewCards.date !== today) {
-                            dailyNewCards = { date: today, count: 1 };
-                        } else {
-                            dailyNewCards = { ...dailyNewCards, count: dailyNewCards.count + 1 };
-                        }
-                    }
+                    const dailyNewCards = updateDailyNewCards(state.dailyNewCards, isFirstTimeSeen, today);
 
                     return {
                         dailyNewCards,
@@ -122,9 +212,9 @@ export const useSrsStore = create<SrsStore>()(
                             ...state.items,
                             [id]: {
                                 ...item,
-                                interval: newInterval,
-                                repetition: newRepetition,
-                                efactor: newEfactor,
+                                interval: reviewResult.interval,
+                                repetition: reviewResult.repetition,
+                                efactor: reviewResult.efactor,
                                 nextReviewDate: nextDate
                             }
                         }
@@ -147,70 +237,14 @@ export const useSrsStore = create<SrsStore>()(
                     set({ dailyNewCards: { date: today, count: 0 } });
                 }
 
-                const pool = continent === 'Todos'
-                    ? COUNTRIES_DB
-                    : COUNTRIES_DB.filter(c => c.continent === continent);
-
-                const directions: SrsDirection[] = category === 'flags' ? ['reverse'] : ['forward', 'reverse'];
-
-                const deck: SrsItemWithCountry[] = [];
-
-                for (const country of pool) {
-                    for (const direction of directions) {
-                        const id = getSrsItemId(country.name, category, direction);
-                        const item = state.items[id];
-
-                        if (item) {
-                            if (item.nextReviewDate <= now) {
-                                deck.push({ ...item, country });
-                            }
-                        } else {
-                            deck.push({
-                                countryName: country.name,
-                                category,
-                                direction,
-                                interval: 0,
-                                repetition: 0,
-                                efactor: 2.5,
-                                nextReviewDate: now - 1000,
-                                country
-                            });
-                        }
-                    }
-                }
-
-                deck.sort((a, b) => {
-                    if (a.direction !== b.direction) {
-                        return a.direction === 'forward' ? -1 : 1;
-                    }
-                    if (a.nextReviewDate !== b.nextReviewDate) {
-                        return a.nextReviewDate - b.nextReviewDate;
-                    }
-                    return Math.random() - 0.5;
-                });
+                const pool = getCountryPool(continent);
+                const directions = getSrsDirections(category);
+                const deck = sortDueDeck(buildDueDeck(pool, directions, category, state.items, now));
 
                 // Limite diário real: considera cards novos já introduzidos HOJE
                 const newCardsLimit = state.settings.maxNewCardsPerDay;
                 const remainingNewCards = Math.max(0, newCardsLimit - newCardsUsedToday);
-                let addedNewCards = 0;
-
-                const finalDeck: SrsItemWithCountry[] = [];
-                for (const card of deck) {
-                    if (finalDeck.length >= maxItems) break;
-
-                    if (card.interval === 0 && card.repetition === 0 && !state.items[getSrsItemId(card.countryName, card.category, card.direction)]) {
-                        // Card novo (nunca visto)
-                        if (addedNewCards < remainingNewCards) {
-                            finalDeck.push(card);
-                            addedNewCards++;
-                        }
-                    } else {
-                        // Revisão devida — entra livremente
-                        finalDeck.push(card);
-                    }
-                }
-
-                return finalDeck;
+                return limitDueDeck(deck, state.items, maxItems, remainingNewCards);
             },
 
             getStats: () => {

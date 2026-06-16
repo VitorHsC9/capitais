@@ -2,7 +2,7 @@ import { MapPin, Building2, Flag, Zap, PenTool, Skull, Shuffle } from 'lucide-re
 import type { GameMode } from '../hooks/useQuizGame';
 
 interface PracticeModesProps {
-    onSelectMode: (mode: GameMode) => void;
+    readonly onSelectMode: (mode: GameMode) => void;
 }
 
 export function PracticeModes({ onSelectMode }: PracticeModesProps) {

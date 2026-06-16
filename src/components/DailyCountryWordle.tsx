@@ -19,6 +19,73 @@ interface DailyCountryWordleState {
 
 const STORAGE_KEY = 'quiz_capitais_daily_country_wordle_v1';
 const MAX_ATTEMPTS = 5;
+const KEYBOARD_ROWS = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+];
+
+const normalizeWord = (word: string) => word.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const getSlotKeys = (length: number, prefix: string) =>
+    Array.from({ length }, (_, index) => `${prefix}-${index + 1}`);
+
+const getGuessCells = (guess: string) => {
+    const counts = new Map<string, number>();
+    return guess.split('').map((char) => {
+        const count = (counts.get(char) || 0) + 1;
+        counts.set(char, count);
+        return { char, key: `${char}-${count}` };
+    });
+};
+
+const getStatusClass = (status: LetterStatus) => {
+    if (status === 'correct') return 'bg-[var(--color-correct)] border-[var(--color-correct)] text-white';
+    if (status === 'present') return 'bg-yellow-500 border-yellow-500 text-white';
+    return 'bg-[var(--surface-color)] border-[var(--border-color)] text-[var(--text-secondary)]';
+};
+
+const getCurrentCellClass = (index: number, cursorIndex: number, value?: string) => {
+    const cursorClass = index === cursorIndex
+        ? 'border-[var(--text-primary)] bg-[var(--surface-color)] shadow-[0_0_0_2px_var(--text-primary)]'
+        : 'border-[var(--border-color)] bg-[var(--bg-color)]';
+    const textClass = value ? 'text-[var(--text-primary)]' : '';
+    return `${cursorClass} ${textClass}`;
+};
+
+function deleteCharacter(guess: string[], cursorIndex: number, wordLength: number) {
+    const nextGuess = [...guess];
+    const shouldDeletePrevious = cursorIndex > 0 && !nextGuess[cursorIndex];
+    const deleteIndex = shouldDeletePrevious ? cursorIndex - 1 : cursorIndex;
+
+    if (nextGuess[deleteIndex]) {
+        nextGuess[deleteIndex] = '';
+        return {
+            guess: nextGuess,
+            cursorIndex: shouldDeletePrevious ? deleteIndex : cursorIndex,
+        };
+    }
+
+    const endIndex = wordLength - 1;
+    if (cursorIndex === wordLength && nextGuess[endIndex]) {
+        nextGuess[endIndex] = '';
+        return { guess: nextGuess, cursorIndex: endIndex };
+    }
+
+    return { guess, cursorIndex };
+}
+
+function typeCharacter(guess: string[], cursorIndex: number, key: string, wordLength: number) {
+    if (cursorIndex >= wordLength) {
+        return { guess, cursorIndex };
+    }
+
+    const nextGuess = [...guess];
+    while (nextGuess.length <= cursorIndex) {
+        nextGuess.push('');
+    }
+    nextGuess[cursorIndex] = key.toUpperCase();
+    return { guess: nextGuess, cursorIndex: cursorIndex + 1 };
+}
 
 export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWordleProps) {
     const [targetCountry, setTargetCountry] = useState<Country | null>(null);
@@ -44,7 +111,7 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
         setNextDailyTime(tomorrow.getTime());
 
         // Load from storage
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = globalThis.localStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
                 const parsed: DailyCountryWordleState = JSON.parse(saved);
@@ -74,13 +141,13 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
             guesses,
             status: gameStatus
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [guesses, gameStatus, targetCountry]);
 
     // Timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -114,8 +181,8 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
             setCurrentGuess([]);
             setCursorIndex(0);
 
-            const normalizedGuess = currentGuess.join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const normalizedTarget = targetWord.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normalizedGuess = normalizeWord(currentGuess.join(''));
+            const normalizedTarget = normalizeWord(targetWord);
 
             if (normalizedGuess === normalizedTarget) {
                 setGameStatus('won');
@@ -123,37 +190,17 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                 setGameStatus('lost');
             }
         } else if (key === 'Backspace') {
-            const newGuess = [...currentGuess];
-            if (cursorIndex > 0 && !newGuess[cursorIndex]) { // If cursor is at an empty spot, move back and delete
-                setCursorIndex(prev => prev - 1);
-                newGuess[cursorIndex - 1] = '';
-                setCurrentGuess(newGuess);
-            } else if (newGuess[cursorIndex]) { // If there's a char at cursor, delete it
-                newGuess[cursorIndex] = '';
-                setCurrentGuess(newGuess);
-            } else if (cursorIndex === wordLength && newGuess[cursorIndex - 1]) { // If cursor is at the end and previous char exists
-                setCursorIndex(prev => prev - 1);
-                newGuess[cursorIndex - 1] = '';
-                setCurrentGuess(newGuess);
-            }
+            const next = deleteCharacter(currentGuess, cursorIndex, wordLength);
+            setCursorIndex(next.cursorIndex);
+            setCurrentGuess(next.guess);
         } else if (key === 'ArrowLeft') {
             setCursorIndex(prev => Math.max(0, prev - 1));
         } else if (key === 'ArrowRight') {
             setCursorIndex(prev => Math.min(wordLength, prev + 1));
         } else if (/^[a-zA-Z]$/.test(key)) {
-            if (cursorIndex < wordLength) {
-                const newGuess = [...currentGuess];
-                // Ensure the array is long enough
-                while (newGuess.length <= cursorIndex) {
-                    newGuess.push('');
-                }
-                newGuess[cursorIndex] = key.toUpperCase();
-                setCurrentGuess(newGuess);
-                // Move cursor forward if not at end
-                if (cursorIndex < wordLength) {
-                    setCursorIndex(prev => prev + 1);
-                }
-            }
+            const next = typeCharacter(currentGuess, cursorIndex, key, wordLength);
+            setCursorIndex(next.cursorIndex);
+            setCurrentGuess(next.guess);
         }
     }, [gameStatus, targetCountry, currentGuess, guesses, cursorIndex, targetWord, wordLength]);
 
@@ -162,8 +209,8 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
         const listener = (e: KeyboardEvent) => {
             handleKey(e.key);
         };
-        window.addEventListener('keydown', listener);
-        return () => window.removeEventListener('keydown', listener);
+        globalThis.addEventListener('keydown', listener);
+        return () => globalThis.removeEventListener('keydown', listener);
     }, [handleKey]);
 
     const checkGuess = (guess: string) => {
@@ -200,13 +247,9 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
     if (!targetCountry) return <div className="p-10 text-center">Carregando desafio...</div>;
 
     const isFinished = gameStatus !== 'playing';
-
-    // Virtual Keyboard Rows
-    const keyboardRows = [
-        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-        ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-    ];
+    const currentSlotKeys = getSlotKeys(wordLength, 'current');
+    const emptyRows = getSlotKeys(Math.max(0, 5 - guesses.length - (isFinished ? 0 : 1)), 'empty-row');
+    const emptySlotKeys = getSlotKeys(wordLength, 'empty-cell');
 
     return (
         <div className="flex flex-col h-full animate-in fade-in duration-300">
@@ -227,18 +270,14 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                 {/* Grid */}
                 <div className="flex flex-col gap-2 mb-4 w-full max-w-2xl px-4 overflow-x-auto">
                     {/* Previous Guesses */}
-                    {guesses.map((guess, i) => {
+                    {guesses.map((guess) => {
                         const status = checkGuess(guess);
                         return (
-                            <div key={i} className="flex gap-1 justify-center min-w-min mx-auto">
-                                {guess.split('').map((char, j) => (
+                            <div key={guess} className="flex gap-1 justify-center min-w-min mx-auto">
+                                {getGuessCells(guess).map(({ char, key }, j) => (
                                     <div
-                                        key={j}
-                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)]
-                                            ${status[j] === 'correct' ? 'bg-[var(--color-correct)] border-[var(--color-correct)] text-white' :
-                                                status[j] === 'present' ? 'bg-yellow-500 border-yellow-500 text-white' :
-                                                    'bg-[var(--surface-color)] border-[var(--border-color)] text-[var(--text-secondary)]'
-                                            }`}
+                                        key={key}
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)] ${getStatusClass(status[j])}`}
                                     >
                                         {char}
                                     </div>
@@ -250,15 +289,12 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                     {/* Current Guess */}
                     {!isFinished && guesses.length < 5 && (
                         <div className="flex gap-1 justify-center min-w-min mx-auto">
-                            {[...Array(wordLength)].map((_, i) => (
+                            {currentSlotKeys.map((key, i) => (
                                 <button
                                     type="button"
-                                    key={i}
+                                    key={key}
                                     onClick={() => setCursorIndex(i)}
-                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all
-                                        ${i === cursorIndex ? 'border-[var(--text-primary)] bg-[var(--surface-color)] shadow-[0_0_0_2px_var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-color)]'}
-                                        ${currentGuess[i] ? 'text-[var(--text-primary)]' : ''}
-                                    `}
+                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center text-lg font-black rounded-lg border-2 uppercase cursor-pointer transition-all ${getCurrentCellClass(i, cursorIndex, currentGuess[i])}`}
                                 >
                                     {currentGuess[i] || ''}
                                 </button>
@@ -267,11 +303,11 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                     )}
 
                     {/* Empty Rows */}
-                    {[...Array(Math.max(0, 5 - guesses.length - (isFinished ? 0 : 1)))].map((_, i) => (
-                        <div key={`empty-${i}`} className="flex gap-1 justify-center min-w-min mx-auto">
-                            {[...Array(wordLength)].map((_, j) => (
+                    {emptyRows.map((rowKey) => (
+                        <div key={rowKey} className="flex gap-1 justify-center min-w-min mx-auto">
+                            {emptySlotKeys.map((key) => (
                                 <div
-                                    key={j}
+                                    key={`${rowKey}-${key}`}
                                     className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-lg border-2 border-[var(--border-color)] bg-[var(--bg-color)] opacity-50"
                                 />
                             ))}
@@ -320,8 +356,8 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
                 {/* Virtual Keyboard */}
                 {!isFinished && (
                     <div className="w-full max-w-md px-1 pb-4">
-                        {keyboardRows.map((row, i) => (
-                            <div key={i} className="flex justify-center gap-1 mb-1">
+                        {KEYBOARD_ROWS.map((row) => (
+                            <div key={row.join('')} className="flex justify-center gap-1 mb-1">
                                 {row.map((key) => (
                                     <button
                                         key={key}

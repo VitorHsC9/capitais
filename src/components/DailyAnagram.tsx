@@ -4,9 +4,11 @@ import { useDailyAnagram } from '../hooks/useDailyAnagram';
 import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, Shuffle, ArrowRight } from 'lucide-react';
 
 interface DailyAnagramProps {
-    onBack: () => void;
-    onNextChallenge: () => void;
+    readonly onBack: () => void;
+    readonly onNextChallenge: () => void;
 }
+
+const ATTEMPT_KEYS = ['attempt-1', 'attempt-2', 'attempt-3', 'attempt-4', 'attempt-5'];
 
 export function DailyAnagram({ onBack, onNextChallenge }: DailyAnagramProps) {
     const { targetCountry, shuffledCapital, guesses, gameStatus, submitGuess, attemptsLeft, nextDailyTime } = useDailyAnagram();
@@ -15,7 +17,7 @@ export function DailyAnagram({ onBack, onNextChallenge }: DailyAnagramProps) {
     // Countdown timer
     useEffect(() => {
         const timer = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const distance = nextDailyTime - now;
 
             if (distance < 0) {
@@ -123,9 +125,9 @@ export function DailyAnagram({ onBack, onNextChallenge }: DailyAnagramProps) {
                     ) : (
                         <div className="space-y-4">
                             <div className="flex justify-center gap-2">
-                                {[...Array(5)].map((_, i) => (
+                                {ATTEMPT_KEYS.map((key, i) => (
                                     <div
-                                        key={i}
+                                        key={key}
                                         className={`w-4 h-4 rounded-full border-2 border-[var(--border-color)] transition-colors ${i < guesses.length ? 'bg-[var(--color-error)]' : 'bg-[var(--surface-color)]'
                                             }`}
                                     />
@@ -146,13 +148,12 @@ export function DailyAnagram({ onBack, onNextChallenge }: DailyAnagramProps) {
                             isAnswered={false}
                             correctAnswer={targetCountry.capital}
                             nextQuestion={() => { }}
-                            isDark={true}
                             placeholder="Digite a capital..."
                         />
                         {guesses.length > 0 && (
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
-                                {guesses.map((g, i) => (
-                                    <span key={i} className="text-[10px] px-2 py-1 bg-[var(--surface-color)] text-[var(--text-secondary)] rounded-lg border-2 border-[var(--border-color)] line-through opacity-70 font-bold">
+                                {guesses.map((g) => (
+                                    <span key={g} className="text-[10px] px-2 py-1 bg-[var(--surface-color)] text-[var(--text-secondary)] rounded-lg border-2 border-[var(--border-color)] line-through opacity-70 font-bold">
                                         {g}
                                     </span>
                                 ))}

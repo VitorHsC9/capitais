@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,7 +10,7 @@ const countriesPath = path.join(__dirname, 'src/data/countries.ts');
 const content = fs.readFileSync(countriesPath, 'utf8');
 
 // Extract the array content
-const match = content.match(/export const COUNTRIES_DB: Country\[\] = \[([\s\S]*)\];/);
+const match = /export const COUNTRIES_DB: Country\[\] = \[([\s\S]*)\];/.exec(content);
 if (!match) {
     console.error('Could not find COUNTRIES_DB array');
     process.exit(1);
@@ -22,37 +22,33 @@ const objectRegex = /{\s*name:\s*'([^']+)',[\s\S]*?}/g;
 const countries = [];
 let objMatch;
 
-while ((objMatch = objectRegex.exec(match[1])) !== null) {
-    // Construct a valid JSON string from the JS object string
-    // This requires adding quotes to keys and handling single quotes
-    let objStr = objMatch[0]
-        .replace(/(\w+):/g, '"$1":') // Quote keys
-        .replace(/'/g, '"') // Replace single quotes with double quotes
-        .replace(/,(\s*})/g, '$1'); // Remove trailing commas
+const getCapture = (text, regex) => regex.exec(text)?.[1];
 
+while ((objMatch = objectRegex.exec(match[1])) !== null) {
     try {
         // We need to be careful with the regex replacement, it might break values containing : or '
         // So let's try a safer manual parsing or just use the regex capture groups for key fields
 
-        const nameMatch = objMatch[0].match(/name:\s*'([^']+)'/);
-        const mapNameMatch = objMatch[0].match(/mapName:\s*'([^']+)'/);
-        const capitalMatch = objMatch[0].match(/capital:\s*'([^']+)'/);
-        const continentMatch = objMatch[0].match(/continent:\s*'([^']+)'/);
-        const codeMatch = objMatch[0].match(/code:\s*'([^']+)'/);
-        const populationMatch = objMatch[0].match(/population:\s*(\d+)/);
-        const mainLanguageMatch = objMatch[0].match(/mainLanguage:\s*'([^']+)'/);
-        const neighborsMatch = objMatch[0].match(/neighboringCountries:\s*\[(.*?)\]/s);
+        const objectText = objMatch[0];
+        const name = getCapture(objectText, /name:\s*'([^']+)'/);
+        const mapName = getCapture(objectText, /mapName:\s*'([^']+)'/);
+        const capital = getCapture(objectText, /capital:\s*'([^']+)'/);
+        const continent = getCapture(objectText, /continent:\s*'([^']+)'/);
+        const code = getCapture(objectText, /code:\s*'([^']+)'/);
+        const population = getCapture(objectText, /population:\s*(\d+)/);
+        const mainLanguage = getCapture(objectText, /mainLanguage:\s*'([^']+)'/);
+        const neighbors = getCapture(objectText, /neighboringCountries:\s*\[(.*?)\]/s);
 
-        if (nameMatch) {
+        if (name) {
             countries.push({
-                name: nameMatch[1],
-                mapName: mapNameMatch ? mapNameMatch[1] : undefined,
-                capital: capitalMatch ? capitalMatch[1] : '',
-                continent: continentMatch ? continentMatch[1] : '',
-                code: codeMatch ? codeMatch[1] : '',
-                population: populationMatch ? parseInt(populationMatch[1]) : undefined,
-                mainLanguage: mainLanguageMatch ? mainLanguageMatch[1] : undefined,
-                neighboringCountries: neighborsMatch ? neighborsMatch[1].replace(/'/g, '').split(',').map(s => s.trim()).filter(s => s) : []
+                name,
+                mapName,
+                capital: capital || '',
+                continent: continent || '',
+                code: code || '',
+                population: population ? Number.parseInt(population, 10) : undefined,
+                mainLanguage,
+                neighboringCountries: neighbors ? neighbors.replaceAll("'", '').split(',').map(s => s.trim()).filter(Boolean) : []
             });
         }
     } catch (e) {

@@ -22,7 +22,7 @@ export function CountryAutocomplete({ onSelect, placeholder, disabled }: Country
             const normalizedQuery = normalizeText(query);
             if (normalizeText(c.name).includes(normalizedQuery)) return true;
             if (c.mapName && normalizeText(c.mapName).includes(normalizedQuery)) return true;
-            if (c.acceptedNames && c.acceptedNames.some(n => normalizeText(n).includes(normalizedQuery))) return true;
+            if (c.acceptedNames?.some(n => normalizeText(n).includes(normalizedQuery))) return true;
             return false;
         }).slice(0, 5);
 

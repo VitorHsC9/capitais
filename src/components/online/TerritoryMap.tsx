@@ -211,7 +211,7 @@ export const TerritoryMap = memo(function TerritoryMap({ countryCode, className 
         if (e.touches.length === 2) {
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
-            lastTouchDist.current = Math.sqrt(dx * dx + dy * dy);
+            lastTouchDist.current = Math.hypot(dx, dy);
         }
     }, [viewBox]);
 
@@ -235,7 +235,7 @@ export const TerritoryMap = memo(function TerritoryMap({ countryCode, className 
         if (e.touches.length === 2 && lastTouchDist.current !== null) {
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const dist = Math.hypot(dx, dy);
             const factor = lastTouchDist.current / dist;
             lastTouchDist.current = dist;
             zoom(factor);
