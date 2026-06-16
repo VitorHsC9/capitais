@@ -25,7 +25,7 @@ export const getDailyCountry = (countries: Country[], salt: number = 0): Country
     let seed = 0;
     for (let i = 0; i < seedString.length; i++) {
         seed = ((seed << 5) - seed) + seedString.charCodeAt(i);
-        seed |= 0; // Convert to 32bit integer
+        seed = Math.trunc(seed)
     }
 
     seed += salt;

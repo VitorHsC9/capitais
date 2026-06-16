@@ -34,7 +34,7 @@ export const useDailyMix = () => {
         let seed = 0;
         for (let i = 0; i < dateStr.length; i++) {
             seed = ((seed << 5) - seed) + dateStr.charCodeAt(i);
-            seed |= 0;
+            seed = Math.trunc(seed);
         }
         const random = mulberry32(seed);
 
