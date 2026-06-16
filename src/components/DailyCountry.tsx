@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDailyCountry } from '../hooks/useDailyCountry';
-import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, Users, Globe, Languages, Map, ArrowRight } from 'lucide-react';
+import { useCountdown } from '../hooks/useCountdown';
+import { ArrowLeft, AlertCircle, Users, Globe, Languages, Map } from 'lucide-react';
 import { CountryAutocomplete } from './CountryAutocomplete';
+import { DailyResultCard } from './DailyResultCard';
 
 interface DailyCountryProps {
     readonly onBack: () => void;
@@ -37,27 +39,8 @@ const getNeighborsHint = (neighboringCountries?: string[]) => {
 
 export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
     const { targetCountry, gameStatus, guesses, submitGuess, nextDailyTime, maxAttempts } = useDailyCountry();
-    const [timeLeftStr, setTimeLeftStr] = useState('');
+    const timeLeftStr = useCountdown(nextDailyTime);
     const [lastIncorrectGuess, setLastIncorrectGuess] = useState<string | null>(null);
-
-    // Countdown timer
-    useEffect(() => {
-        const timer = setInterval(() => {
-            const now = Date.now();
-            const distance = nextDailyTime - now;
-
-            if (distance < 0) {
-                setTimeLeftStr("00:00:00");
-            } else {
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                setTimeLeftStr(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-            }
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [nextDailyTime]);
 
     const handleGuess = (guess: string) => {
         if (!targetCountry) return;
@@ -168,29 +151,12 @@ export function DailyCountry({ onBack, onNextChallenge }: DailyCountryProps) {
                 )}
 
                 {isFinished ? (
-                    <div className="bg-[var(--surface-color)] p-6 rounded-2xl border-2 border-[var(--border-color)] shadow-[4px_4px_0_var(--border-color)] animate-in slide-in-from-bottom-4 duration-500 text-center">
-                        <div className={`flex items-center justify-center gap-2 ${gameStatus === 'won' ? 'text-[var(--color-correct)]' : 'text-[var(--color-error)]'} font-black mb-2`}>
-                            {gameStatus === 'won' ? <CheckCircle className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
-                            <span className="uppercase tracking-wide">{gameStatus === 'won' ? 'VOCÊ ACERTOU!' : 'FIM DE JOGO'}</span>
-                        </div>
-                        <p className="text-[var(--text-secondary)] text-sm mb-6 font-bold">O país era <strong className="text-[var(--text-primary)] uppercase">{targetCountry.name}</strong></p>
-
-                        <div className="text-center mb-6">
-                            <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">PRÓXIMO</div>
-                            <div className="text-lg font-mono font-bold text-[var(--text-primary)] flex items-center justify-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                {timeLeftStr}
-                            </div>
-                        </div>
-
-                        <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
-                            <Share2 className="w-4 h-4" /> Compartilhar
-                        </button>
-
-                        <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
-                            <ArrowRight className="w-4 h-4" /> Próximo Desafio
-                        </button>
-                    </div>
+                    <DailyResultCard
+                        gameStatus={gameStatus}
+                        countryName={targetCountry.name}
+                        timeLeftStr={timeLeftStr}
+                        onNextChallenge={onNextChallenge}
+                    />
                 ) : (
                     <>
                         <div className="text-center text-xs font-bold text-[var(--text-secondary)] mb-2 uppercase tracking-wide">

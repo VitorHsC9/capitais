@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { COUNTRIES_DB, type Country } from '../data/countries';
+import { useCountriesByContinent, useSupremeCountdown } from './useSupremeShared';
 
 type GameStatus = 'playing' | 'won' | 'lost';
 
@@ -13,31 +14,8 @@ export function useSupremeGame({ isMatch }: SupremeGameConfig) {
     const [timeLeft, setTimeLeft] = useState(12 * 60);
     const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
 
-    const countriesByContinent = useMemo(() => {
-        const grouped: Record<string, Country[]> = {};
-        COUNTRIES_DB.forEach(country => {
-            if (!grouped[country.continent]) grouped[country.continent] = [];
-            grouped[country.continent].push(country);
-        });
-        return grouped;
-    }, []);
-
-    useEffect(() => {
-        if (gameStatus !== 'playing') return;
-
-        const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    setGameStatus('lost');
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [gameStatus]);
+    const countriesByContinent = useCountriesByContinent();
+    useSupremeCountdown(gameStatus, setGameStatus, setTimeLeft);
 
     const handleInput = (text: string) => {
         if (gameStatus !== 'playing') return;

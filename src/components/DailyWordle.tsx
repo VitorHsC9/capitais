@@ -1,10 +1,15 @@
 import { DailyWordleGame } from './DailyWordleGame';
 import { useDailyWordle } from '../hooks/useDailyWordle';
+import type { Country } from '../data/countries';
 
 interface DailyWordleProps {
     readonly onBack: () => void;
     readonly onNextChallenge: () => void;
 }
+
+const renderCapitalResult = (country: Country) => (
+    <>A capital era <strong className="text-[var(--text-primary)] uppercase">{country.capital}</strong> ({country.name})</>
+);
 
 export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
     const game = useDailyWordle();
@@ -24,7 +29,7 @@ export function DailyWordle({ onBack, onNextChallenge }: DailyWordleProps) {
             cursorIndex={game.cursorIndex}
             setCursorIndex={game.setCursorIndex}
             wordLength={game.wordLength}
-            resultText={(country) => <>A capital era <strong className="text-[var(--text-primary)] uppercase">{country.capital}</strong> ({country.name})</>}
+            resultText={renderCapitalResult}
             onBack={onBack}
             onNextChallenge={onNextChallenge}
         />

@@ -1,6 +1,7 @@
 
 import fs from 'node:fs';
 import https from 'node:https';
+import { randomInt } from 'node:crypto';
 
 // Mock the countries data since we can't easily import TS directly in JS without build
 // I will copy the structure of one country to test, or better, I will read the file and extract names
@@ -13,7 +14,7 @@ const seededRandom = (seed) => {
     const m = 0x80000000;
     const a = 1103515245;
     const c = 12345;
-    let state = seed || Math.floor(Math.random() * (m - 1));
+    let state = seed || randomInt(1, m);
 
     return () => {
         state = (a * state + c) % m;

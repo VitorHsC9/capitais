@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useDailyMap } from '../hooks/useDailyMap';
+import { useCountdown } from '../hooks/useCountdown';
 import { checkCountryName } from '../utils/validation';
-import { Clock, CheckCircle, Share2, ArrowLeft, AlertCircle, ArrowRight } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CountryAutocomplete } from './CountryAutocomplete';
+import { DailyResultCard } from './DailyResultCard';
 import type { Country } from '../data/countries';
 
 // We need a GeoJSON of the world. For this example, I'll fetch a simplified one.
@@ -49,29 +51,10 @@ function MapZoomer({ targetCountry, geoJsonData }: { readonly targetCountry: Cou
 
 export function DailyMap({ onBack, onNextChallenge }: DailyMapProps) {
     const { targetCountry, gameStatus, setGameStatus, nextDailyTime } = useDailyMap();
-    const [timeLeftStr, setTimeLeftStr] = useState('');
+    const timeLeftStr = useCountdown(nextDailyTime);
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [loadingMap, setLoadingMap] = useState(true);
     const [lastIncorrectGuess, setLastIncorrectGuess] = useState<string | null>(null);
-
-    // Countdown timer
-    useEffect(() => {
-        const timer = setInterval(() => {
-            const now = Date.now();
-            const distance = nextDailyTime - now;
-
-            if (distance < 0) {
-                setTimeLeftStr("00:00:00");
-            } else {
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                setTimeLeftStr(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-            }
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [nextDailyTime]);
 
     // Fetch GeoJSON
     useEffect(() => {
@@ -166,29 +149,12 @@ export function DailyMap({ onBack, onNextChallenge }: DailyMapProps) {
                 )}
 
                 {isFinished ? (
-                    <div className="bg-[var(--surface-color)] p-6 rounded-2xl border-2 border-[var(--border-color)] shadow-[4px_4px_0_var(--border-color)] animate-in slide-in-from-bottom-4 duration-500 text-center">
-                        <div className="flex items-center justify-center gap-2 text-[var(--color-correct)] font-black mb-2">
-                            <CheckCircle className="w-6 h-6" />
-                            <span className="uppercase tracking-wide">VOCÊ ACERTOU!</span>
-                        </div>
-                        <p className="text-[var(--text-secondary)] text-sm mb-6 font-bold">O país era <strong className="text-[var(--text-primary)] uppercase">{targetCountry.name}</strong></p>
-
-                        <div className="text-center mb-6">
-                            <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">PRÓXIMO</div>
-                            <div className="text-lg font-mono font-bold text-[var(--text-primary)] flex items-center justify-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                {timeLeftStr}
-                            </div>
-                        </div>
-
-                        <button className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg-color)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
-                            <Share2 className="w-4 h-4" /> Compartilhar
-                        </button>
-
-                        <button onClick={onNextChallenge} className="w-full mt-3 py-3 bg-[var(--surface-color)] text-[var(--text-primary)] font-black rounded-xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[4px] transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-[var(--border-color)]">
-                            <ArrowRight className="w-4 h-4" /> Próximo Desafio
-                        </button>
-                    </div>
+                    <DailyResultCard
+                        gameStatus={gameStatus}
+                        countryName={targetCountry.name}
+                        timeLeftStr={timeLeftStr}
+                        onNextChallenge={onNextChallenge}
+                    />
                 ) : (
                     <CountryAutocomplete
                         onSelect={handleGuess}

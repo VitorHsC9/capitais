@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { COUNTRIES_DB, CONFIG } from '../data/countries';
+import { COUNTRIES_DB } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
 import { useStatistics } from './useStatistics';
+import { shuffleArray } from '../utils/array';
+import { generateRoundOptions } from '../utils/quiz';
 
 // --- FUNÇÃO DE NORMALIZAÇÃO ---
 const normalizeText = (text: string) => {
@@ -16,40 +18,6 @@ export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writin
 type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
 
 // --- FUNÇÕES AUXILIARES ---
-const shuffleArray = <T,>(array: T[]): T[] => [...array].sort(() => Math.random() - 0.5);
-
-const getRandomItems = <T,>(arr: T[], count: number, excludeItem?: T): T[] => {
-  const result: T[] = [];
-  const takenIndices = new Set<number>();
-  
-  const excludeIndex = excludeItem ? arr.indexOf(excludeItem) : -1;
-  if (excludeIndex !== -1) takenIndices.add(excludeIndex);
-
-  while (result.length < count && takenIndices.size < arr.length) {
-    const idx = Math.floor(Math.random() * arr.length);
-    if (!takenIndices.has(idx)) {
-      takenIndices.add(idx);
-      result.push(arr[idx]);
-    }
-  }
-  return result;
-};
-
-const generateRoundOptions = (correct: Country): Country[] => {
-  const needed = CONFIG.OPTIONS_COUNT - 1;
-  const sameContinentPool = COUNTRIES_DB.filter(c => c.continent === correct.continent && c.name !== correct.name);
-  let distractors = getRandomItems(sameContinentPool, needed);
-
-  if (distractors.length < needed) {
-    const remainingNeeded = needed - distractors.length;
-    const otherPool = COUNTRIES_DB.filter(c => c.continent !== correct.continent);
-    const extraDistractors = getRandomItems(otherPool, remainingNeeded);
-    distractors = [...distractors, ...extraDistractors];
-  }
-
-  return shuffleArray([...distractors, correct]);
-};
-
 // --- HOOK PRINCIPAL ---
 
 export const useQuizGame = () => {

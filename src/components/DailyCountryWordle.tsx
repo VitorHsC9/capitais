@@ -1,5 +1,6 @@
 import { DailyWordleGame } from './DailyWordleGame';
 import { useDailyWordleGame } from '../hooks/useDailyWordleGame';
+import type { Country } from '../data/countries';
 
 interface DailyCountryWordleProps {
     readonly onBack: () => void;
@@ -7,6 +8,9 @@ interface DailyCountryWordleProps {
 }
 
 const getCountryName = (country: { name: string }) => country.name;
+const renderCountryResult = (country: Country) => (
+    <>O pais era <strong className="text-[var(--text-primary)] uppercase">{country.name}</strong> ({country.capital})</>
+);
 
 export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWordleProps) {
     const game = useDailyWordleGame({
@@ -31,7 +35,7 @@ export function DailyCountryWordle({ onBack, onNextChallenge }: DailyCountryWord
             cursorIndex={game.cursorIndex}
             setCursorIndex={game.setCursorIndex}
             wordLength={game.wordLength}
-            resultText={(country) => <>O pais era <strong className="text-[var(--text-primary)] uppercase">{country.name}</strong> ({country.capital})</>}
+            resultText={renderCountryResult}
             onBack={onBack}
             onNextChallenge={onNextChallenge}
         />

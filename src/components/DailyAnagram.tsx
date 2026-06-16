@@ -19,7 +19,6 @@ export function DailyAnagram({ onBack, onNextChallenge }: DailyAnagramProps) {
             clueLabel="Pais"
             clueValue={game.targetCountry.name}
             inputPlaceholder="Digite a capital..."
-            targetCountry={game.targetCountry}
             shuffledAnswer={game.shuffledCapital}
             guesses={game.guesses}
             gameStatus={game.gameStatus}

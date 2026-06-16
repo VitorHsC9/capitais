@@ -1,7 +1,5 @@
 import { useDailyAnagramGame } from './useDailyAnagramGame';
-import type { DailyGameState } from './useDailyWordleGame';
-
-export type { DailyGameState };
+export type { DailyGameState } from './useDailyWordleGame';
 
 const getCountryCapital = (country: { capital: string }) => country.capital;
 

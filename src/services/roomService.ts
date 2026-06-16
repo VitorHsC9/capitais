@@ -12,6 +12,7 @@ import {
 import { COUNTRIES_DB, CONFIG } from '../data/countries';
 import type { Country } from '../data/countries';
 import { shuffleArray, getRandomItems } from '../utils/array';
+import { randomInt, randomString } from '../utils/random';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -92,7 +93,7 @@ const toQuestion = (c: Country): RoundQuestion => ({
 });
 
 function generateRoundQuestion(category: OnlineCategory, roundIndex: number, inputFormat: InputFormat): RoundData {
-    const correctCountry = COUNTRIES_DB[Math.floor(Math.random() * COUNTRIES_DB.length)];
+    const correctCountry = COUNTRIES_DB[randomInt(COUNTRIES_DB.length)];
 
     // Pick round type based on category
     const availableTypes = getCategoryRoundTypes(category);
@@ -126,16 +127,11 @@ function generateRoundQuestion(category: OnlineCategory, roundIndex: number, inp
 }
 
 export function generateRoomCode(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return code;
+    return randomString(6, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
 }
 
 export function generatePlayerId(): string {
-    return Math.random().toString(36).substring(2, 12);
+    return randomString(10);
 }
 
 // ─── Room Operations ─────────────────────────────────────────────

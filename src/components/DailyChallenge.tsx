@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import { PixelatedFlag } from './PixelatedFlag';
 import { CountryAutocomplete } from './CountryAutocomplete';
 import { useDailyGame } from '../hooks/useDailyGame';
+import { useCountdown } from '../hooks/useCountdown';
 import { Clock, CheckCircle, XCircle, Share2, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface DailyChallengeProps {
@@ -13,27 +13,7 @@ const ATTEMPT_KEYS = ['attempt-1', 'attempt-2', 'attempt-3', 'attempt-4', 'attem
 
 export function DailyChallenge({ onBack, onNextChallenge }: DailyChallengeProps) {
     const { targetCountry, guesses, gameStatus, submitGuess, attemptsLeft, nextDailyTime } = useDailyGame();
-    const [timeLeftStr, setTimeLeftStr] = useState('');
-
-    // Countdown timer
-    useEffect(() => {
-        const timer = setInterval(() => {
-            const now = Date.now();
-            const distance = nextDailyTime - now;
-
-            if (distance < 0) {
-                setTimeLeftStr("00:00:00");
-                // Optionally trigger a reload or re-check here
-            } else {
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                setTimeLeftStr(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-            }
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [nextDailyTime]);
+    const timeLeftStr = useCountdown(nextDailyTime);
 
     if (!targetCountry) return <div className="p-10 text-center">Carregando desafio...</div>;
 

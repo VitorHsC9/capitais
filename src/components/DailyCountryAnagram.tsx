@@ -26,7 +26,6 @@ export function DailyCountryAnagram({ onBack, onNextChallenge }: DailyCountryAna
             clueLabel="Capital"
             clueValue={game.targetCountry.capital}
             inputPlaceholder="Digite o pais..."
-            targetCountry={game.targetCountry}
             shuffledAnswer={game.shuffledAnswer}
             guesses={game.guesses}
             gameStatus={game.gameStatus}

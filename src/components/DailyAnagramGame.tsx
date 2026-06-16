@@ -1,6 +1,5 @@
 import { ArrowLeft, ArrowRight, CheckCircle, Clock, Share2, Shuffle, XCircle } from 'lucide-react';
 import { InputAnswer } from './InputAnswer';
-import type { Country } from '../data/countries';
 import type { DailyGameState } from '../hooks/useDailyWordleGame';
 import { useCountdown } from '../hooks/useCountdown';
 
@@ -11,7 +10,6 @@ interface DailyAnagramGameProps {
     readonly clueLabel: string;
     readonly clueValue: string;
     readonly inputPlaceholder: string;
-    readonly targetCountry: Country;
     readonly shuffledAnswer: string;
     readonly guesses: string[];
     readonly gameStatus: DailyGameState;

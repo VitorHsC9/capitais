@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Country } from '../data/countries';
 import { COUNTRIES_DB } from '../data/countries';
 import { getDailyCountry, getDailySeed } from '../utils/daily';
+import { shuffleArray } from '../utils/array';
 import type { DailyGameState } from './useDailyWordleGame';
 
 interface DailyAnagramState {
@@ -19,7 +20,7 @@ interface DailyAnagramGameConfig {
 
 const MAX_ATTEMPTS = 5;
 const normalizeWord = (word: string) => word.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const shuffleWord = (word: string) => word.toUpperCase().split('').sort(() => Math.random() - 0.5).join('');
+const shuffleWord = (word: string) => shuffleArray(word.toUpperCase().split('')).join('');
 const getNextMidnight = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Clock, XCircle, Share2, Trophy, ArrowRight } from 'lucide-react';
 import { useDailyMix } from '../hooks/useDailyMix';
+import { useCountdown } from '../hooks/useCountdown';
 import { OptionButton } from './OptionButton';
 import { ProgressBar } from './ProgressBar';
 import { CountryAutocomplete } from './CountryAutocomplete';
@@ -12,27 +13,8 @@ interface DailyMixProps {
 
 export function DailyMix({ onBack, onNextChallenge }: DailyMixProps) {
     const { gameState, submitAnswer, nextDailyTime } = useDailyMix();
-    const [timeLeftStr, setTimeLeftStr] = useState('');
+    const timeLeftStr = useCountdown(nextDailyTime);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
-    // Countdown timer
-    useEffect(() => {
-        const timer = setInterval(() => {
-            const now = Date.now();
-            const distance = nextDailyTime - now;
-
-            if (distance < 0) {
-                setTimeLeftStr("00:00:00");
-            } else {
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                setTimeLeftStr(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-            }
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [nextDailyTime]);
 
     if (!gameState) return <div className="p-10 text-center">Carregando desafio...</div>;
 

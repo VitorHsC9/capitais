@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { COUNTRIES_DB } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
+import { randomFloat } from '../utils/random';
 
 export type SrsCategory = 'capitals' | 'flags' | 'map';
 export type SrsDirection = 'forward' | 'reverse';
@@ -145,7 +146,7 @@ function sortDueDeck(deck: SrsItemWithCountry[]) {
         if (a.nextReviewDate !== b.nextReviewDate) {
             return a.nextReviewDate - b.nextReviewDate;
         }
-        return Math.random() - 0.5;
+        return randomFloat() - 0.5;
     });
 }
 

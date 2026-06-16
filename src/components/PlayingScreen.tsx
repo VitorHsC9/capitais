@@ -5,9 +5,10 @@ import { useGameStore } from '../hooks/useGameStore';
 import { ProgressBar } from './ProgressBar';
 import { OptionButton } from './OptionButton';
 import { InputAnswer } from './InputAnswer';
+import { shuffleArray } from '../utils/array';
 
 const shuffleText = (text: string) => {
-    return text.split('').sort(() => Math.random() - 0.5).join('').toUpperCase();
+    return shuffleArray(text.split('')).join('').toUpperCase();
 };
 
 export function PlayingScreen() {

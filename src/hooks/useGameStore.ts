@@ -1,26 +1,12 @@
 import { create } from 'zustand';
-import { COUNTRIES_DB, CONFIG } from '../data/countries';
+import { COUNTRIES_DB } from '../data/countries';
 import type { Country, Continent } from '../data/countries';
-import { shuffleArray, getRandomItems } from '../utils/array';
+import { shuffleArray } from '../utils/array';
 import { checkCountryName, checkCountryCapital } from '../utils/validation';
+import { generateRoundOptions } from '../utils/quiz';
 
 export type GameMode = 'classic' | 'flags' | 'reverse' | 'suddenDeath' | 'writing' | 'survival' | 'anagram';
 export type GameState = 'start' | 'playing' | 'finished' | 'stats' | 'game_over';
-
-const generateRoundOptions = (correct: Country): Country[] => {
-    const needed = CONFIG.OPTIONS_COUNT - 1;
-    const sameContinentPool = COUNTRIES_DB.filter(c => c.continent === correct.continent && c.name !== correct.name);
-    let distractors = getRandomItems(sameContinentPool, needed);
-
-    if (distractors.length < needed) {
-        const remainingNeeded = needed - distractors.length;
-        const otherPool = COUNTRIES_DB.filter(c => c.continent !== correct.continent);
-        const extraDistractors = getRandomItems(otherPool, remainingNeeded);
-        distractors = [...distractors, ...extraDistractors];
-    }
-
-    return shuffleArray([...distractors, correct]);
-};
 
 interface GameStore {
     // State
