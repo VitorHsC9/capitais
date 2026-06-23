@@ -113,6 +113,30 @@ describe('daily hooks', () => {
         expect(result.current.guesses).toHaveLength(5);
     });
 
+    it('ignores incomplete wordle submits and clamps typing/deleting at bounds', () => {
+        const { result } = renderHook(() => useDailyWordleGame({
+            storageKey: 'wordle-bounds',
+            salt: 1,
+            getTargetWord: () => 'CABUL',
+            parseErrorMessage: 'bad wordle',
+        }));
+
+        act(() => result.current.handleKey('Enter'));
+        expect(result.current.guesses).toEqual([]);
+
+        'CABULX'.split('').forEach((key) => {
+            act(() => result.current.handleKey(key));
+        });
+        expect(result.current.currentGuess.join('')).toBe('CABUL');
+
+        act(() => result.current.handleKey('Backspace'));
+        expect(result.current.currentGuess.join('')).toBe('CABU');
+
+        act(() => result.current.handleKey('ArrowRight'));
+        act(() => result.current.handleKey('Backspace'));
+        expect(result.current.currentGuess.join('')).toBe('CABU');
+    });
+
     it('restores saved wordle state and ignores old or invalid state', () => {
         localStorage.setItem('saved-wordle', JSON.stringify({
             date: '2026-06-23',
@@ -326,6 +350,18 @@ describe('daily hooks', () => {
         localStorage.setItem('quiz_capitais_daily_map_v1', '{');
         renderHook(() => useDailyMap());
         expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('restores saved daily map status for the current day', () => {
+        localStorage.setItem('quiz_capitais_daily_map_v1', JSON.stringify({
+            date: '2026-06-23',
+            isCorrect: true,
+            status: 'won',
+        }));
+
+        const { result } = renderHook(() => useDailyMap());
+
+        expect(result.current.gameStatus).toBe('won');
     });
 
     it('wraps the daily anagram and wordle games with country capitals', () => {

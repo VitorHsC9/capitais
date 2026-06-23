@@ -254,6 +254,12 @@ describe('daily game components', () => {
 
         fireEvent.click(screen.getByText(/Proximo/));
         expect(onNextChallenge).toHaveBeenCalledOnce();
+
+        dailyGameState.gameStatus = 'playing';
+        dailyGameState.guesses = ['Brasil', 'Japao'];
+        dailyGameState.targetCountry = { ...country, population: 500_000, neighboringCountries: [] };
+        rerender(<DailyCountry onBack={vi.fn()} onNextChallenge={onNextChallenge} />);
+        expect(screen.getByText(/Menos de 1/)).toBeInTheDocument();
     });
 
     it('shows loading states when hooks have no target country', () => {

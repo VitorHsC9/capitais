@@ -239,6 +239,16 @@ describe('App', () => {
         expect(await screen.findByTestId('supreme-menu')).toBeInTheDocument();
         fireEvent.click(screen.getByText('capitals'));
         expect(await screen.findByTestId('supreme-capitals')).toBeInTheDocument();
+
+        cleanup();
+        renderApp('/supreme-menu');
+        fireEvent.click(await screen.findByText('countries'));
+        expect(await screen.findByTestId('supreme-countries')).toBeInTheDocument();
+
+        cleanup();
+        renderApp('/supreme-menu');
+        fireEvent.click(await screen.findByText('final'));
+        expect(await screen.findByTestId('supreme-final')).toBeInTheDocument();
     });
 
     it('handles global shortcuts and sudden death timer ticks while playing', async () => {
@@ -253,6 +263,20 @@ describe('App', () => {
 
         fireEvent.keyDown(window, { key: '1' });
         expect(state.game.handleAnswer).toHaveBeenCalledWith(COUNTRIES_DB[0].capital);
+    });
+
+    it('ticks sudden death timer interval', () => {
+        vi.useFakeTimers();
+        state.game = makeGame({
+            gameMode: 'suddenDeath',
+            gameState: 'playing',
+            isAnswered: false,
+        });
+
+        renderApp('/playing');
+        vi.advanceTimersByTime(1000);
+
+        expect(state.game.tickTimer).toHaveBeenCalledOnce();
     });
 
     it('submits timeout answers, records finished games and shows achievement toasts', async () => {
@@ -311,5 +335,45 @@ describe('App', () => {
             renderApp(path);
             expect(await screen.findByTestId(testId)).toBeInTheDocument();
         }
+    }, 15_000);
+
+    it('executes route back and next callbacks across routed screens', async () => {
+        const routeActions = [
+            ['/supreme-capitals', 'supreme-capitals', 'back', 'supreme-menu'],
+            ['/supreme-countries', 'supreme-countries', 'back', 'supreme-menu'],
+            ['/supreme-final', 'supreme-final', 'back', 'supreme-menu'],
+            ['/supreme-menu', 'supreme-menu', 'back', 'home'],
+            ['/daily', 'daily', 'back', 'home'],
+            ['/daily-anagram', 'daily-anagram', 'back', 'home'],
+            ['/daily-wordle', 'daily-wordle', 'back', 'home'],
+            ['/daily-map', 'daily-map', 'back', 'home'],
+            ['/daily-country', 'daily-country', 'back', 'home'],
+            ['/daily-population', 'daily-population', 'back', 'home'],
+            ['/daily-country-anagram', 'daily-country-anagram', 'back', 'home'],
+            ['/daily-country-wordle', 'daily-country-wordle', 'back', 'home'],
+            ['/daily-mix', 'daily-mix', 'back', 'home'],
+            ['/daily-mix', 'daily-mix', 'next', 'daily'],
+            ['/online', 'online-lobby', 'back', 'home'],
+        ];
+
+        for (const [path, initialId, buttonText, finalId] of routeActions) {
+            cleanup();
+            renderApp(path);
+            expect(await screen.findByTestId(initialId)).toBeInTheDocument();
+            fireEvent.click(screen.getByText(buttonText));
+            expect(await screen.findByTestId(finalId)).toBeInTheDocument();
+        }
+
+        cleanup();
+        renderApp('/practice');
+        await screen.findByText('select-mode');
+        fireEvent.click(screen.getAllByRole('button')[2]);
+        expect(await screen.findByTestId('home')).toBeInTheDocument();
+
+        cleanup();
+        renderApp('/continents');
+        expect(await screen.findByTestId('continents')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('continent-back'));
+        expect(await screen.findByText('select-mode')).toBeInTheDocument();
     }, 15_000);
 });

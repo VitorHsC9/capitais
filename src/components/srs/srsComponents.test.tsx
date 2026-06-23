@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import '@testing-library/jest-dom/vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SrsItem, SrsItemWithCountry } from '../../hooks/useSrsStore';
 import { SrsBrowser } from './SrsBrowser';
@@ -101,25 +101,55 @@ vi.mock('../../hooks/useSrsStore', () => ({
     },
 }));
 
-vi.mock('react-leaflet', () => ({
-    MapContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="map-container">{children}</div>,
-    TileLayer: () => <div data-testid="tile-layer" />,
-    GeoJSON: ({ onEachFeature }: { onEachFeature?: (feature: unknown, layer: unknown) => void }) => {
-        const layer = {
-            on: vi.fn((_event: string, callback: () => void) => callback()),
-            setStyle: vi.fn(),
-            bindPopup: vi.fn(() => ({ openPopup: vi.fn() })),
-            getBounds: vi.fn(() => ({ isValid: () => true })),
-            _map: { flyToBounds: vi.fn() },
-        };
-        onEachFeature?.({ properties: { name: 'Brazil' } }, layer);
-        return <div data-testid="geo-json" />;
-    },
-    useMap: () => ({
-        closePopup: vi.fn(),
-        flyToBounds: vi.fn(),
-    }),
+const mapMocks = vi.hoisted(() => ({
+    featureNames: ['Brazil'],
+    clickHandlers: [] as Array<() => void>,
+    flyToBounds: vi.fn(),
+    closePopup: vi.fn(),
 }));
+
+vi.mock('react-leaflet', async () => {
+    const React = await vi.importActual<typeof import('react')>('react');
+    const makeLayer = (name: string) => ({
+        feature: { properties: { name } },
+        on: vi.fn((_event: string, callback: () => void) => {
+            mapMocks.clickHandlers.push(callback);
+        }),
+        setStyle: vi.fn(),
+        bindPopup: vi.fn(() => ({ openPopup: vi.fn() })),
+        getBounds: vi.fn(() => ({ isValid: () => true })),
+        _map: { flyToBounds: mapMocks.flyToBounds },
+    });
+
+    return {
+        MapContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="map-container">{children}</div>,
+        TileLayer: () => <div data-testid="tile-layer" />,
+        GeoJSON: React.forwardRef(({
+            onEachFeature,
+            style,
+        }: {
+            onEachFeature?: (feature: unknown, layer: unknown) => void;
+            style?: (feature: { properties: { name: string } }) => unknown;
+        }, ref) => {
+            React.useImperativeHandle(ref, () => ({
+                eachLayer: (callback: (layer: ReturnType<typeof makeLayer>) => void) => {
+                    mapMocks.featureNames.forEach((name) => callback(makeLayer(name)));
+                },
+            }));
+
+        mapMocks.featureNames.forEach((name) => {
+            style?.({ properties: { name } });
+            const layer = makeLayer(name);
+            onEachFeature?.({ properties: { name } }, layer);
+        });
+        return <div data-testid="geo-json" />;
+        }),
+        useMap: () => ({
+            closePopup: mapMocks.closePopup,
+            flyToBounds: mapMocks.flyToBounds,
+        }),
+    };
+});
 
 vi.mock('leaflet', () => ({
     default: {
@@ -141,6 +171,10 @@ describe('SRS components', () => {
         storeState.processReview.mockClear();
         storeState.updateSettings.mockClear();
         navigate.mockClear();
+        mapMocks.featureNames = ['Brazil'];
+        mapMocks.clickHandlers = [];
+        mapMocks.flyToBounds.mockClear();
+        mapMocks.closePopup.mockClear();
     });
 
     afterEach(() => {
@@ -240,9 +274,78 @@ describe('SRS components', () => {
         storeState.getDueItems.mockReturnValue([]);
         render(<SrsFlashcard />);
         expect(screen.getByText(/Conclu/)).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Voltar aos Decks'));
+        expect(navigate).toHaveBeenCalledWith('/srs');
 
         storeState.getDueItems.mockReturnValue([undefined as never]);
         render(<SrsFlashcard />);
         expect(container).toBeDefined();
+    });
+
+    it('reviews reverse capital and forward flag cards', () => {
+        search = new URLSearchParams('cat=capitals&cont=Todos');
+        storeState.getDueItems.mockReturnValue([{ ...dueCards[0], direction: 'reverse', interval: 3 }]);
+        const { rerender } = render(<SrsFlashcard />);
+
+        expect(screen.getByText(/De qual/)).toBeInTheDocument();
+        expect(screen.getByText('Brasilia')).toBeInTheDocument();
+        fireEvent.click(screen.getByText(/Revelar/));
+        fireEvent.click(screen.getByText('Bom'));
+        expect(storeState.processReview).toHaveBeenCalledWith('Brasil', 'capitals', 'reverse', true);
+
+        cleanup();
+        search = new URLSearchParams('cat=flags&cont=Todos');
+        storeState.getDueItems.mockReturnValue([{ ...dueCards[1], direction: 'forward' }]);
+        render(<SrsFlashcard />);
+
+        expect(screen.getByText(/Como/)).toBeInTheDocument();
+        expect(screen.getByText('Brasil')).toBeInTheDocument();
+        fireEvent.click(screen.getByText(/Revelar/));
+        expect(screen.getByAltText('Bandeira')).toBeInTheDocument();
+        rerender;
+    });
+
+    it('handles interactive map guesses and highlighted map answers', async () => {
+        vi.useRealTimers();
+        search = new URLSearchParams('cat=map&cont=Todos');
+        mapMocks.featureNames = ['Argentina', 'Brazil'];
+        storeState.getDueItems.mockReturnValue([{ ...dueCards[2], direction: 'forward' }]);
+        const { rerender } = render(<SrsFlashcard />);
+
+        await waitFor(() => expect(screen.getByTestId('map-container')).toBeInTheDocument());
+        expect(screen.getByText(/Mapa Interativo/)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText(/Revelar/));
+        expect(screen.getByText('Errei')).toBeInTheDocument();
+
+        cleanup();
+        mapMocks.featureNames = ['Argentina', 'Brazil'];
+        mapMocks.clickHandlers = [];
+        storeState.getDueItems.mockReturnValue([{ ...dueCards[2], direction: 'forward' }]);
+        render(<SrsFlashcard />);
+        await waitFor(() => expect(mapMocks.clickHandlers.length).toBeGreaterThan(0));
+        act(() => mapMocks.clickHandlers[0]?.());
+        expect(screen.getByText('Errei')).toBeInTheDocument();
+        expect(mapMocks.flyToBounds).toHaveBeenCalled();
+
+        cleanup();
+        mapMocks.featureNames = ['Brazil'];
+        mapMocks.clickHandlers = [];
+        storeState.getDueItems.mockReturnValue([{ ...dueCards[2], direction: 'forward' }]);
+        render(<SrsFlashcard />);
+        await waitFor(() => expect(mapMocks.clickHandlers.length).toBeGreaterThan(0));
+        act(() => mapMocks.clickHandlers[0]?.());
+        expect(screen.getByText('Bom')).toBeInTheDocument();
+        rerender;
+    }, 10_000);
+
+    it('renders default flashcard text for an unknown category', () => {
+        search = new URLSearchParams('cat=unknown&cont=Todos');
+        storeState.getDueItems.mockReturnValue([{ ...dueCards[2], category: 'unknown' as never, direction: 'forward' }]);
+
+        render(<SrsFlashcard />);
+
+        fireEvent.click(screen.getByText(/Revelar/));
+        expect(screen.getAllByTestId('map-container').length).toBeGreaterThan(0);
     });
 });

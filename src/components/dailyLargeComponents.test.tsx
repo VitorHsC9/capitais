@@ -165,4 +165,44 @@ describe('large daily components', () => {
         render(<DailyPopulation onBack={vi.fn()} onNextChallenge={vi.fn()} />);
         expect(errorSpy).toHaveBeenCalled();
     });
+
+    it('can reorder daily population into the winning order and supports drag handlers', () => {
+        render(<DailyPopulation onBack={vi.fn()} onNextChallenge={vi.fn()} />);
+
+        const getCountryButtons = () => screen.getAllByRole('button')
+            .filter((button) => COUNTRIES_DB.some((country) => button.textContent?.includes(country.name)));
+
+        const names = getCountryButtons().map((button) => {
+            const country = COUNTRIES_DB.find((item) => button.textContent?.includes(item.name));
+            return country!.name;
+        });
+        const sortedNames = [...names].sort((a, b) => {
+            const aPopulation = COUNTRIES_DB.find((country) => country.name === a)?.population ?? 0;
+            const bPopulation = COUNTRIES_DB.find((country) => country.name === b)?.population ?? 0;
+            return bPopulation - aPopulation;
+        });
+
+        const dataTransfer = { effectAllowed: '' };
+        fireEvent.dragStart(getCountryButtons()[0], { dataTransfer });
+        fireEvent.dragOver(getCountryButtons()[1]);
+        fireEvent.dragEnd(getCountryButtons()[1]);
+
+        sortedNames.forEach((name, targetIndex) => {
+            let currentIndex = getCountryButtons().findIndex((button) => button.textContent?.includes(name));
+            while (currentIndex > targetIndex) {
+                fireEvent.keyDown(getCountryButtons()[currentIndex], { key: 'ArrowUp' });
+                currentIndex--;
+            }
+            while (currentIndex < targetIndex) {
+                fireEvent.keyDown(getCountryButtons()[currentIndex], { key: 'ArrowDown' });
+                currentIndex++;
+            }
+        });
+
+        fireEvent.click(screen.getByText('CONFIRMAR ORDEM'));
+        expect(screen.getByText(/Parab/)).toBeInTheDocument();
+        expect(JSON.parse(localStorage.getItem('quiz_capitais_daily_population_v1') ?? '{}')).toMatchObject({
+            status: 'won',
+        });
+    });
 });

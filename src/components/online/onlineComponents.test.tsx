@@ -156,6 +156,9 @@ describe('online components', () => {
         });
         rerender(<OnlineGame game={typingGame} />);
         fireEvent.change(screen.getByPlaceholderText(/Digite o pa/), { target: { value: 'Brasil' } });
+        fireEvent.keyDown(screen.getByPlaceholderText(/Digite o pa/), { key: 'Enter' });
+        expect(typingGame.handleAnswer).toHaveBeenCalledWith('Brasil');
+        fireEvent.change(screen.getByPlaceholderText(/Digite o pa/), { target: { value: 'Brasil' } });
         fireEvent.click(screen.getByRole('button', { name: '' }));
         expect(typingGame.handleAnswer).toHaveBeenCalledWith('Brasil');
 
@@ -190,6 +193,20 @@ describe('online components', () => {
         }} />);
         expect(screen.getByText('Ponto do oponente')).toBeInTheDocument();
 
+        rerender(<OnlineGame game={{
+            ...resultGame,
+            myAnswer: { answer: 'Brasilia', answeredAt: Date.now(), isCorrect: true },
+            opponentAnswer: { answer: 'Brasilia', answeredAt: Date.now(), isCorrect: true },
+        }} />);
+        expect(screen.getByText('Ambos acertaram!')).toBeInTheDocument();
+
+        rerender(<OnlineGame game={{
+            ...resultGame,
+            myAnswer: { answer: 'wrong', answeredAt: Date.now(), isCorrect: false },
+            opponentAnswer: { answer: 'wrong', answeredAt: Date.now(), isCorrect: false },
+        }} />);
+        expect(screen.getByText('Ninguem acertou')).toBeInTheDocument();
+
         const infiniteGame = makeGame({
             roomData: room({ mode: 'infinite' }),
             currentRound: round(),
@@ -209,6 +226,23 @@ describe('online components', () => {
         });
         rerender(<OnlineGame game={survivalGame} />);
         expect(screen.getAllByText('Beto').length).toBeGreaterThan(0);
+    });
+
+    it('renders incorrect selected options and fallback round labels', () => {
+        const wrongSelectionGame = makeGame({
+            phase: 'round-result',
+            myAnswer: { answer: 'Buenos Aires', answeredAt: Date.now(), isCorrect: false },
+            opponentAnswer: { answer: 'Brasilia', answeredAt: Date.now(), isCorrect: true },
+        });
+        const { rerender } = render(<OnlineGame game={wrongSelectionGame} />);
+        expect(screen.getByText('Ponto do oponente')).toBeInTheDocument();
+
+        const fallbackGame = makeGame({
+            currentRound: round({ type: 'unknown' as never }),
+            roomData: room({ rounds: { 0: round({ type: 'unknown' as never }) } }),
+        });
+        rerender(<OnlineGame game={fallbackGame} />);
+        expect(screen.getAllByText('Brasil').length).toBeGreaterThan(0);
     });
 
     it('renders online results winner, draw, loser and actions', () => {
@@ -245,6 +279,17 @@ describe('online components', () => {
             }),
         })} onBack={onBack} />);
         expect(screen.getByText('DERROTA')).toBeInTheDocument();
+
+        rerender(<OnlineResults game={makeGame({
+            roomData: room({
+                mode: 'infinite',
+                players: {
+                    me: { ...room().players!.me, score: 0, isAlive: true },
+                    them: { ...room().players!.them, score: 999, isAlive: false },
+                },
+            }),
+        })} onBack={onBack} />);
+        expect(screen.getByText('VITÓRIA!')).toBeInTheDocument();
 
         const { container } = render(<OnlineResults game={makeGame({ roomData: null })} onBack={onBack} />);
         expect(container).toBeEmptyDOMElement();
@@ -293,6 +338,93 @@ describe('online components', () => {
         fireEvent.click(screen.getByText(/INICIAR/));
         expect(currentGame.handleReady).toHaveBeenCalledOnce();
         expect(currentGame.handleStartGame).toHaveBeenCalledOnce();
+    });
+
+    it('covers lobby join, loading, back and incomplete waiting states', () => {
+        currentGame = makeGame({
+            phase: 'menu',
+            playerName: 'Ana',
+            roomData: null,
+            roomCode: null,
+            isLoading: true,
+        });
+        const onBack = vi.fn();
+        const { rerender } = render(<OnlineLobby onBack={onBack} />);
+
+        fireEvent.change(screen.getByLabelText('Entrar numa Sala'), { target: { value: 'ab-12_3' } });
+        expect(screen.getByDisplayValue('AB123')).toBeInTheDocument();
+        expect(screen.getAllByRole('button').some((button) => button.querySelector('.animate-spin'))).toBe(true);
+
+        currentGame = makeGame({
+            phase: 'menu',
+            playerName: 'Ana',
+            roomData: null,
+            roomCode: null,
+            isLoading: false,
+        });
+        rerender(<OnlineLobby onBack={onBack} />);
+        fireEvent.click(screen.getByText('CRIAR SALA'));
+        expect(currentGame.goToCategorySelect).toHaveBeenCalledOnce();
+        fireEvent.change(screen.getByLabelText('Entrar numa Sala'), { target: { value: 'ROOM99' } });
+        fireEvent.click(screen.getByText('ENTRAR'));
+        expect(currentGame.handleJoinRoom).toHaveBeenCalledWith('ROOM99');
+
+        currentGame = makeGame({
+            phase: 'mystery' as never,
+            roomData: null,
+        });
+        rerender(<OnlineLobby onBack={onBack} />);
+        expect(screen.getAllByText('Online').length).toBe(2);
+
+        currentGame = makeGame({
+            phase: 'category-select',
+            roomData: null,
+        });
+        rerender(<OnlineLobby onBack={onBack} />);
+        fireEvent.click(screen.getAllByRole('button')[0]);
+        expect(currentGame.goBackToMenu).toHaveBeenCalledOnce();
+        fireEvent.click(screen.getByText('BANDEIRAS'));
+        fireEvent.click(screen.getByText(/TERRIT/));
+        fireEvent.click(screen.getByText('MISTO'));
+        expect(currentGame.selectCategory).toHaveBeenCalledWith('flags');
+        expect(currentGame.selectCategory).toHaveBeenCalledWith('territories');
+        expect(currentGame.selectCategory).toHaveBeenCalledWith('mix');
+
+        currentGame = makeGame({
+            phase: 'mode-select',
+            selectedCategory: 'mix',
+            selectedMode: 'classic',
+            selectedInputFormat: 'multiple_choice',
+            isLoading: true,
+        });
+        rerender(<OnlineLobby onBack={onBack} />);
+        fireEvent.click(screen.getByText('Alternativas'));
+        fireEvent.click(screen.getByText(/SOBREVIV/));
+        fireEvent.click(screen.getByText('INFINITO'));
+        expect(currentGame.setSelectedInputFormat).toHaveBeenCalledWith('multiple_choice');
+        expect(currentGame.selectMode).toHaveBeenCalledWith('survival');
+        expect(currentGame.selectMode).toHaveBeenCalledWith('infinite');
+
+        currentGame = makeGame({
+            phase: 'waiting',
+            roomData: room({
+                status: 'waiting',
+                inputFormat: 'typing',
+                players: {
+                    me: { ...room().players!.me, isReady: false },
+                },
+            }),
+            roomCode: 'ROOM1',
+            isHost: false,
+        });
+        Object.assign(navigator, { clipboard: { writeText: vi.fn() } });
+        rerender(<OnlineLobby onBack={onBack} />);
+        fireEvent.click(screen.getAllByRole('button')[0]);
+        expect(currentGame.handleLeave).toHaveBeenCalledOnce();
+        expect(screen.getByText(/Aguardando oponente/)).toBeInTheDocument();
+        expect(screen.getByText('ESTOU PRONTO')).toBeInTheDocument();
+        fireEvent.click(screen.getAllByRole('button')[1]);
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ROOM1');
     });
 
     it('routes lobby directly to game and results phases', () => {

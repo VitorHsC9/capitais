@@ -88,6 +88,19 @@ describe('roomService', () => {
         });
     });
 
+    it('retries room code generation when a generated code already exists', async () => {
+        const service = await import('./roomService');
+        databaseState.set('rooms/AAAAAA', { status: 'waiting' });
+
+        await service.createRoom('Host', 'flags', 'infinite', 'multiple_choice', 'host-1');
+
+        expect(databaseState.get('rooms/AAAAAA')).toMatchObject({
+            category: 'flags',
+            mode: 'infinite',
+            totalRounds: 999,
+        });
+    });
+
     it('rejects invalid joins', async () => {
         const service = await import('./roomService');
 
@@ -174,6 +187,65 @@ describe('roomService', () => {
             players: { a: { lives: 0 }, b: { lives: 3 } },
         });
         await expect(service.advanceRound('INFINITE')).resolves.toBe(false);
+    });
+
+    it('generates rounds for every online category and typing format', async () => {
+        const service = await import('./roomService');
+
+        const categoryCases = [
+            ['FLAGS', 'flags', 'multiple_choice', 'flag'],
+            ['TERRITORIES', 'territories', 'multiple_choice', 'territory'],
+            ['MIXTYPING', 'mix', 'typing', 'flag'],
+        ] as const;
+
+        for (const [roomCode, category, inputFormat, expectedType] of categoryCases) {
+            databaseState.set(`rooms/${roomCode}`, {
+                category,
+                mode: 'classic',
+                inputFormat,
+                currentRound: 0,
+                totalRounds: 3,
+                players: { a: { isAlive: true, lives: 3 }, b: { isAlive: true, lives: 3 } },
+            });
+
+            await expect(service.advanceRound(roomCode)).resolves.toBe(true);
+            expect(databaseState.get(`rooms/${roomCode}`)).toMatchObject({
+                currentRound: 1,
+                [`rounds/1`]: expect.objectContaining({
+                    type: expectedType,
+                }),
+            });
+        }
+    });
+
+    it('fills round options from other continents when the same-continent pool is too small', async () => {
+        const service = await import('./roomService');
+        const { CONFIG } = await import('../data/countries');
+        const originalOptionsCount = CONFIG.OPTIONS_COUNT;
+        CONFIG.OPTIONS_COUNT = 300;
+
+        try {
+            databaseState.set('rooms/FALLBACK', {
+                category: 'capitals',
+                mode: 'classic',
+                inputFormat: 'multiple_choice',
+                currentRound: 0,
+                totalRounds: 3,
+                players: { a: { isAlive: true, lives: 3 }, b: { isAlive: true, lives: 3 } },
+            });
+
+            await expect(service.advanceRound('FALLBACK')).resolves.toBe(true);
+            expect(databaseState.get('rooms/FALLBACK')).toMatchObject({
+                currentRound: 1,
+                'rounds/1': expect.objectContaining({
+                    options: expect.arrayContaining([
+                        expect.objectContaining({ name: expect.any(String) }),
+                    ]),
+                }),
+            });
+        } finally {
+            CONFIG.OPTIONS_COUNT = originalOptionsCount;
+        }
     });
 
     it('requests rematches, leaves rooms, and emits listener snapshots', async () => {

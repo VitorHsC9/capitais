@@ -48,9 +48,9 @@ describe('useGameStore', () => {
 
     it('shows an alert when the selected continent has no countries', () => {
         useGameStore.getState().startQuiz('Todos');
-        useGameStore.getState().startQuiz('Oceania');
+        useGameStore.getState().startQuiz('Atlantida' as never);
 
-        expect(globalThis.alert).not.toHaveBeenCalled();
+        expect(globalThis.alert).toHaveBeenCalledWith('Erro ao carregar países.');
     });
 
     it('handles correct answers and moves to the next question', () => {
@@ -74,6 +74,10 @@ describe('useGameStore', () => {
             isAnswered: false,
             selectedAnswer: null,
         });
+
+        useGameStore.setState({ currentIndex: COUNTRIES_DB.length - 1 });
+        useGameStore.getState().nextQuestion();
+        expect(useGameStore.getState().gameState).toBe('finished');
     });
 
     it('checks country names in reverse mode', () => {

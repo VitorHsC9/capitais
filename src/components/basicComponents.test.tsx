@@ -87,6 +87,25 @@ describe('basic components', () => {
         expect(screen.queryByRole('list')).not.toBeInTheDocument();
     });
 
+    it('covers autocomplete aliases, default placeholder and empty enter state', () => {
+        const onSelect = vi.fn();
+        const aliasCountry = COUNTRIES_DB.find((country) => country.acceptedNames?.length && country.mapName) ?? firstCountry;
+
+        const { rerender } = render(<CountryAutocomplete onSelect={onSelect} />);
+        const input = screen.getByPlaceholderText(/Digite o nome/);
+
+        fireEvent.focus(input);
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(onSelect).not.toHaveBeenCalled();
+
+        fireEvent.change(input, { target: { value: aliasCountry.acceptedNames?.[0] ?? aliasCountry.name } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(onSelect).toHaveBeenCalledWith(aliasCountry.name);
+
+        rerender(<CountryAutocomplete onSelect={onSelect} disabled />);
+        expect(screen.getByPlaceholderText(/Digite o nome/)).toBeDisabled();
+    });
+
     it('submits typed answers and advances after answered state', () => {
         const onSubmit = vi.fn();
         const nextQuestion = vi.fn();
@@ -266,5 +285,47 @@ describe('basic components', () => {
             expect(screen.queryByText('Carregando...')).not.toBeInTheDocument();
             expect(getContext).toHaveBeenCalled();
         });
+    });
+
+    it('handles pixelated flag drawing guard paths', async () => {
+        const getContext = vi.fn(() => null);
+        HTMLCanvasElement.prototype.getContext = getContext as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+        class MockImageWithNoSize {
+            crossOrigin = '';
+            naturalWidth = 0;
+            naturalHeight = 0;
+            onload: (() => void) | null = null;
+            set src(_value: string) {
+                queueMicrotask(() => this.onload?.());
+            }
+        }
+
+        vi.stubGlobal('Image', MockImageWithNoSize);
+        render(<PixelatedFlag countryCode="br" attempt={-1} />);
+
+        await waitFor(() => expect(getContext).toHaveBeenCalled());
+        cleanup();
+
+        const drawImage = vi.fn();
+        HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+            clearRect: vi.fn(),
+            drawImage,
+            imageSmoothingEnabled: true,
+        })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+        class MockImageWithSize {
+            crossOrigin = '';
+            naturalWidth = 320;
+            naturalHeight = 213;
+            onload: (() => void) | null = null;
+            set src(_value: string) {
+                queueMicrotask(() => this.onload?.());
+            }
+        }
+
+        vi.stubGlobal('Image', MockImageWithSize);
+        render(<PixelatedFlag countryCode="ar" attempt={-1} />);
+        await waitFor(() => expect(drawImage).toHaveBeenCalled());
     });
 });

@@ -83,6 +83,15 @@ describe('useQuizGame', () => {
         }, 2);
     });
 
+    it('alerts when quiz starts without a country pool', () => {
+        const { result } = renderHook(() => useQuizGame());
+
+        act(() => result.current.startQuiz('Atlantida' as never));
+
+        expect(window.alert).toHaveBeenCalledWith('Erro ao carregar países.');
+        expect(result.current.gameState).toBe('start');
+    });
+
     it('uses country names as answers in reverse and flags modes', () => {
         const first = COUNTRIES_DB[0];
         const { result } = renderHook(() => useQuizGame());

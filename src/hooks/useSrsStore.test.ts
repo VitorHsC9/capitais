@@ -86,6 +86,39 @@ describe('useSrsStore', () => {
         });
     });
 
+    it('includes existing due cards before new cards and filters by continent', () => {
+        const firstDueId = getSrsItemId('Brasil', 'capitals', 'forward');
+        const secondDueId = getSrsItemId('Portugal', 'capitals', 'forward');
+        useSrsStore.setState({
+            items: {
+                [secondDueId]: {
+                    countryName: 'Portugal',
+                    category: 'capitals',
+                    direction: 'forward',
+                    interval: 2,
+                    repetition: 2,
+                    efactor: 2.5,
+                    nextReviewDate: Date.now() - 1,
+                },
+                [firstDueId]: {
+                    countryName: 'Brasil',
+                    category: 'capitals',
+                    direction: 'forward',
+                    interval: 2,
+                    repetition: 2,
+                    efactor: 2.5,
+                    nextReviewDate: Date.now() - 10,
+                },
+            },
+            settings: { maxNewCardsPerDay: 0 },
+        });
+
+        const dueCards = useSrsStore.getState().getDueItems('capitals', 'Europa', 10);
+
+        expect(dueCards.every((card) => card.country.continent === 'Europa')).toBe(true);
+        expect(dueCards[0]).toMatchObject({ countryName: 'Portugal', interval: 2 });
+    });
+
     it('resets daily new-card tracking when the day changes', () => {
         useSrsStore.setState({ dailyNewCards: { date: '2026-06-22', count: 7 } });
 
@@ -126,5 +159,11 @@ describe('useSrsStore', () => {
             newCardsToday: 3,
             newCardsLimit: 20,
         });
+    });
+
+    it('reports zero new cards for stats from a previous day', () => {
+        useSrsStore.setState({ dailyNewCards: { date: '2026-06-22', count: 5 } });
+
+        expect(useSrsStore.getState().getStats().newCardsToday).toBe(0);
     });
 });

@@ -143,6 +143,10 @@ describe('wrapper components', () => {
         state.anagramGame = { ...state.anagramGame, targetCountry: null };
         rerender(<DailyAnagram onBack={onBack} onNextChallenge={onNextChallenge} />);
         expect(screen.getByText('Carregando desafio...')).toBeInTheDocument();
+
+        state.countryAnagramGame = { ...state.countryAnagramGame, targetCountry: null };
+        rerender(<DailyCountryAnagram onBack={onBack} onNextChallenge={onNextChallenge} />);
+        expect(screen.getByText('Carregando desafio...')).toBeInTheDocument();
     });
 
     it('renders daily wordle wrappers and loading states', () => {
@@ -157,6 +161,10 @@ describe('wrapper components', () => {
 
         state.countryWordleGame = { ...state.countryWordleGame, targetCountry: null };
         rerender(<DailyCountryWordle onBack={vi.fn()} onNextChallenge={vi.fn()} />);
+        expect(screen.getByText('Carregando desafio...')).toBeInTheDocument();
+
+        state.wordleGame = { ...state.wordleGame, targetCountry: null };
+        rerender(<DailyWordle onBack={vi.fn()} onNextChallenge={vi.fn()} />);
         expect(screen.getByText('Carregando desafio...')).toBeInTheDocument();
     });
 

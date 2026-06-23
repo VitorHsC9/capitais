@@ -271,4 +271,145 @@ describe('useOnlineGame', () => {
         expect(result.current.phase).toBe('menu');
         expect(result.current.selectedCategory).toBeNull();
     });
+
+    it('handles create/start/rematch/leave failures and fallback navigation', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const { result } = renderHook(() => useOnlineGame());
+
+        act(() => result.current.setPlayerName('Ana'));
+        await act(async () => result.current.handleCreateRoom());
+        expect(result.current.error).toBe('Selecione categoria e modo');
+
+        act(() => {
+            result.current.clearError();
+            result.current.selectCategory('flags');
+            result.current.selectMode('classic');
+        });
+        service.createRoom.mockRejectedValueOnce(new Error('offline'));
+        await act(async () => result.current.handleCreateRoom());
+        expect(result.current.error).toBe('Erro ao criar sala. Verifique sua conexão.');
+
+        service.createRoom.mockResolvedValueOnce('ROOM1');
+        await act(async () => result.current.handleCreateRoom());
+        act(() => service.roomCallback?.(makeRoom({ status: 'waiting' })));
+
+        service.startGame.mockRejectedValueOnce(new Error('start failed'));
+        await act(async () => result.current.handleStartGame());
+        expect(result.current.error).toBe('Erro ao iniciar partida');
+
+        service.requestRematch.mockRejectedValueOnce(new Error('rematch failed'));
+        await act(async () => result.current.handleRematch());
+        expect(result.current.error).toBe('Erro ao solicitar revanche');
+
+        service.leaveRoom.mockRejectedValueOnce(new Error('leave failed'));
+        await act(async () => result.current.handleLeave());
+        expect(consoleSpy).toHaveBeenCalledWith('Error leaving room:', expect.any(Error));
+
+        act(() => result.current.goBackToMenu());
+        expect(result.current.phase).toBe('menu');
+    });
+
+    it('scores non-capital answers and refreshes answer listeners across rounds', async () => {
+        const { result } = renderHook(() => useOnlineGame());
+
+        act(() => {
+            result.current.setPlayerName('Ana');
+            result.current.selectCategory('territories');
+            result.current.selectMode('survival');
+        });
+        await act(async () => result.current.handleCreateRoom());
+
+        const territoryRoom = makeRoom({
+            status: 'playing',
+            mode: 'survival',
+            inputFormat: 'multiple_choice',
+            rounds: {
+                0: {
+                    question,
+                    options: [question],
+                    type: 'territory',
+                    startedAt: Date.now(),
+                },
+            },
+        });
+        act(() => service.roomCallback?.(territoryRoom));
+        act(() => result.current.handleAnswer('Argentina'));
+        expect(service.submitAnswer).toHaveBeenLastCalledWith('ROOM1', 0, 'player-1', 'Argentina', false);
+        expect(service.updatePlayerScore).toHaveBeenLastCalledWith('ROOM1', 'player-1', 0, 0, false, 3);
+
+        act(() => service.answersCallback?.({
+            'player-1': { answer: 'Argentina', answeredAt: Date.now(), isCorrect: false },
+            'player-2': { answer: 'Brasil', answeredAt: Date.now(), isCorrect: true },
+        }));
+        expect(result.current.phase).toBe('round-result');
+        act(() => service.roomCallback?.({
+            ...territoryRoom,
+            currentRound: 1,
+            rounds: {
+                1: {
+                    question,
+                    options: [question],
+                    type: 'flag',
+                    startedAt: Date.now(),
+                },
+            },
+        }));
+        expect(result.current.phase).toBe('playing');
+        expect(result.current.myAnswer).toBeNull();
+    });
+
+    it('treats unknown online round types as incorrect answers', async () => {
+        const { result } = renderHook(() => useOnlineGame());
+
+        act(() => {
+            result.current.setPlayerName('Ana');
+            result.current.selectCategory('mix');
+            result.current.selectMode('classic');
+        });
+        await act(async () => result.current.handleCreateRoom());
+        act(() => service.roomCallback?.(makeRoom({
+            status: 'playing',
+            inputFormat: 'multiple_choice',
+            rounds: {
+                0: {
+                    question,
+                    options: [question],
+                    type: 'unknown' as never,
+                    startedAt: Date.now(),
+                },
+            },
+        })));
+
+        act(() => result.current.handleAnswer('Brasil'));
+
+        expect(service.submitAnswer).toHaveBeenLastCalledWith('ROOM1', 0, 'player-1', 'Brasil', false);
+    });
+
+    it('restores stored identity and accepts Firebase answers before local answers', async () => {
+        sessionStorage.setItem('online-player-id', 'stored-player');
+        localStorage.setItem('online-player-name', 'Lia');
+        const { result } = renderHook(() => useOnlineGame());
+
+        expect(result.current.playerId).toBe('stored-player');
+        expect(result.current.playerName).toBe('Lia');
+
+        await act(async () => result.current.handleJoinRoom('room1'));
+        act(() => service.roomCallback?.(makeRoom({
+            status: 'playing',
+            hostId: 'stored-player',
+            rounds: {
+                0: {
+                    question,
+                    options: [question],
+                    type: 'flag',
+                    startedAt: Date.now(),
+                },
+            },
+        })));
+        act(() => service.answersCallback?.({
+            'stored-player': { answer: 'Brasil', answeredAt: Date.now(), isCorrect: true },
+        }));
+
+        expect(result.current.myAnswer?.answer).toBe('Brasil');
+    });
 });
