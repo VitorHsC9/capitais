@@ -6,7 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COUNTRIES_DB } from '../data/countries';
 import { useCountdown } from './useCountdown';
 import { useDailyAnagramGame } from './useDailyAnagramGame';
+import { useDailyAnagram } from './useDailyAnagram';
+import { useDailyCountry } from './useDailyCountry';
+import { useDailyGame } from './useDailyGame';
+import { useDailyMap } from './useDailyMap';
 import { useDailyStatus } from './useDailyStatus';
+import { useDailyWordle } from './useDailyWordle';
 import { useDailyWordleGame } from './useDailyWordleGame';
 
 vi.mock('../utils/array', () => ({
@@ -223,5 +228,119 @@ describe('daily hooks', () => {
 
         act(() => vi.advanceTimersByTime(1000));
         expect(result.current.wordle.timeLeft).toBe(getExpectedTimeUntilLocalMidnight());
+    });
+
+    it('plays the daily country-name guessing game and persists results', () => {
+        const { result } = renderHook(() => useDailyGame());
+        const target = COUNTRIES_DB[0];
+
+        expect(result.current.targetCountry).toEqual(target);
+        expect(result.current.gameStatus).toBe('playing');
+
+        act(() => result.current.submitGuess('wrong'));
+        expect(result.current.guesses).toEqual(['wrong']);
+        expect(result.current.attemptsLeft).toBe(4);
+
+        act(() => result.current.submitGuess(target.name.toUpperCase()));
+        expect(result.current.gameStatus).toBe('won');
+        expect(JSON.parse(localStorage.getItem('quiz_capitais_daily_v1') ?? '{}')).toMatchObject({
+            date: '2026-06-23',
+            status: 'won',
+        });
+
+        act(() => result.current.submitGuess('ignored'));
+        expect(result.current.guesses).toEqual(['wrong', target.name.toUpperCase()]);
+    });
+
+    it('restores and rejects saved daily country-name game state', () => {
+        localStorage.setItem('quiz_capitais_daily_v1', JSON.stringify({
+            date: '2026-06-23',
+            guesses: ['saved'],
+            status: 'lost',
+        }));
+        const saved = renderHook(() => useDailyGame());
+        expect(saved.result.current.gameStatus).toBe('lost');
+        expect(saved.result.current.guesses).toEqual(['saved']);
+
+        localStorage.setItem('quiz_capitais_daily_v1', JSON.stringify({
+            date: '2026-06-22',
+            guesses: ['old'],
+            status: 'won',
+        }));
+        const old = renderHook(() => useDailyGame());
+        expect(old.result.current.gameStatus).toBe('playing');
+        expect(old.result.current.guesses).toEqual([]);
+
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        localStorage.setItem('quiz_capitais_daily_v1', '{');
+        renderHook(() => useDailyGame());
+        expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('loses daily country mode after the maximum attempts', () => {
+        const { result } = renderHook(() => useDailyCountry());
+
+        expect(result.current.maxAttempts).toBe(5);
+        for (let attempt = 0; attempt < result.current.maxAttempts; attempt++) {
+            act(() => result.current.submitGuess(`wrong-${attempt}`));
+        }
+
+        expect(result.current.gameStatus).toBe('lost');
+        expect(result.current.guesses).toHaveLength(5);
+    });
+
+    it('wins and restores daily country mode', () => {
+        const target = COUNTRIES_DB[0];
+        const { result } = renderHook(() => useDailyCountry());
+
+        act(() => result.current.submitGuess(target.name));
+        expect(result.current.gameStatus).toBe('won');
+        expect(JSON.parse(localStorage.getItem('quiz_capitais_daily_country_v1') ?? '{}')).toMatchObject({
+            date: '2026-06-23',
+            guesses: [target.name],
+            status: 'won',
+        });
+
+        const restored = renderHook(() => useDailyCountry());
+        expect(restored.result.current.gameStatus).toBe('won');
+    });
+
+    it('handles daily map wins, manual status changes and parse errors', () => {
+        const target = COUNTRIES_DB[0];
+        const { result } = renderHook(() => useDailyMap());
+
+        act(() => result.current.submitGuess('wrong'));
+        expect(result.current.gameStatus).toBe('playing');
+
+        act(() => result.current.submitGuess(target.name));
+        expect(result.current.gameStatus).toBe('won');
+        expect(JSON.parse(localStorage.getItem('quiz_capitais_daily_map_v1') ?? '{}')).toMatchObject({
+            isCorrect: true,
+            status: 'won',
+        });
+
+        act(() => result.current.setGameStatus('lost'));
+        expect(result.current.gameStatus).toBe('lost');
+
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        localStorage.setItem('quiz_capitais_daily_map_v1', '{');
+        renderHook(() => useDailyMap());
+        expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('wraps the daily anagram and wordle games with country capitals', () => {
+        const anagram = renderHook(() => useDailyAnagram());
+        expect(anagram.result.current.shuffledCapital).toBe(anagram.result.current.shuffledAnswer);
+
+        act(() => anagram.result.current.submitGuess(COUNTRIES_DB[0].capital));
+        expect(anagram.result.current.gameStatus).toBe('won');
+
+        const wordle = renderHook(() => useDailyWordle());
+        COUNTRIES_DB[0].capital.toUpperCase().split('').forEach((key) => {
+            act(() => wordle.result.current.handleKey(key));
+        });
+        act(() => wordle.result.current.handleKey('Enter'));
+
+        expect(wordle.result.current.gameStatus).toBe('won');
     });
 });
