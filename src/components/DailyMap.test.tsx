@@ -98,7 +98,7 @@ describe('DailyMap', () => {
 
         await waitFor(() => expect(screen.getByTestId('map-container')).toBeInTheDocument());
         expect(screen.getByTestId('geo-json')).toHaveTextContent('#ef4444');
-        expect(fitBounds).toHaveBeenCalled();
+        await waitFor(() => expect(fitBounds).toHaveBeenCalled());
 
         const input = screen.getByPlaceholderText(/Digite/);
         const wrongCountry = COUNTRIES_DB[1].name;
