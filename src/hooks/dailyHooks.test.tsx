@@ -18,6 +18,20 @@ vi.mock('../utils/daily', () => ({
     getDailySeed: () => '2026-06-23',
 }));
 
+const getExpectedTimeUntilLocalMidnight = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const distance = tomorrow.getTime() - now.getTime();
+
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
 describe('daily hooks', () => {
     beforeEach(() => {
         vi.useFakeTimers();
@@ -204,10 +218,10 @@ describe('daily hooks', () => {
 
         expect(result.current.wordle.isCompleted).toBe(true);
         expect(result.current.flag.isCompleted).toBe(false);
-        expect(result.current.wordle.timeLeft).toBe('17:00:00');
+        expect(result.current.wordle.timeLeft).toBe(getExpectedTimeUntilLocalMidnight());
         expect(errorSpy).toHaveBeenCalled();
 
         act(() => vi.advanceTimersByTime(1000));
-        expect(result.current.wordle.timeLeft).toBe('16:59:59');
+        expect(result.current.wordle.timeLeft).toBe(getExpectedTimeUntilLocalMidnight());
     });
 });
