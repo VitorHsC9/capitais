@@ -4,11 +4,14 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useOnlineGame } from './useOnlineGame';
-import type { RoomData } from '../services/roomService';
+import type { PlayerAnswer, RoomData } from '../services/roomService';
+
+type RoundAnswers = Record<string, PlayerAnswer>;
+type JoinRoomResult = { success: boolean; error?: string };
 
 const service = vi.hoisted(() => {
     let roomCallback: ((data: RoomData | null) => void) | null = null;
-    let answersCallback: ((answers: RoomData['answers'][string] | null) => void) | null = null;
+    let answersCallback: ((answers: RoundAnswers | null) => void) | null = null;
 
     return {
         get roomCallback() {
@@ -24,7 +27,7 @@ const service = vi.hoisted(() => {
             answersCallback = value;
         },
         createRoom: vi.fn(async () => 'ROOM1'),
-        joinRoom: vi.fn(async () => ({ success: true })),
+        joinRoom: vi.fn(async (): Promise<JoinRoomResult> => ({ success: true })),
         setPlayerReady: vi.fn(async () => undefined),
         startGame: vi.fn(async () => undefined),
         submitAnswer: vi.fn(async () => undefined),
@@ -37,7 +40,7 @@ const service = vi.hoisted(() => {
             roomCallback = callback;
             return vi.fn();
         }),
-        listenToAnswers: vi.fn((_roomCode: string, _round: number, callback: (answers: RoomData['answers'][string] | null) => void) => {
+        listenToAnswers: vi.fn((_roomCode: string, _round: number, callback: (answers: RoundAnswers | null) => void) => {
             answersCallback = callback;
             return vi.fn();
         }),

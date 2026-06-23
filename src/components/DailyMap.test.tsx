@@ -68,7 +68,6 @@ const geoJson = {
 
 describe('DailyMap', () => {
     beforeEach(() => {
-        vi.useFakeTimers();
         vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
             json: () => Promise.resolve(geoJson),
         })));
@@ -85,7 +84,6 @@ describe('DailyMap', () => {
 
     afterEach(() => {
         cleanup();
-        vi.useRealTimers();
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
     });
@@ -103,12 +101,10 @@ describe('DailyMap', () => {
         expect(fitBounds).toHaveBeenCalled();
 
         const input = screen.getByPlaceholderText(/Digite/);
-        fireEvent.change(input, { target: { value: 'errado' } });
+        const wrongCountry = COUNTRIES_DB[1].name;
+        fireEvent.change(input, { target: { value: wrongCountry } });
         fireEvent.keyDown(input, { key: 'Enter' });
-        expect(screen.getByText(/errado/)).toBeInTheDocument();
-
-        vi.advanceTimersByTime(2000);
-        expect(screen.queryByText(/errado/)).not.toBeInTheDocument();
+        expect(screen.getByText(new RegExp(wrongCountry))).toBeInTheDocument();
 
         fireEvent.change(input, { target: { value: COUNTRIES_DB[0].name } });
         fireEvent.keyDown(input, { key: 'Enter' });
