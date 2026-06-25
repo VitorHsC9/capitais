@@ -245,6 +245,41 @@ describe('online components', () => {
         expect(screen.getAllByText('Brasil').length).toBeGreaterThan(0);
     });
 
+    it('covers online game timer, missing opponent and guarded typing submit states', () => {
+        const noOpponentGame = makeGame({
+            opponentId: null,
+            timeLeft: 4,
+            roomData: room({
+                mode: 'infinite',
+                players: {
+                    me: { ...room().players!.me, lives: undefined as never },
+                },
+            }),
+        });
+        const { rerender } = render(<OnlineGame game={noOpponentGame} />);
+        expect(screen.getByText('???')).toBeInTheDocument();
+
+        const capitalTypingGame = makeGame({
+            currentRound: round({ type: 'capital' }),
+            roomData: room({ inputFormat: 'typing', rounds: { 0: round({ type: 'capital' }) } }),
+        });
+        rerender(<OnlineGame game={capitalTypingGame} />);
+        const input = screen.getByPlaceholderText(/Digite a capital/);
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(capitalTypingGame.handleAnswer).not.toHaveBeenCalled();
+
+        fireEvent.change(input, { target: { value: '   ' } });
+        fireEvent.click(screen.getByRole('button', { name: '' }));
+        expect(capitalTypingGame.handleAnswer).not.toHaveBeenCalled();
+
+        const answeredGame = makeGame({
+            myAnswer: { answer: 'Brasilia', answeredAt: Date.now(), isCorrect: true },
+        });
+        rerender(<OnlineGame game={answeredGame} />);
+        fireEvent.click(screen.getByText('Brasilia'));
+        expect(answeredGame.handleAnswer).not.toHaveBeenCalled();
+    });
+
     it('renders online results winner, draw, loser and actions', () => {
         const onBack = vi.fn();
         const game = makeGame({ phase: 'results', roomData: room({ status: 'finished' }) });

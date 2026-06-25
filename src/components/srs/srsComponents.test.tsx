@@ -302,7 +302,7 @@ describe('SRS components', () => {
         expect(screen.getByText('Brasil')).toBeInTheDocument();
         fireEvent.click(screen.getByText(/Revelar/));
         expect(screen.getByAltText('Bandeira')).toBeInTheDocument();
-        rerender;
+        expect(rerender).toBeTypeOf('function');
     });
 
     it('handles interactive map guesses and highlighted map answers', async () => {
@@ -336,7 +336,7 @@ describe('SRS components', () => {
         await waitFor(() => expect(mapMocks.clickHandlers.length).toBeGreaterThan(0));
         act(() => mapMocks.clickHandlers[0]?.());
         expect(screen.getByText('Bom')).toBeInTheDocument();
-        rerender;
+        expect(rerender).toBeTypeOf('function');
     }, 10_000);
 
     it('renders default flashcard text for an unknown category', () => {

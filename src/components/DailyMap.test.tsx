@@ -143,4 +143,27 @@ describe('DailyMap', () => {
         await waitFor(() => expect(errorSpy).toHaveBeenCalled());
         expect(screen.queryByTestId('map-container')).not.toBeInTheDocument();
     });
+
+    it('matches map features by ISO when map name does not match', async () => {
+        const isoOnlyGeoJson = {
+            type: 'FeatureCollection',
+            features: [
+                { type: 'Feature', properties: {}, geometry: {} },
+                { type: 'Feature', properties: { name: 'Not the target', ISO_A2: COUNTRIES_DB[0].code }, geometry: {} },
+            ],
+        };
+        vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
+            json: () => Promise.resolve(isoOnlyGeoJson),
+        })));
+        dailyMapState = {
+            ...dailyMapState,
+            targetCountry: { ...COUNTRIES_DB[0], mapName: undefined },
+        };
+
+        render(<DailyMap onBack={vi.fn()} onNextChallenge={vi.fn()} />);
+
+        await waitFor(() => expect(screen.getByTestId('map-container')).toBeInTheDocument());
+        expect(screen.getByTestId('geo-json')).toHaveTextContent('#ef4444');
+        await waitFor(() => expect(fitBounds).toHaveBeenCalled());
+    });
 });

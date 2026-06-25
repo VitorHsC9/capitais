@@ -94,7 +94,7 @@ function geometryToPath(geometry: GeoFeature['geometry']): string {
 }
 
 // Pre-compute paths (memoized outside component)
-let pathCache: Map<string, string> = new Map();
+const pathCache: Map<string, string> = new Map();
 
 function getFeaturePath(feature: GeoFeature): string {
     const cached = pathCache.get(feature.id);
