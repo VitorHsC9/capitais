@@ -134,6 +134,43 @@ O app estará disponível em `http://localhost:5173`.
 | `npm run preview` | Preview do build |
 | `npm run lint` | Verificação de lint |
 | `npm run test` | Executar testes |
+| `npm run test:coverage` | Executar testes unitários com cobertura |
+| `npm run e2e` | Executar testes E2E com Playwright |
+
+### Verificacao de Qualidade
+
+Comandos usados para validar a entrega do projeto:
+
+```bash
+npm run lint
+npm run test:coverage
+npm run e2e
+npm run build
+```
+
+Resultados esperados:
+
+- Lint sem erros.
+- Cobertura minima configurada em 85% para statements, branches, functions e lines.
+- Testes unitarios executados com Vitest.
+- Testes E2E executados com Playwright/Chromium.
+- Build de producao gerado em `dist/`.
+
+Relatorios locais:
+
+- Cobertura HTML: `coverage/index.html`
+- Playwright HTML: `playwright-report/index.html`
+
+### Docker
+
+Build e execucao via container:
+
+```bash
+docker compose build
+docker compose up
+```
+
+Depois de subir o container, a aplicacao fica disponivel em `http://localhost:8080`.
 
 ---
 

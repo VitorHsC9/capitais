@@ -56,30 +56,45 @@ export default function App() {
 
   const game = useGameStore();
   const { clearNotifications, updateStats, stats, newAchievements } = useStatistics();
+  const {
+    gameMode,
+    gameState,
+    isAnswered,
+    timeLeft,
+    currentOptions,
+    score,
+    correctCount,
+    maxStreak,
+    questions,
+    tickTimer,
+    handleAnswer,
+    restart,
+    setGameMode,
+    startQuiz,
+  } = game;
 
 
 
   // Timer loop for Sudden Death
   useEffect(() => {
-    if (game.gameMode !== 'suddenDeath' || game.gameState !== 'playing' || game.isAnswered) return;
+    if (gameMode !== 'suddenDeath' || gameState !== 'playing' || isAnswered) return;
 
     const timer = setInterval(() => {
-      game.tickTimer();
+      tickTimer();
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [game.gameState, game.gameMode, game.isAnswered, game.tickTimer]);
+  }, [gameState, gameMode, isAnswered, tickTimer]);
 
   useEffect(() => {
-    if (game.timeLeft === 0 && game.gameMode === 'suddenDeath' && game.gameState === 'playing' && !game.isAnswered) {
-      game.handleAnswer('TIME_UP');
+    if (timeLeft === 0 && gameMode === 'suddenDeath' && gameState === 'playing' && !isAnswered) {
+      handleAnswer('TIME_UP');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.timeLeft, game.gameMode, game.gameState, game.isAnswered, game.handleAnswer]);
+  }, [timeLeft, gameMode, gameState, isAnswered, handleAnswer]);
 
   const handleRestart = () => {
     clearNotifications();
-    game.restart();
+    restart();
     navigate('/practice');
   };
 
@@ -87,31 +102,31 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Impede atalhos numéricos no modo escrita ou anagrama (pois o usuário precisa digitar números talvez ou focar no input)
-      if (location.pathname !== '/playing' || game.isAnswered || ['writing', 'anagram', 'daily'].includes(game.gameMode)) return;
+      if (location.pathname !== '/playing' || isAnswered || ['writing', 'anagram', 'daily'].includes(gameMode)) return;
 
       const key = e.key;
       if (['1', '2', '3', '4', '5'].includes(key)) {
         const idx = Number.parseInt(key, 10) - 1;
-        if (game.currentOptions[idx]) {
-          const opt = game.currentOptions[idx];
+        if (currentOptions[idx]) {
+          const opt = currentOptions[idx];
           // Lógica para determinar qual campo enviar como resposta
-          const isCapitalMode = ['classic', 'suddenDeath', 'survival'].includes(game.gameMode);
-          game.handleAnswer(isCapitalMode ? opt.capital : opt.name);
+          const isCapitalMode = ['classic', 'suddenDeath', 'survival'].includes(gameMode);
+          handleAnswer(isCapitalMode ? opt.capital : opt.name);
         }
       }
     };
     globalThis.addEventListener('keydown', handleKeyDown);
     return () => globalThis.removeEventListener('keydown', handleKeyDown);
-  }, [location.pathname, game.isAnswered, game.currentOptions, game.gameMode]);
+  }, [location.pathname, isAnswered, currentOptions, gameMode, handleAnswer]);
 
   const handleModeSelect = (mode: GameMode) => {
-    game.setGameMode(mode);
+    setGameMode(mode);
     navigate('/continents');
   };
 
   const handleContinentSelect = (continent: Continent) => {
     clearNotifications();
-    game.startQuiz(continent);
+    startQuiz(continent);
     navigate('/playing');
     setModal('none');
   };
@@ -119,17 +134,17 @@ export default function App() {
   // Abre stats ao finalizar
   const hasUpdatedStatsRef = useRef(false);
   useEffect(() => {
-    if (game.gameState === 'finished' || game.gameState === 'game_over') {
+    if (gameState === 'finished' || gameState === 'game_over') {
       if (!hasUpdatedStatsRef.current) {
         hasUpdatedStatsRef.current = true;
         updateStats({
-          score: game.score,
-          correctCount: game.correctCount,
-          streak: game.maxStreak
-        }, game.gameState === 'game_over' ? game.correctCount + 1 : game.questions.length);
+          score,
+          correctCount,
+          streak: maxStreak
+        }, gameState === 'game_over' ? correctCount + 1 : questions.length);
       }
 
-      if (game.gameState === 'finished') {
+      if (gameState === 'finished') {
         triggerConfetti();
       }
 
@@ -137,7 +152,7 @@ export default function App() {
     } else {
       hasUpdatedStatsRef.current = false;
     }
-  }, [game.gameState, game.score, game.correctCount, game.maxStreak, game.questions.length, updateStats]);
+  }, [gameState, score, correctCount, maxStreak, questions.length, updateStats]);
 
   // Confete de Achievement
   useEffect(() => {
