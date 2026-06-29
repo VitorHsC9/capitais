@@ -409,7 +409,7 @@ describe('online components', () => {
             roomData: null,
         });
         rerender(<OnlineLobby onBack={onBack} />);
-        expect(screen.getAllByText('Online').length).toBe(2);
+        expect(screen.getAllByText('Online')).toHaveLength(2);
 
         currentGame = makeGame({
             phase: 'category-select',

@@ -20,7 +20,7 @@ export function useSupremeFinal() {
         const normalizedInput = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         if (!normalizedInput) return;
 
-        const match = COUNTRIES_DB.find(c => {
+        const hasMatch = COUNTRIES_DB.some(c => {
             let found = false;
 
             // Check if it matches name and hasn't been guessed yet
@@ -46,7 +46,7 @@ export function useSupremeFinal() {
             return found;
         });
 
-        if (match) {
+        if (hasMatch) {
             setInput(''); // Clear input on success
         }
     };
